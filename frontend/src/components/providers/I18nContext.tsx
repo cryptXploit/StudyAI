@@ -76,7 +76,7 @@ const translations: Translations = {
 interface I18nContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, fallback?: string) => string;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
@@ -84,11 +84,11 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>('en');
 
-  const t = (key: string): string => {
+  const t = (key: string, fallback?: string): string => {
     const translation = translations[key];
     if (!translation) {
       console.warn(`Translation key not found: ${key}`);
-      return key;
+      return fallback ?? key;
     }
     return translation[language];
   };
