@@ -1,0 +1,68 @@
+name: Quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_staging_e2e:
+        description: Run guarded E2E tests against the staging stack
+        required: true
+        default: false
+        type: boolean
+      run_staging_load:
+        description: Run the guarded load test against the staging API
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run test:backend
+
+  staging-e2e:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_staging_e2e
+    needs: backend-tests
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          E2E_ENABLED: 'true'
+          E2E_FRONTEND_URL: ${{ secrets.E2E_FRONTEND_URL }}
+          E2E_API_URL: ${{ secrets.E2E_API_URL }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report
+          if-no-files-found: ignore
+
+  staging-load:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_staging_load
+    needs: backend-tests
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run bounded staging load test
+        run: docker run --rm -v "$PWD:/work" -w /work grafana/k6 run load-tests/k6-chat-upload.js
+        env:
+          BASE_URL: ${{ secrets.E2E_API_URL }}
+          AUTH_TOKEN: ${{ secrets.LOAD_TEST_AUTH_TOKEN }}

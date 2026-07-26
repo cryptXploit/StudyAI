@@ -1,0 +1,109 @@
+# Dependencies
+node_modules/
+
+# Environment files and secrets. Keep only shareable templates in Git.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Framework/build output
+.next/
+dist/
+build/
+out/
+.turbo/
+.cache/
+*.tsbuildinfo
+
+# Test artifacts and coverage
+coverage/
+playwright-report/
+test-results/
+blob-report/
+*.lcov
+
+# Runtime files
+logs/
+*.log
+*.pid
+*.pid.lock
+tmp/
+temp/
+
+# Local service data
+.redis/
+.supabase/
+*.sqlite
+*.sqlite3
+*.db
+
+# Private credential files
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+credentials*.json
+
+# OS and editor metadata
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+
+
+
+
+# Folders
+Arcitecture/*
+docs/*
+Mannual_Task_For_Later/*
+migrations/*
+AI_PROJECT_CONTEXT.md
+ARCHITECTURE.md
+DOCUMENTATION_MASTER_INDEX.md
+n8n-OCR-WORKFLOW-GUIDE.md
+*.md
+
+
+
+
+
+
+
+
+
+
+
+
+## Frontend
+
+frontend\.env
+frontend\.env.local
+frontend/*.md
+*.class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Backend
+
+backend\.env
+backend\.env.local
+
+
+

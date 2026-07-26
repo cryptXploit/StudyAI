@@ -1,0 +1,234 @@
+{
+  "name": "Notification Hub - Email/WhatsApp/Telegram Router",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "notification",
+        "responseMode": "onReceived",
+        "responseData": "successResponse",
+        "options": {}
+      },
+      "id": "webhook_trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "rules": [
+            {
+              "value1": "={{ $json.message_type }}",
+              "value2": "email",
+              "operation": "equals"
+            },
+            {
+              "value1": "={{ $json.message_type }}",
+              "value2": "whatsapp",
+              "operation": "equals"
+            },
+            {
+              "value1": "={{ $json.message_type }}",
+              "value2": "telegram",
+              "operation": "equals"
+            }
+          ]
+        }
+      },
+      "id": "switch_node",
+      "name": "Switch Message Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        200,
+        380
+      ],
+      "connections": {
+        "webhook_trigger": [
+          [
+            {
+              "node": "switch_node",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "{{ $env.N8N_EMAIL_FROM }}",
+        "toEmail": "={{ $json.user_email }}",
+        "subject": "={{ $json.subject || 'Study Reminder' }}",
+        "htmlBody": "={{ $json.content }}",
+        "options": {}
+      },
+      "id": "sendgrid_email",
+      "name": "Send Email (SendGrid)",
+      "type": "n8n-nodes-base.sendGrid",
+      "typeVersion": 1,
+      "position": [
+        400,
+        200
+      ],
+      "credentials": {
+        "sendGridApi": "sendgrid_api"
+      },
+      "connections": {
+        "switch_node": [
+          [
+            {
+              "node": "sendgrid_email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "parameters": {
+        "accountSid": "={{ $credentials.twilio.accountSid }}",
+        "authToken": "={{ $credentials.twilio.authToken }}",
+        "toNumber": "={{ $json.phone }}",
+        "fromNumber": "={{ $env.TWILIO_PHONE_NUMBER }}",
+        "message": "={{ $json.content }}",
+        "options": {}
+      },
+      "id": "twilio_whatsapp",
+      "name": "Send WhatsApp (Twilio)",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 2,
+      "position": [
+        400,
+        380
+      ],
+      "credentials": {
+        "twilioApi": "twilio_api"
+      },
+      "connections": {
+        "switch_node": [
+          [
+            {
+              "node": "twilio_whatsapp",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.telegram_id }}",
+        "text": "={{ $json.content }}",
+        "parseMode": "HTML",
+        "options": {}
+      },
+      "id": "telegram_bot",
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        400,
+        560
+      ],
+      "credentials": {
+        "telegramBotApi": "telegram_bot_api"
+      },
+      "connections": {
+        "switch_node": [
+          [
+            {
+              "node": "telegram_bot",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "parameters": {
+        "responseData": "firstEntryJson"
+      },
+      "id": "success_response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        600,
+        380
+      ],
+      "connections": {
+        "sendgrid_email": [
+          [
+            {
+              "node": "success_response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ],
+        "twilio_whatsapp": [
+          [
+            {
+              "node": "success_response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ],
+        "telegram_bot": [
+          [
+            {
+              "node": "success_response",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "parameters": {
+        "message": "Invalid message_type. Expected: email, whatsapp, or telegram",
+        "options": {}
+      },
+      "id": "error_response",
+      "name": "Invalid Type Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        600,
+        560
+      ],
+      "connections": {
+        "switch_node": [
+          [
+            {
+              "node": "error_response",
+              "type": "main",
+              "index": 3
+            }
+          ]
+        ]
+      }
+    }
+  ],
+  "connections": {},
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "errorHandler": "simple"
+  },
+  "versionId": "1",
+  "meta": {
+    "instanceId": "default"
+  },
+  "pinData": {}
+}

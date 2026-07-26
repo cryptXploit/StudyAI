@@ -1,0 +1,271 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import SecureLayout from '@/components/layout/SecureLayout';
+import RequireAdmin from '@/components/hoc/RequireAdmin';
+import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
+
+interface ApiConfig {
+  id: string;
+  provider_name: string;
+  api_key: string;
+  model_name: string;
+  priority: number;
+  is_active: boolean;
+  task_type: string;
+  available_models?: string[]; 
+  isLoadingModels?: boolean;
+  has_api_key?: boolean;
+}
+
+const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
+
+export default function AdminSettingsPage() {
+  const supabase = createClient();
+  const [configs, setConfigs] = useState<ApiConfig[]>([]);
+  const [activeTab, setActiveTab] = useState<'embedding' | 'general' | 'complex'>('embedding');
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchConfigs();
+  }, []);
+
+  const fetchConfigs = async () => {
+    setIsLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    const response = await fetch(`${apiOrigin}/api/admin/api-configurations`, {
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+    const payload = await response.json().catch(() => ({}));
+    const data = payload.data;
+    if (response.ok && data) {
+      const formattedData = data.map(d => ({ ...d, available_models: d.model_name ? [d.model_name] : [] }));
+      setConfigs(formattedData);
+    } else {
+      setSaveStatus(`Unable to load routing settings: ${payload.error || response.statusText}`);
+    }
+    setIsLoading(false);
+  };
+
+  const fetchAvailableModels = async (id: string, provider: string, apiKey: string) => {
+    if (!apiKey || apiKey.length < 10) return;
+    
+    handleUpdate(id, 'isLoadingModels', true);
+    try {
+      let models: string[] = [];
+      
+      if (provider.toLowerCase() === 'gemini' || provider.toLowerCase() === 'google') {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        const data = await res.json();
+        if (data.models) {
+          models = data.models.map((m: any) => m.name.replace('models/', ''));
+        }
+      } else if (provider.toLowerCase() === 'groq') {
+        const res = await fetch('https://api.groq.com/openai/v1/models', {
+          headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        const data = await res.json();
+        if (data.data) {
+          models = data.data.map((m: any) => m.id);
+        }
+      } else if (provider.toLowerCase() === 'atomesus') {
+        // 🟢 NEW: Attempt to fetch models from Atomesus (Standard format)
+        try {
+          const res = await fetch('https://api.atomesus.com/v1/models', {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+          });
+          const data = await res.json();
+          if (data.data) models = data.data.map((m: any) => m.id);
+        } catch (e) {
+          // Fallback to manual entry if API doesn't support /models endpoint
+          models = []; 
+        }
+      }
+
+      handleUpdate(id, 'available_models', models);
+      
+      if (models.length > 0) {
+        const currentConfig = configs.find(c => c.id === id);
+        if (!currentConfig?.model_name || !models.includes(currentConfig.model_name)) {
+          handleUpdate(id, 'model_name', models[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch models");
+    } finally {
+      handleUpdate(id, 'isLoadingModels', false);
+    }
+  };
+
+  const handleUpdate = (id: string, field: keyof ApiConfig, value: any) => {
+    setConfigs((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
+  };
+
+  const handleAddNewRoute = () => {
+    const newConfig: ApiConfig = {
+      id: `temp-${Date.now()}`, 
+      provider_name: 'gemini',
+      api_key: '',
+      model_name: '',
+      priority: filteredConfigs.length + 1,
+      is_active: true,
+      task_type: activeTab,
+      available_models: [],
+      isLoadingModels: false
+    };
+    setConfigs([...configs, newConfig]);
+  };
+
+  const handleSave = async () => {
+    setSaveStatus('Saving...');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`${apiOrigin}/api/admin/api-configurations`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ configs }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || 'Save failed');
+      
+      await fetchConfigs(); 
+      setSaveStatus('Saved Successfully!');
+      setTimeout(() => setSaveStatus(null), 3000);
+      
+    } catch (error: any) {
+      console.error("Save Configuration Error:", error);
+      setSaveStatus(`Error: ${error.message}`); 
+    }
+  };
+
+  const filteredConfigs = configs.filter(c => c.task_type === activeTab);
+
+  return (
+    <RequireAdmin>
+    <SecureLayout>
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div className="flex justify-between items-center border-b pb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">LLM Routing Gateway</h1>
+            <p className="text-slate-600 mt-1">Configure Cascading Fallback & Dynamic Models</p>
+          </div>
+          <Link href="/admin/analytics" className="px-4 py-2 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100">
+            View Analytics & Health ➜
+          </Link>
+          {/* NEW LINK TO ADD */}
+          <Link href="/admin/resources" className="ml-2 px-4 py-2 bg-amber-50 text-amber-700 font-semibold rounded-lg hover:bg-amber-100">
+            Manage Resource Vault ➜
+          </Link>
+        </div>
+
+        <div className="flex space-x-2 bg-slate-100 p-1 rounded-xl w-max">
+          <button onClick={() => setActiveTab('embedding')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'embedding' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>1. Embedding AI</button>
+          <button onClick={() => setActiveTab('general')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'general' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>2. Free Users (General)</button>
+          <button onClick={() => setActiveTab('complex')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'complex' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>3. Pro Users (Complex)</button>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50 border-b text-slate-600">
+              <tr>
+                <th className="px-6 py-4 font-semibold">Priority</th>
+                <th className="px-6 py-4 font-semibold">Provider</th>
+                <th className="px-6 py-4 font-semibold">API Key</th>
+                <th className="px-6 py-4 font-semibold w-1/4">Select Model</th>
+                <th className="px-6 py-4 font-semibold">Active</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredConfigs.map((config) => (
+                <tr key={config.id} className={`hover:bg-slate-50 ${!config.is_active ? 'opacity-60' : ''}`}>
+                  <td className="px-6 py-4">
+                    <select value={config.priority} onChange={(e) => handleUpdate(config.id, 'priority', parseInt(e.target.value))} className="px-3 py-2 border rounded-lg focus:ring-indigo-500 font-bold text-slate-700">
+                      {[1, 2, 3, 4, 5, 6, 7].map((n) => <option key={n} value={n}>Route Priority {n}</option>)}
+                    </select>
+                  </td>
+                  
+                  <td className="px-6 py-4">
+                    <select value={config.provider_name} onChange={(e) => handleUpdate(config.id, 'provider_name', e.target.value)} className="px-3 py-2 border rounded-lg focus:ring-indigo-500 font-bold text-slate-800 capitalize">
+                      <option value="gemini">Gemini</option>
+                      <option value="groq">Groq</option>
+                      <option value="openai">OpenAI</option>
+                      <option value="deepseek">DeepSeek</option>
+                      <option value="atomesus">Atomesus</option> {/* 🟢 NEW: Added Atomesus */}
+                    </select>
+                  </td>
+                  
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <input 
+                        type="password" 
+                        value={config.api_key || ''} 
+                        onChange={(e) => handleUpdate(config.id, 'api_key', e.target.value)} 
+                        onBlur={(e) => fetchAvailableModels(config.id, config.provider_name, e.target.value)}
+                        placeholder="Paste API Key & click outside..." 
+                        className="w-full px-3 py-2 border rounded-lg font-mono text-xs focus:ring-indigo-500" 
+                      />
+                    </div>
+                  </td>
+
+                  <td className="px-6 py-4">
+                    {config.isLoadingModels ? (
+                      <span className="text-xs text-indigo-500 animate-pulse">Fetching models...</span>
+                    ) : config.available_models && config.available_models.length > 0 ? (
+                      <select 
+                        value={config.model_name || ''} 
+                        onChange={(e) => handleUpdate(config.id, 'model_name', e.target.value)} 
+                        className="w-full px-3 py-2 border rounded-lg focus:ring-indigo-500 text-xs font-mono"
+                      >
+                        {config.available_models.map(model => (
+                          <option key={model} value={model}>{model}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input 
+                        type="text" 
+                        value={config.model_name || ''} 
+                        onChange={(e) => handleUpdate(config.id, 'model_name', e.target.value)} 
+                        placeholder="Type model manually..." 
+                        className="w-full px-3 py-2 border rounded-lg font-mono text-xs focus:ring-indigo-500 bg-slate-50" 
+                      />
+                    )}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <input type="checkbox" checked={config.is_active} onChange={(e) => handleUpdate(config.id, 'is_active', e.target.checked)} className="w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500" />
+                  </td>
+                </tr>
+              ))}
+              {filteredConfigs.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                    No configuration found for this section. Click the button below to add a new provider route.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+          
+          <div className="p-6 bg-slate-50 border-t flex justify-between items-center">
+            <button onClick={handleAddNewRoute} className="px-4 py-2 border border-indigo-600 text-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition">
+              + Add New Provider Route
+            </button>
+
+            <div className="flex items-center gap-4">
+              <span className={`text-sm font-medium ${saveStatus?.includes('Error') ? 'text-red-600' : 'text-emerald-600'}`}>{saveStatus}</span>
+              <button onClick={handleSave} className="px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 shadow-sm transition">
+                Save Gateway Rules
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SecureLayout>
+    </RequireAdmin>
+  );
+}
