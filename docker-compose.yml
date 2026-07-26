@@ -1,4 +1,4 @@
-name: studyai
+version: "2.4"
 
 # Production application stack for a managed Supabase project.
 # Do not add a partial local Supabase stack here: Studio needs the complete
