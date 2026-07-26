@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
@@ -68,6 +68,14 @@ const translations = {
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 export default function ConceptBattlePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950" />}>
+      <ConceptBattleContent />
+    </Suspense>
+  );
+}
+
+function ConceptBattleContent() {
   const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
