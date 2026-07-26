@@ -1,48 +1,75 @@
-version: '3.8'
+name: studyai
+
+# Production application stack for a managed Supabase project.
+# Do not add a partial local Supabase stack here: Studio needs the complete
+# official Supabase service set (Kong, Auth, REST, Meta, Storage and more).
+# This app connects to the managed Supabase URL configured in .env instead.
 
 services:
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1000"]
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    # Keep the API private to this VM; publish it through your TLS reverse proxy.
+    ports:
+      - "127.0.0.1:5000:5000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        NEXT_PUBLIC_PADDLE_ENV: ${NEXT_PUBLIC_PADDLE_ENV:-sandbox}
+        NEXT_PUBLIC_PADDLE_CLIENT_TOKEN: ${NEXT_PUBLIC_PADDLE_CLIENT_TOKEN:-}
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
 
   n8n:
     image: n8nio/n8n:latest
-    ports:
-      - "5678:5678"
+    restart: unless-stopped
     environment:
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - NODE_ENV=production
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
-
-  # Local Supabase setup core services
-  # Note: A full local Supabase environment is normally started via the Supabase CLI (`npx supabase start`).
-  # This provides the core db representation for the docker-compose stack.
-  supabase-db:
-    image: supabase/postgres:15.1.1.06
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: your-super-secret-and-long-postgres-password
-    volumes:
-      - db_data:/var/lib/postgresql/data
-
-  supabase-studio:
-    image: supabase/studio:20240101-f123456
-    ports:
-      - "54323:3000"
-    environment:
-      STUDIO_PG_META_URL: http://supabase-meta:8080
-      POSTGRES_PASSWORD: your-super-secret-and-long-postgres-password
-      SUPABASE_URL: http://localhost:8000
-      SUPABASE_ANON_KEY: your-anon-key
 
 volumes:
   redis_data:
   n8n_data:
-  db_data:
