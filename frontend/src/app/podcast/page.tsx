@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
@@ -73,7 +73,7 @@ const translations = {
 
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
-export default function PodcastPage() {
+function PodcastPageContent() {
   const supabase = createClient();
   const router = useRouter();
   const [topic, setTopic] = useState('');
@@ -1027,4 +1027,8 @@ export default function PodcastPage() {
       </div>
     </SecureLayout>
   );
+}
+
+export default function PodcastPage() {
+  return <Suspense fallback={<div className="min-h-screen bg-slate-950" />}><PodcastPageContent /></Suspense>;
 }

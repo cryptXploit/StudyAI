@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
@@ -112,7 +112,7 @@ const Molecule3DViewer = dynamic(() => import('@/components/MoleculeViewer'), {
   )
 });
 
-export default function MoleculePage() {
+function MoleculePageContent() {
   const supabase = createClient();
   const router = useRouter();
   
@@ -597,4 +597,8 @@ export default function MoleculePage() {
       </div>
     </SecureLayout>
   );
+}
+
+export default function MoleculePage() {
+  return <Suspense fallback={<div className="min-h-screen bg-slate-950" />}><MoleculePageContent /></Suspense>;
 }

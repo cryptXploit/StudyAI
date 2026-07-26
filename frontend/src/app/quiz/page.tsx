@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
 import { Play, Code, Loader2, FileText, CheckCircle2, Clock, Trophy, Copy, History, PlusCircle, ListTree, Circle, Target, BookOpen, Menu, X, Trash2, PlayCircle } from 'lucide-react';
@@ -71,7 +71,7 @@ const translations = {
 
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
-export default function QuizGeneratorPage() {
+function QuizGeneratorPageContent() {
   const supabase = createClient();
   const { tokens, tier, refreshTokens } = useTokens();
   const [files, setFiles] = useState<any[]>([]);
@@ -767,4 +767,8 @@ export default function QuizGeneratorPage() {
       </div>
     </SecureLayout>
   );
+}
+
+export default function QuizGeneratorPage() {
+  return <Suspense fallback={<div className="min-h-screen bg-slate-950" />}><QuizGeneratorPageContent /></Suspense>;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
 import { Layers, Loader2, CheckCircle2, History, X, RefreshCcw, Smile, Meh, Frown, Sparkles, Info, Puzzle, BookOpen, Trophy, Trash2, Pencil, Menu } from 'lucide-react';
@@ -101,7 +101,7 @@ type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 interface Flashcard { q: string; a: string; }
 
-export default function FlashcardsPage() {
+function FlashcardsPageContent() {
   const supabase = createClient();
   const router = useRouter();
   
@@ -786,4 +786,8 @@ export default function FlashcardsPage() {
 
     </SecureLayout>
   );
+}
+
+export default function FlashcardsPage() {
+  return <Suspense fallback={<div className="min-h-screen bg-slate-950" />}><FlashcardsPageContent /></Suspense>;
 }

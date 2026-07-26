@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
@@ -75,7 +75,7 @@ const translations = {
 
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
-export default function MindMapPage() {
+function MindMapPageContent() {
   const supabase = createClient();
   const router = useRouter();
   const { tokens, tier, refreshTokens } = useTokens();
@@ -968,4 +968,8 @@ export default function MindMapPage() {
       </div>
     </SecureLayout>
   );
+}
+
+export default function MindMapPage() {
+  return <Suspense fallback={<div className="min-h-screen bg-slate-950" />}><MindMapPageContent /></Suspense>;
 }
