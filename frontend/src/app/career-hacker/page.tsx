@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -46,14 +47,14 @@ export default function CareerHackerPage() {
 
   const [files, setFiles] = useState<any[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
-  
+
   const [targetDesc, setTargetDesc] = useState('');
   const [cvText, setCvText] = useState('');
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<{email_draft: string, cv_suggestions: string[]} | null>(null);
   const [isCopied, setIsCopied] = useState(false);
-  
+
   const [historyList, setHistoryList] = useState<any[]>([]);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false); // 🟢 Modal State
 
@@ -94,12 +95,12 @@ export default function CareerHackerPage() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/career/history` : `${apiUrlBase}/api/career/history`;
-      
+
       const res = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${session?.access_token}` } });
       const data = await res.json();
-      
+
       if (data.success) {
         setHistoryList(data.history);
         sessionStorage.setItem('Prepia_career_history', JSON.stringify(data.history));
@@ -117,19 +118,19 @@ export default function CareerHackerPage() {
     setIsLoading(true); setResult(null);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); 
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/career/tailor` : `${apiUrlBase}/api/career/tailor`;
-      
+
       const response = await fetch(apiUrl, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
         body: JSON.stringify({ targetDesc, cvText, fileIds: selectedFileIds, language }),
-        signal: controller.signal 
+        signal: controller.signal
       });
-      
+
       clearTimeout(timeoutId);
 
       // 🟢 CORRECT PLACEMENT: Check for Token Error (402) during feature generation
@@ -139,21 +140,21 @@ export default function CareerHackerPage() {
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         setResult(data.data);
-        sessionStorage.removeItem('Prepia_career_history'); 
-        setTimeout(() => fetchHistory(), 1500); 
-      } else { 
-        alert(data.error || "Failed to generate strategy."); 
-      }
-    } catch (error: any) { 
-      if (error.name === 'AbortError') {
-        alert("🚨 Timeout: Server took too long to craft the strategy. Try simplifying your target description.");
+        sessionStorage.removeItem('Prepia_career_history');
+        setTimeout(() => fetchHistory(), 1500);
       } else {
-        alert("Server connection error."); 
+        showPublicError(data);
       }
-    } 
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        showPublicError();
+      } else {
+        showPublicError();
+      }
+    }
     finally { setIsLoading(false); }
   };
 
@@ -166,12 +167,12 @@ export default function CareerHackerPage() {
     e.stopPropagation();
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/career/history/${id}` : `${apiUrlBase}/api/career/history/${id}`;
-      
+
       await fetch(apiUrl, { method: 'DELETE', headers: { 'Authorization': `Bearer ${session?.access_token}` } });
-      
-      sessionStorage.removeItem('Prepia_career_history'); 
+
+      sessionStorage.removeItem('Prepia_career_history');
       setHistoryList(prev => prev.filter(h => h.id !== id));
     } catch (err) {}
   };
@@ -216,7 +217,7 @@ export default function CareerHackerPage() {
   return (
     <SecureLayout>
       <div className="flex flex-col md:flex-row h-[calc(100vh-80px)] max-w-7xl mx-auto overflow-hidden bg-slate-950 lg:border lg:border-slate-800 lg:rounded-3xl lg:shadow-2xl lg:mt-4 font-sans relative">
-        
+
         {/* Mobile Smart Header */}
         <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0`}>
           <div className="flex flex-col">
@@ -244,9 +245,9 @@ export default function CareerHackerPage() {
         {/* Right Area: Inputs & Results */}
         <div ref={scrollRef} onScroll={handleScroll} className="w-full flex-1 flex flex-col relative overflow-y-auto bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] h-full custom-scrollbar">
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/95 to-slate-950 pointer-events-none"></div>
-          
+
           <div className="flex-1 p-4 md:p-10 z-10 space-y-8 pb-32">
-            
+
             {/* Input Form */}
             <form onSubmit={handleGenerate} className="bg-slate-900/80 backdrop-blur-md p-6 rounded-3xl border border-slate-800 shadow-xl space-y-5">
               <div>
@@ -268,7 +269,7 @@ export default function CareerHackerPage() {
             <AnimatePresence>
               {result && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  
+
                   {/* Email Draft Card */}
                   <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Mail size={100}/></div>
@@ -307,14 +308,14 @@ export default function CareerHackerPage() {
         {/* Mobile Floating Input Dock */}
         <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
           <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-            <button 
-              onClick={() => setIsMobileDrawerOpen('history')} 
+            <button
+              onClick={() => setIsMobileDrawerOpen('history')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-slate-200 font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all active:scale-95 border border-slate-700"
             >
               <History size={18} /> {t.history}
             </button>
-            <button 
-              onClick={() => setIsMobileDrawerOpen('sources')} 
+            <button
+              onClick={() => setIsMobileDrawerOpen('sources')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all active:scale-95 border border-indigo-400/50"
             >
               <FileText size={18} /> {t.ragSources}
@@ -325,7 +326,7 @@ export default function CareerHackerPage() {
         {/* 🟢 MOBILE BOTTOM SHEET DRAWERS 🟢 */}
         <div className={`fixed inset-0 z-[100] lg:hidden transition-all duration-300 ${isMobileDrawerOpen !== 'none' ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
           <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           {/* Sources Drawer */}
           <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen === 'sources' ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
@@ -340,11 +341,11 @@ export default function CareerHackerPage() {
         </div>
 
       </div>
-      
+
       {/* 🟢 ADDED: OutOfTokens Modal Component */}
-      <OutOfTokensModal 
-        isOpen={isTokenModalOpen} 
-        onClose={() => setIsTokenModalOpen(false)} 
+      <OutOfTokensModal
+        isOpen={isTokenModalOpen}
+        onClose={() => setIsTokenModalOpen(false)}
       />
     </SecureLayout>
   );

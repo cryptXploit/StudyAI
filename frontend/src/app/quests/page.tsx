@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -10,21 +11,21 @@ import { motion } from 'framer-motion';
 export default function QuestsPage() {
   const supabase = createClient();
   const router = useRouter();
-  
+
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [claiming, setClaiming] = useState<string | null>(null);
-  
+
   // 🟢 NEW: Heatmap State
   const [heatmapData, setHeatmapData] = useState<Record<string, number>>({});
-  
+
   // 🟢 NEW: Dream Varsity State
   const [dreamVarsity, setDreamVarsity] = useState<any>(null);
   const UNIVERSITIES = ['BUET', 'DMC', 'DU', 'MIT', 'Harvard'];
 
-  useEffect(() => { 
-    fetchUserData(); 
+  useEffect(() => {
+    fetchUserData();
     fetchHeatmapData();
     fetchDreamVarsity();
   }, []);
@@ -33,13 +34,13 @@ export default function QuestsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      
+
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/profile` : `${apiUrlBase}/api/profile`;
-      
+
       const response = await fetch(fetchUrl, { headers: { 'Authorization': `Bearer ${session.access_token}` } });
       const data = await response.json();
-      
+
       if (data.success && data.profile) {
         setUserData(data.profile);
         const fields = [data.profile.full_name, data.profile.university, data.profile.country, data.profile.session_year, data.profile.dob];
@@ -54,13 +55,13 @@ export default function QuestsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      
+
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/quests/heatmap` : `${apiUrlBase}/api/quests/heatmap`;
-      
+
       const response = await fetch(fetchUrl, { headers: { 'Authorization': `Bearer ${session.access_token}` } });
       const data = await response.json();
-      
+
       if (data.success && data.heatmap) {
         setHeatmapData(data.heatmap);
       }
@@ -100,12 +101,12 @@ export default function QuestsPage() {
       const { data: { session } } = await supabase.auth.getSession();
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/quests/${endpoint}` : `${apiUrlBase}/api/quests/${endpoint}`;
-      
+
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
       });
-      
+
       const data = await response.json();
 
       if (!response.ok || !data.success) {
@@ -113,19 +114,19 @@ export default function QuestsPage() {
       }
 
       alert(`Success! You earned ${data.tokensAdded} ✨ tokens.`);
-      
+
       if (endpoint === 'daily-drip') {
         const today = new Date().toISOString().split('T')[0];
         setUserData((prev: any) => ({ ...prev, last_login_date: today }));
       } else if (endpoint === 'claim-profile') {
         setUserData((prev: any) => ({ ...prev, is_profile_optimized: true }));
       }
-      
+
       // Refresh Data (Background)
-      fetchUserData(); 
-      fetchHeatmapData(); 
-      
-    } catch (err: any) { alert(`Error: ${err.message}`); } finally { setClaiming(null); }
+      fetchUserData();
+      fetchHeatmapData();
+
+    } catch (err: any) { showPublicError(); } finally { setClaiming(null); }
   };
 
   // 🟢 NEW: Generate 364 days for the grid (52 weeks x 7 days)
@@ -157,7 +158,7 @@ export default function QuestsPage() {
   return (
     <SecureLayout>
       <div className="max-w-5xl mx-auto p-6 md:p-10 mt-4 font-sans">
-        
+
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-center bg-slate-950 p-8 rounded-3xl shadow-xl border border-slate-800 mb-8 relative overflow-hidden">
            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -173,14 +174,14 @@ export default function QuestsPage() {
             <h2 className="text-xl font-black text-slate-800 flex items-center gap-2"><Activity className="text-emerald-500"/> Your Consistency Heatmap</h2>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Last 52 Weeks</p>
           </div>
-          
+
           <div className="w-full overflow-x-auto pb-4">
             <div className="min-w-[800px] flex justify-start">
               {/* CSS Grid Magic: Flow column fills top-to-bottom then left-to-right exactly like GitHub */}
               <div className="grid grid-rows-7 grid-flow-col gap-[3px]">
                 {generateHeatmapGrid().map((day, idx) => (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     title={`${day.count} tasks on ${day.date}`}
                     className={`w-[11px] h-[11px] rounded-[2px] transition-colors duration-200 ${getHeatmapColor(day.count)} cursor-pointer`}
                   ></div>
@@ -188,7 +189,7 @@ export default function QuestsPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Heatmap Legend */}
           <div className="flex items-center justify-end gap-2 text-xs font-medium text-slate-500 mt-2">
             <span>Less</span>
@@ -208,7 +209,7 @@ export default function QuestsPage() {
              <h2 className="text-xl font-black text-slate-800 flex items-center gap-2"><Target className="text-indigo-500"/> Dream Varsity Settings</h2>
              <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest">Configuration</span>
            </div>
-           
+
            {!dreamVarsity?.varsity_name ? (
              <div className="text-center py-6">
                 <p className="text-slate-500 font-medium mb-4">Select your dream university to track your preparation.</p>
@@ -230,7 +231,7 @@ export default function QuestsPage() {
                        <p className="text-sm font-bold text-slate-500">Current Progress: {dreamVarsity.tracking_mode === 'auto' ? (userData?.streak_count || 0) * 5 : (dreamVarsity.progress || 0)}%</p>
                      </div>
                    </div>
-                   
+
                    <div className="flex gap-2">
                      <button onClick={shareToStory} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:shadow-md transition-all active:scale-95">
                        <Share2 size={16}/> Share
@@ -243,17 +244,17 @@ export default function QuestsPage() {
 
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
                    <h4 className="font-black text-slate-700 text-sm mb-4 uppercase tracking-widest flex items-center gap-2"><Settings size={16}/> Tracking Mode</h4>
-                   
+
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <button 
+                      <button
                         onClick={() => updateDreamVarsity({ tracking_mode: 'manual' })}
                         className={`p-4 rounded-xl border-2 text-left transition-all ${(!dreamVarsity.tracking_mode || dreamVarsity.tracking_mode === 'manual') ? 'bg-white border-indigo-500 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}
                       >
                          <h5 className={`font-black text-sm mb-1 ${(!dreamVarsity.tracking_mode || dreamVarsity.tracking_mode === 'manual') ? 'text-indigo-600' : 'text-slate-700'}`}>Manual Control</h5>
                          <p className="text-xs font-medium text-slate-500 leading-relaxed">Update progress manually from the dashboard widget using +XP and Skip buttons.</p>
                       </button>
-                      
-                      <button 
+
+                      <button
                         onClick={() => updateDreamVarsity({ tracking_mode: 'auto' })}
                         className={`p-4 rounded-xl border-2 text-left transition-all ${dreamVarsity.tracking_mode === 'auto' ? 'bg-white border-emerald-500 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}
                       >
@@ -279,14 +280,14 @@ export default function QuestsPage() {
                  </div>
               </div>
               <p className="text-slate-500 text-sm font-medium mb-6 relative z-10 flex-1">Log in every day to claim your daily free tokens.</p>
-              <button 
+              <button
                 onClick={() => claimQuest('daily-drip', 'daily')}
                 disabled={isDailyClaimed || claiming === 'daily'}
                 className={`w-full py-4 rounded-xl font-black flex items-center justify-center gap-2 transition-all relative z-10 ${
                   isDailyClaimed ? 'bg-slate-100 text-slate-400' : 'bg-gradient-to-r from-orange-500 to-rose-500 text-white hover:from-orange-400 hover:to-rose-400 shadow-lg active:scale-95'
                 }`}
               >
-                {claiming === 'daily' ? <Loader2 className="animate-spin"/> : isDailyClaimed ? <CheckCircle2/> : <Zap/>} 
+                {claiming === 'daily' ? <Loader2 className="animate-spin"/> : isDailyClaimed ? <CheckCircle2/> : <Zap/>}
                 {isDailyClaimed ? 'Claimed for Today' : 'Claim 30 Tokens'}
               </button>
            </motion.div>
@@ -307,14 +308,14 @@ export default function QuestsPage() {
                  </div>
               </div>
               <p className="text-slate-500 text-sm font-medium mb-6 relative z-10 flex-1">Add your university details, country, and DOB.</p>
-              <button 
+              <button
                 onClick={() => claimQuest('claim-profile', 'profile')}
                 disabled={userData?.is_profile_optimized || claiming === 'profile'}
                 className={`w-full py-4 rounded-xl font-black flex items-center justify-center gap-2 transition-all relative z-10 ${
                   userData?.is_profile_optimized ? 'bg-emerald-50 text-emerald-500 border border-emerald-200' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg active:scale-95'
                 }`}
               >
-                {claiming === 'profile' ? <Loader2 className="animate-spin"/> : userData?.is_profile_optimized ? <CheckCircle2/> : <Gift/>} 
+                {claiming === 'profile' ? <Loader2 className="animate-spin"/> : userData?.is_profile_optimized ? <CheckCircle2/> : <Gift/>}
                 {userData?.is_profile_optimized ? 'Bounty Claimed' : completionPercentage < 100 ? 'Go to Profile' : 'Claim 100 Tokens'}
               </button>
            </motion.div>

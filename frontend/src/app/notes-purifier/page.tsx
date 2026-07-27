@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -65,8 +66,8 @@ type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 const MemoizedMarkdown = React.memo(({ content }: { content: string }) => {
   return (
-    <ReactMarkdown 
-      remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} 
+    <ReactMarkdown
+      remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]}
       rehypePlugins={[rehypeKatex]}
       components={{
         table: ({node, ...props}) => <div className="overflow-x-auto my-4 border border-slate-700 rounded-xl shadow-sm"><table className="min-w-full divide-y divide-slate-200" {...props}/></div>,
@@ -87,7 +88,7 @@ export default function PurifierPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
   const [purifiedContent, setPurifiedContent] = useState<{title: string, content: string} | null>(null);
@@ -140,18 +141,18 @@ export default function PurifierPage() {
         console.warn("Auth Check:", authError?.message || "No user found");
         return;
       }
-      
+
       const { data, error } = await supabase.from('purified_notes')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-        
+
       if (error) {
         console.error("Database Fetch Error:", error.message);
         return;
       }
       if (data) setHistoryList(data);
-      
+
     } catch (err: any) {
       console.error("🚨 Supabase Connection Failed:", err.message || err);
     }
@@ -161,7 +162,7 @@ export default function PurifierPage() {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files).slice(0, 5);
       setSelectedFiles(filesArray);
-      
+
       previewUrls.forEach(url => URL.revokeObjectURL(url));
       const newPreviews = filesArray.map(file => URL.createObjectURL(file));
       setPreviewUrls(newPreviews);
@@ -230,13 +231,13 @@ export default function PurifierPage() {
 
       // Save images to session memory for Parallel Comparison View
       setSessionImages([...previewUrls]);
-      
+
       setPurifiedContent({ title: data.title, content: data.content });
       if (data.savedId) setActiveNoteId(data.savedId);
-      
+
       refreshTokens();
       fetchHistory();
-      
+
       // 🟢 Memory cleanup for UI preview URLs
       previewUrls.forEach(url => URL.revokeObjectURL(url));
       setSelectedFiles([]);
@@ -244,9 +245,9 @@ export default function PurifierPage() {
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert('🚨 Error: Server took too long to extract text. Try uploading fewer images or ensure images are smaller.');
+        showPublicError();
       } else {
-        alert(`🚨 Error: ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -279,14 +280,14 @@ export default function PurifierPage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-950 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-slate-950 bg-slate-950 lg:border lg:border-slate-700 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Panel: Upload Zone (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-teal-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -304,20 +305,20 @@ export default function PurifierPage() {
           </div>
 
           <form onSubmit={submitPurification} className="space-y-6">
-            <div 
+            <div
               className="w-full border-2 border-dashed border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/5 rounded-2xl p-6 text-center cursor-pointer transition-all"
               onClick={() => fileInputRef.current?.click()}
             >
               <ImageIcon size={32} className="text-emerald-400 mx-auto mb-3" />
               <p className="text-sm font-bold text-slate-300">{t.uploadLabel}</p>
               <p className="text-xs text-slate-500 mt-1">JPEG, PNG only</p>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileChange} 
-                accept="image/jpeg, image/png, image/jpg" 
-                multiple 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/jpeg, image/png, image/jpg"
+                multiple
+                className="hidden"
               />
             </div>
 
@@ -352,7 +353,7 @@ export default function PurifierPage() {
                 </p>
               ) : (
                 historyList.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
                     onClick={() => {
                       setActiveNoteId(item.id);
@@ -376,7 +377,7 @@ export default function PurifierPage() {
 
         {/* Right Panel: Output Viewer */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-900">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-emerald-900/90 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]`}>
             <div className="flex flex-col">
@@ -387,7 +388,7 @@ export default function PurifierPage() {
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col p-0 relative bg-slate-900">
-          
+
           {!purifiedContent && !isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60 p-10">
               <Wand2 size={80} className="text-slate-300 mb-6" />
@@ -402,7 +403,7 @@ export default function PurifierPage() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-700 bg-slate-900">
-               
+
                <div className="p-8 border-b border-slate-700 bg-emerald-50/50 flex justify-between items-start z-10 shadow-sm">
                   <div>
                     <h2 className="text-3xl font-black text-slate-200 mb-1">{purifiedContent?.title}</h2>
@@ -437,14 +438,14 @@ export default function PurifierPage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 border border-emerald-400/50"
               >
@@ -452,7 +453,7 @@ export default function PurifierPage() {
               </button>
             </div>
           </div>
-          
+
         </div>
 
         {/* 🟢 MOBILE BOTTOM SHEET DRAWERS 🟢 */}
@@ -460,7 +461,7 @@ export default function PurifierPage() {
           <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
           <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-            
+
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
                 {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-emerald-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-emerald-400"/> New Note</>}
@@ -476,15 +477,15 @@ export default function PurifierPage() {
                     historyList.map(item => {
                       const isActive = activeNoteId === item.id;
                       return (
-                        <div 
-                          key={item.id} 
-                          onClick={() => { 
+                        <div
+                          key={item.id}
+                          onClick={() => {
                             setActiveNoteId(item.id);
                             setPurifiedContent({ title: item.title, content: item.purified_text });
                             setSelectedFiles([]); setPreviewUrls([]);
                             setSessionImages([]);
-                            setIsMobileDrawerOpen('none'); 
-                          }} 
+                            setIsMobileDrawerOpen('none');
+                          }}
                           className={`group p-4 bg-slate-950 border rounded-xl cursor-pointer hover:shadow-md transition-all ${isActive ? 'border-emerald-500/50' : 'border-slate-800'}`}
                         >
                           <div className="flex justify-between items-center mb-2">
@@ -501,20 +502,20 @@ export default function PurifierPage() {
                 </div>
               ) : (
                 <form onSubmit={(e) => { submitPurification(e); if(selectedFiles.length > 0) setIsMobileDrawerOpen('none'); }} className="space-y-6">
-                  <div 
+                  <div
                     className="w-full border-2 border-dashed border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/5 rounded-2xl p-6 text-center cursor-pointer transition-all"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     <ImageIcon size={32} className="text-emerald-400 mx-auto mb-3" />
                     <p className="text-sm font-bold text-slate-300">{t.uploadLabel}</p>
                     <p className="text-xs text-slate-500 mt-1">JPEG, PNG only</p>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      onChange={handleFileChange} 
-                      accept="image/jpeg, image/png, image/jpg" 
-                      multiple 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/jpeg, image/png, image/jpg"
+                      multiple
+                      className="hidden"
                     />
                   </div>
 
@@ -558,7 +559,7 @@ export default function PurifierPage() {
                  <span className="text-sm font-bold">Close View</span>
               </button>
             </div>
-            
+
             {/* Split View Container */}
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                {/* Left: Original Images */}
@@ -573,7 +574,7 @@ export default function PurifierPage() {
                      ))}
                   </div>
                </div>
-               
+
                {/* Right: Purified Text */}
                <div className="w-full md:w-1/2 h-1/2 md:h-full bg-slate-900 p-6 md:p-12 overflow-y-auto custom-scrollbar">
                   <div className="w-full max-w-3xl mx-auto">

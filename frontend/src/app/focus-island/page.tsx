@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
@@ -59,7 +60,7 @@ function FocusIslandContent() {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const [language, setLanguage] = useState<LanguageType>('English');
   const t = translations[language] || translations['English'];
   const [isMounted, setIsMounted] = useState(false);
@@ -77,7 +78,7 @@ function FocusIslandContent() {
   const [ambientVolume, setAmbientVolume] = useState(30);
   const [selectedLofi, setSelectedLofi] = useState(LOFI_STREAMS[0].url);
   const [selectedAmbient, setSelectedAmbient] = useState(AMBIENT_SOUNDS[0].url);
-  
+
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null);
   const playPromiseRef = useRef<Promise<void> | any>(null); // 🟢 AbortError Tracker
 
@@ -107,14 +108,14 @@ function FocusIslandContent() {
     fetchData();
     const savedLang = localStorage.getItem('Prepia_language');
     if (savedLang) setLanguage(savedLang as LanguageType);
-    
+
     // Load Pinned Note
     const savedNote = localStorage.getItem('focus_pinned_note');
     if (savedNote) {
       setPinnedText(savedNote);
       setIsPinned(true);
     }
-    
+
     // Connect Socket
     socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
     return () => { if (socket) socket.disconnect(); };
@@ -126,7 +127,7 @@ function FocusIslandContent() {
       setCurrentUser(user);
       const { data } = await supabase.from('focus_sessions').select('*').eq('user_id', user.id).order('completed_at', { ascending: false });
       if (data) setHistory(data);
-      
+
       // Auto-join room if URL has ?room=...
       if (roomCode) {
         socket.emit('join-room', { roomCode, user: { id: user.id, name: user.email?.split('@')[0] } });
@@ -143,9 +144,9 @@ function FocusIslandContent() {
        }
     };
     document.addEventListener('visibilitychange', handleVisibility);
-    
+
     socket.on('room-update', (users: any) => { setRoomUsers(users); });
-    
+
     return () => {
        document.removeEventListener('visibilitychange', handleVisibility);
        socket.off('room-update');
@@ -211,7 +212,7 @@ function FocusIslandContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
       });
-      
+
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
@@ -221,7 +222,7 @@ function FocusIslandContent() {
         socket.emit('join-room', { roomCode: data.roomCode, user: { id: currentUser.id, name: currentUser.email?.split('@')[0] } });
       }
     } catch (error: any) {
-      alert(`🚨 Failed to create room: ${error.message}`);
+      showPublicError();
     }
   };
 
@@ -253,13 +254,13 @@ function FocusIslandContent() {
          {/* 🟢 Main Island (Left/Center) */}
          <div ref={scrollRef} onScroll={handleScroll} className={`w-full ${roomCode ? 'lg:w-3/5' : 'lg:w-2/3'} flex-1 lg:flex-none p-6 md:p-8 pt-24 lg:pt-8 pb-28 lg:pb-8 flex flex-col items-center justify-between relative bg-gradient-to-b from-slate-900 to-indigo-950 overflow-y-auto lg:overflow-hidden transition-all duration-300 custom-scrollbar min-h-screen lg:min-h-0`}>
             <div className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-40 animate-pulse" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80')" }}></div>
-            
+
             <div className="w-full hidden lg:flex justify-between items-center z-10 mb-8">
                <div>
                   <h2 className="text-3xl font-black text-white tracking-tight">{t.title}</h2>
                   <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest">{t.subtitle}</p>
                </div>
-               
+
                {!roomCode ? (
                  <button onClick={createRoom} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs text-white flex items-center gap-2 shadow-lg transition-all active:scale-95">
                     <Users size={16}/> Create Group Room
@@ -281,7 +282,7 @@ function FocusIslandContent() {
                <div className="text-8xl md:text-9xl font-black font-mono text-white tracking-tighter bg-white/10 backdrop-blur-md px-12 py-8 rounded-[40px] border border-white/20 shadow-2xl shadow-indigo-500/20">
                   {formatTime(timeLeft)}
                </div>
-               
+
                <div className="flex gap-4 mt-8">
                   <button onClick={() => setIsRunning(!isRunning)} className="px-10 py-4 bg-indigo-500 hover:bg-indigo-400 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg transition-all active:scale-95">
                      {isRunning ? <Pause size={18}/> : <Play size={18}/>} {isRunning ? t.pause : t.start}
@@ -319,14 +320,14 @@ function FocusIslandContent() {
          {/* Mobile Floating Input Dock */}
          <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> Logs
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400/50"
               >
@@ -337,7 +338,7 @@ function FocusIslandContent() {
 
          {/* 🟢 Right Side Panels (Desktop Only) */}
          <div className={`hidden lg:flex ${roomCode ? 'w-2/5' : 'w-1/3'} bg-white p-0 border-l border-slate-200 flex-col transition-all duration-300`}>
-            
+
             {/* MULTIPLAYER ZONE */}
             {roomCode && (
                <div className="p-6 bg-slate-50 border-b border-slate-200">
@@ -359,7 +360,7 @@ function FocusIslandContent() {
                   <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-1.5">
                      <Pin size={14} className="text-rose-500"/> {t.pinLabel}
                   </h3>
-                  <button 
+                  <button
                     onClick={() => {
                        if (isPinned) {
                           setIsPinned(false); // Enable editing
@@ -373,10 +374,10 @@ function FocusIslandContent() {
                     {isPinned ? "Edit Note" : "Save Pin"}
                   </button>
                </div>
-               
-               <textarea 
-                 value={pinnedText} 
-                 onChange={e => setPinnedText(e.target.value)} 
+
+               <textarea
+                 value={pinnedText}
+                 onChange={e => setPinnedText(e.target.value)}
                  placeholder={t.pinPlaceholder}
                  disabled={isPinned}
                  className={`w-full flex-1 p-4 border rounded-2xl outline-none font-medium text-sm resize-none transition-all duration-300 ${isPinned ? 'bg-rose-50/40 border-rose-100 text-slate-600 cursor-default shadow-inner' : 'bg-rose-50 border-rose-200 text-slate-800 focus:ring-1 focus:ring-rose-300 shadow-sm'}`}
@@ -389,7 +390,7 @@ function FocusIslandContent() {
           <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
           <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-            
+
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
                 {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-indigo-400"/> {t.historyTitle}</> : <><Pin size={18} className="text-indigo-400"/> Room & Notes</>}
@@ -443,13 +444,13 @@ function FocusIslandContent() {
                        </div>
                      )}
                   </div>
-                  
+
                   <div className="flex-1 flex flex-col bg-slate-950 p-5 rounded-2xl border border-slate-800 min-h-[250px]">
                      <div className="flex justify-between items-center mb-3">
                         <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-1.5">
                            <Pin size={14} className="text-rose-500"/> {t.pinLabel}
                         </h3>
-                        <button 
+                        <button
                           onClick={() => {
                              if (isPinned) setIsPinned(false);
                              else { localStorage.setItem('focus_pinned_note', pinnedText); setIsPinned(true); }
@@ -459,9 +460,9 @@ function FocusIslandContent() {
                           {isPinned ? "Edit" : "Save"}
                         </button>
                      </div>
-                     <textarea 
-                       value={pinnedText} 
-                       onChange={e => setPinnedText(e.target.value)} 
+                     <textarea
+                       value={pinnedText}
+                       onChange={e => setPinnedText(e.target.value)}
                        placeholder={t.pinPlaceholder}
                        disabled={isPinned}
                        className={`w-full flex-1 p-4 border rounded-xl outline-none font-medium text-sm resize-none transition-all duration-300 ${isPinned ? 'bg-slate-900/50 border-slate-800 text-slate-400 cursor-default' : 'bg-slate-900 border-slate-700 text-slate-200 focus:border-indigo-500'}`}

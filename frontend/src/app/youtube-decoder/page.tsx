@@ -5,6 +5,7 @@ import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
 import { Sparkles, Loader2, History, Trash2, ShieldCheck, PlaySquare, GraduationCap, Copy, Check, ListChecks, Maximize2, Minimize2, X, Clock, AlertCircle } from 'lucide-react';
 import { useTokens } from '@/hooks/useTokens';
+import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -189,7 +190,9 @@ export default function YoutubeDecoderPage() {
       setTempVideoId(data.videoId);
       setShowModal(true);
     } catch (err: any) {
-      setUiError(`Scan Error: ${err.message}`);
+      const message = getPublicErrorMessage();
+      setUiError(message);
+      showPublicError();
     } finally {
       setIsFetching(false);
     }
@@ -248,11 +251,9 @@ export default function YoutubeDecoderPage() {
       refreshTokens();
       fetchHistory();
     } catch (err: any) {
-      if (err.name === 'AbortError') {
-        setUiError('Decoding Error: Server took too long to respond. Try selecting fewer chapters.');
-      } else {
-        setUiError(`Decoding Error: ${err.message}`);
-      }
+      const message = getPublicErrorMessage();
+      setUiError(message);
+      showPublicError();
     } finally {
       setIsDecoding(false);
     }

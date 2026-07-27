@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -105,16 +106,16 @@ export default function PresentationPage() {
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('bubbles');
   const [files, setFiles] = useState<any[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [activeDeckId, setActiveDeckId] = useState<string | null>(null);
   const [slidesData, setSlidesData] = useState<any>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
-  
+
   const { tokens, tier, refreshTokens } = useTokens();
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [requiredTokensForModal, setRequiredTokensForModal] = useState(15);
-  
+
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [showNotes, setShowNotes] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -200,7 +201,7 @@ export default function PresentationPage() {
       const { data: { session } } = await supabase.auth.getSession();
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/presentation/generate` : `${apiUrlBase}/api/presentation/generate`;
-      
+
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
@@ -221,7 +222,7 @@ export default function PresentationPage() {
       }
 
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
@@ -234,16 +235,16 @@ export default function PresentationPage() {
       if (data.savedId) {
         setActiveDeckId(data.savedId);
       }
-      
+
       refreshTokens();
       // Refresh the left sidebar to show the newly saved presentation
       fetchHistory();
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert("🚨 Oops! Server took too long to craft the slides. Please try again.");
+        showPublicError();
       } else {
-        alert(`🚨 Oops! ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -347,7 +348,7 @@ export default function PresentationPage() {
       setHistoryList((current) => current.map((deck) => deck.id === activeDeckId ? { ...deck, slides_data: slidesData } : deck));
       setIsEditing(false);
     } catch (error: any) {
-      alert(error.message || 'Could not save deck changes');
+      showPublicError();
     } finally {
       setIsSavingDeck(false);
     }
@@ -392,14 +393,14 @@ export default function PresentationPage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-50 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-white bg-slate-950 lg:border lg:border-slate-200 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Panel: Controls (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-violet-500 to-fuchsia-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -432,8 +433,8 @@ export default function PresentationPage() {
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2">{t.slidesLabel}</label>
-                <select 
-                  value={slideCount} 
+                <select
+                  value={slideCount}
                   onChange={(e) => setSlideCount(Number(e.target.value))}
                   className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-violet-500 outline-none font-bold text-slate-200 cursor-pointer"
                 >
@@ -485,7 +486,7 @@ export default function PresentationPage() {
                 historyList.map((item) => {
                   const isActive = activeDeckId === item.id;
                   return (
-                    <div 
+                    <div
                       key={item.id}
                       onClick={() => selectDeck(item)}
                       className={`group p-4 rounded-xl cursor-pointer transition-all shadow-sm border ${isActive ? 'bg-violet-500/10 border-violet-500/50' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}`}
@@ -531,7 +532,7 @@ export default function PresentationPage() {
             </div>
             <button onClick={() => window.location.href='/chat'} className="px-3 py-3 font-black rounded-xl transition uppercase tracking-wider text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg">Chat</button>
           </div>
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-20 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-violet-500/30 shadow-[0_0_15px_rgba(139,92,246,0.1)]`}>
             <div className="flex flex-col">
@@ -566,10 +567,10 @@ export default function PresentationPage() {
             </div>
           ) : (
             <div className="flex flex-col h-full animate-in fade-in zoom-in-95 duration-500">
-              
+
               {/* 16:9 Presentation Canvas */}
               <div ref={presentationCanvasRef} className={`relative w-full aspect-video ${presentationTemplates.find((template) => template.id === templateId)?.canvas || presentationTemplates[0].canvas} rounded-2xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col justify-center p-12 md:p-20`}>
-                
+
                 {/* Decorative Elements */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 to-fuchsia-500"></div>
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl"></div>
@@ -706,14 +707,14 @@ export default function PresentationPage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all active:scale-95 border border-violet-400/50"
               >
@@ -731,7 +732,7 @@ export default function PresentationPage() {
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
               {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-violet-400"/> {t.historyTitle}</> : isMobileDrawerOpen === 'template' ? <><LayoutTemplate size={18} className="text-violet-400"/> Deck design</> : <><Sparkles size={18} className="text-violet-400"/> New Deck</>}
@@ -747,9 +748,9 @@ export default function PresentationPage() {
                   historyList.map(item => {
                     const isActive = activeDeckId === item.id;
                     return (
-                      <div 
-                        key={item.id} 
-                        onClick={() => { selectDeck(item); setIsMobileDrawerOpen('none'); }} 
+                      <div
+                        key={item.id}
+                        onClick={() => { selectDeck(item); setIsMobileDrawerOpen('none'); }}
                         className={`group p-4 bg-slate-950 border rounded-xl cursor-pointer hover:shadow-md transition-all ${isActive ? 'border-violet-500/50' : 'border-slate-800'}`}
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -788,8 +789,8 @@ export default function PresentationPage() {
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <label className="block text-[11px] font-black tracking-widest text-slate-400 uppercase mb-2">{t.slidesLabel}</label>
-                    <select 
-                      value={slideCount} 
+                    <select
+                      value={slideCount}
                       onChange={(e) => setSlideCount(Number(e.target.value))}
                       className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-violet-500/50 outline-none font-bold text-slate-200 cursor-pointer"
                     >

@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -13,7 +14,7 @@ export default function LabGraphPage() {
   const [prompt, setPrompt] = useState('');
   const [rawData, setRawData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [activeGraphId, setActiveGraphId] = useState<string | null>(null);
   const [chartConfig, setChartConfig] = useState<any>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
@@ -91,11 +92,11 @@ export default function LabGraphPage() {
 
       setChartConfig(data.chartConfig);
       if (data.savedId) setActiveGraphId(data.savedId);
-      
+
       refreshTokens();
       fetchHistory();
     } catch (error: any) {
-      alert(`🚨 Graph Error: ${error.message}`);
+      showPublicError();
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +122,7 @@ export default function LabGraphPage() {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    
+
     img.onload = () => {
       canvas.width = img.width + 80;
       canvas.height = img.height + 80;
@@ -188,14 +189,14 @@ export default function LabGraphPage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-950 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-slate-950 bg-slate-950 lg:border lg:border-slate-700 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Panel: Inputs (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative z-10">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-blue-500 to-cyan-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -251,7 +252,7 @@ export default function LabGraphPage() {
                 <p className="text-xs text-slate-400 text-center py-4 bg-slate-900 rounded-xl">No graphs plotted yet.</p>
               ) : (
                 historyList.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
                     onClick={() => { setActiveGraphId(item.id); setChartConfig(item.chart_config); }}
                     className={`group p-3 rounded-xl cursor-pointer transition-all border flex justify-between items-center ${activeGraphId === item.id ? 'bg-blue-500/10 border-blue-500/50' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}`}
@@ -270,7 +271,7 @@ export default function LabGraphPage() {
 
         {/* Right Panel: Premium Graph Viewport */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-900">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)]`}>
             <div className="flex flex-col">
@@ -281,7 +282,7 @@ export default function LabGraphPage() {
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col p-0 relative bg-slate-900">
-          
+
           {!chartConfig && !isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60 p-10">
               <ChartIcon size={80} className="text-slate-300 mb-6" />
@@ -295,7 +296,7 @@ export default function LabGraphPage() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-700">
-               
+
                {/* Aesthetic Header */}
                <div className="p-6 md:p-8 border-b border-slate-700 bg-slate-950 flex flex-col md:flex-row gap-4 justify-between items-center z-10 shadow-sm">
                   <div className="text-center md:text-left">
@@ -319,7 +320,7 @@ export default function LabGraphPage() {
                      </div>
                   </div>
                </div>
-               
+
                <div className="h-20 lg:h-0"></div>
 
             </div>
@@ -329,14 +330,14 @@ export default function LabGraphPage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> Saved
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all active:scale-95 border border-blue-400/50"
               >
@@ -344,7 +345,7 @@ export default function LabGraphPage() {
               </button>
             </div>
           </div>
-          
+
         </div>
 
         {/* 🟢 MOBILE BOTTOM SHEET DRAWERS 🟢 */}
@@ -352,7 +353,7 @@ export default function LabGraphPage() {
           <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
           <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-            
+
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
                 {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-blue-400"/> Saved Graphs</> : <><ChartIcon size={18} className="text-blue-400"/> Plot Data</>}
@@ -366,13 +367,13 @@ export default function LabGraphPage() {
                     <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">No graphs plotted yet.</p>
                   ) : (
                     historyList.map(item => (
-                      <div 
-                        key={item.id} 
-                        onClick={() => { 
-                          setActiveGraphId(item.id); 
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          setActiveGraphId(item.id);
                           setChartConfig(item.chart_config);
-                          setIsMobileDrawerOpen('none'); 
-                        }} 
+                          setIsMobileDrawerOpen('none');
+                        }}
                         className="group p-4 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:shadow-md transition-all flex justify-between items-center"
                       >
                         <div className="flex items-center gap-2 truncate pr-2">
@@ -417,7 +418,7 @@ export default function LabGraphPage() {
             </div>
           </div>
         </div>
-        
+
         </div>
       </div>
     </SecureLayout>

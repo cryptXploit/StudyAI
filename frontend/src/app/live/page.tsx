@@ -1,4 +1,5 @@
 'use client';
+import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -108,7 +109,7 @@ export default function LivePodcastPage() {
   const startListening = async () => {
     if (!recognitionRef.current) return;
     if (liveStateRef.current !== 'idle' || recognitionActiveRef.current) return;
-    
+
     if (synthRef.current) synthRef.current.cancel(); // stop ai speaking
     setTranscript('');
     transcriptRef.current = '';
@@ -288,8 +289,8 @@ export default function LivePodcastPage() {
               const data = JSON.parse(dataStr);
               if (data.error) {
                 if (data.error === 'INSUFFICIENT_TOKENS') setShowTokenModal(true);
-                setLiveError(data.error);
-                if (data.error !== 'INSUFFICIENT_TOKENS') alert(data.error);
+                setLiveError(getPublicErrorMessage(data));
+                if (data.error !== 'INSUFFICIENT_TOKENS') showPublicError(data);
                 liveStateRef.current = 'idle';
                 setState('idle');
                 return;
@@ -313,9 +314,9 @@ export default function LivePodcastPage() {
       }
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : 'Live discussion could not be started.';
+      const message = getPublicErrorMessage();
       setLiveError(message);
-      alert(message);
+      showPublicError();
       liveStateRef.current = 'idle';
       setState('idle');
     } finally {
@@ -334,12 +335,12 @@ export default function LivePodcastPage() {
 
   const speakText = (text: string) => {
     if (!synthRef.current) { liveStateRef.current = 'idle'; setState('idle'); return; }
-    
+
     liveStateRef.current = 'speaking';
     setState('speaking');
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = getLangCode();
-    
+
     // Prefer an installed native voice in the selected language. If the OS has
     // no Bangla/Hindi voice, use its available default voice instead of failing
     // silently, while the full answer remains visible as subtitles.
@@ -370,7 +371,7 @@ export default function LivePodcastPage() {
       setState('idle');
       resumeListeningRef.current = false;
     };
-    
+
     synthRef.current.speak(utterance);
   };
 
@@ -394,14 +395,14 @@ export default function LivePodcastPage() {
   return (
     <SecureLayout>
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden pt-16">
-        
+
         {/* Background Grid */}
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(99,102,241,.16) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,.16) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
         <OutOfTokensModal isOpen={showTokenModal} onClose={() => setShowTokenModal(false)} requiredTokens={2} />
 
         <div className="relative z-10 flex flex-col items-center max-w-4xl w-full px-6">
-          
+
           <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400 mb-4 text-center">
             Live AI Podcast
           </h1>
@@ -481,12 +482,12 @@ export default function LivePodcastPage() {
 
             {/* Text Fallback Input */}
             <form onSubmit={handleTextSubmit} className="w-full relative opacity-70 hover:opacity-100 transition-opacity focus-within:opacity-100">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
                 disabled={state !== 'idle'}
-                placeholder="Or type your message here..." 
+                placeholder="Or type your message here..."
                 className="w-full bg-slate-900 border border-slate-700 text-white rounded-full py-3 px-6 pr-12 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
               />
               <button type="submit" disabled={!textInput.trim() || state !== 'idle'} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-indigo-400 hover:text-indigo-300 disabled:opacity-50">
@@ -552,7 +553,7 @@ export default function LivePodcastPage() {
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
               <Settings2 size={18} className="text-indigo-400"/> Settings

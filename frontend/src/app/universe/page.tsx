@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -9,7 +10,7 @@ import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import dynamic from 'next/dynamic';
 
 // 🟢 Safely Dynamic Import the 3D WebGL Library to prevent SSR Crash
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { 
+const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#020617] text-indigo-500">
@@ -67,11 +68,11 @@ export default function UniversePage() {
   const supabase = createClient();
   const [topic, setTopic] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [activeUniverseId, setActiveUniverseId] = useState<string | null>(null);
   const [graphData, setGraphData] = useState<any>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
-  
+
   // Interactive Panel State
   const [selectedNode, setSelectedNode] = useState<any>(null);
 
@@ -165,15 +166,15 @@ export default function UniversePage() {
 
       setGraphData(data.graphData);
       if (data.savedId) setActiveUniverseId(data.savedId);
-      
+
       refreshTokens();
       fetchHistory();
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert("🚨 Space-Time Error: Server took too long to build the universe. Please try again.");
+        showPublicError();
       } else {
-        alert(`🚨 Space-Time Error: ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -198,7 +199,7 @@ export default function UniversePage() {
       // Aim at node from outside it
       const distance = 40;
       const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
-      
+
       fgRef.current.cameraPosition(
         { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio }, // new position
         node, // lookAt ({ x, y, z })
@@ -209,14 +210,14 @@ export default function UniversePage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-50 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-slate-50 bg-slate-950 lg:border lg:border-slate-200 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Control & Info Panel (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative z-10">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-indigo-500 to-fuchsia-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -273,7 +274,7 @@ export default function UniversePage() {
                 <p className="text-xs text-slate-600 text-center py-4 bg-slate-900 rounded-xl">{t.noHistory}</p>
               ) : (
                 historyList.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
                     onClick={() => {
                       setActiveUniverseId(item.id);
@@ -297,7 +298,7 @@ export default function UniversePage() {
 
         {/* Right Panel: The 3D WebGL Canvas */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-[#020617]">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]`}>
             <div className="flex flex-col">
@@ -308,10 +309,10 @@ export default function UniversePage() {
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col p-0 lg:p-0 relative">
-          
+
           {/* Subtle Space Vignette Overlay */}
           <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_150px_rgba(0,0,0,0.9)] z-10"></div>
-          
+
           {!graphData && !isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60 z-20">
               <Orbit size={80} className="text-slate-800 mb-6 animate-[spin_10s_linear_infinite]" />
@@ -325,7 +326,7 @@ export default function UniversePage() {
             </div>
           ) : (
             <div className="w-full h-full relative animate-in fade-in duration-1000">
-               
+
                <div className="absolute top-6 left-8 z-20 text-white flex flex-col pointer-events-none">
                   <h3 className="text-xl font-black tracking-wider uppercase opacity-80 flex items-center gap-2"><Focus size={16} className="text-indigo-500"/> Universe of {topic}</h3>
                   <p className="text-[10px] text-slate-400 font-mono tracking-widest mt-1">Left Click & Drag to Rotate • Scroll to Zoom • Click Node for Details</p>
@@ -371,14 +372,14 @@ export default function UniversePage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-400 hover:to-blue-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all active:scale-95 border border-indigo-400/50"
               >
@@ -386,7 +387,7 @@ export default function UniversePage() {
               </button>
             </div>
           </div>
-          
+
         </div>
 
         </div>
@@ -397,7 +398,7 @@ export default function UniversePage() {
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
               {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-indigo-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-indigo-400"/> New Universe</>}
@@ -413,15 +414,15 @@ export default function UniversePage() {
                   historyList.map(item => {
                     const isActive = activeUniverseId === item.id;
                     return (
-                      <div 
-                        key={item.id} 
-                        onClick={() => { 
+                      <div
+                        key={item.id}
+                        onClick={() => {
                           setActiveUniverseId(item.id);
                           setGraphData(item.graph_data);
                           setTopic(item.topic);
                           setSelectedNode(null);
-                          setIsMobileDrawerOpen('none'); 
-                        }} 
+                          setIsMobileDrawerOpen('none');
+                        }}
                         className={`group p-4 bg-slate-950 border rounded-xl cursor-pointer hover:shadow-md transition-all ${isActive ? 'border-indigo-500/50' : 'border-slate-800'}`}
                       >
                         <div className="flex justify-between items-center mb-2">

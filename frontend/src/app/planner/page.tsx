@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -65,11 +66,11 @@ export default function PlannerPage() {
   const [topic, setTopic] = useState('');
   const [examDate, setExamDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [activeRoutineId, setActiveRoutineId] = useState<string | null>(null);
   const [routineData, setRoutineData] = useState<any>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
-  
+
   const { tokens, tier, refreshTokens } = useTokens();
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [requiredTokensForModal, setRequiredTokensForModal] = useState(10);
@@ -145,7 +146,7 @@ export default function PlannerPage() {
       const { data: { session } } = await supabase.auth.getSession();
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/planner/generate` : `${apiUrlBase}/api/planner/generate`;
-      
+
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
@@ -167,7 +168,7 @@ export default function PlannerPage() {
 
       const data = await response.json();
       if (!data.valid || !data.routineData) throw new Error(data.error || "Failed to generate routine.");
-      
+
       refreshTokens();
 
       // Save to Supabase (Zero cost for future loads)
@@ -188,9 +189,9 @@ export default function PlannerPage() {
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert("🚨 Timeout: Server took too long to craft the routine. Try selecting a shorter timeframe.");
+        showPublicError();
       } else {
-        alert(`🚨 Error: ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -211,7 +212,7 @@ export default function PlannerPage() {
     await supabase.from('study_routines')
       .update({ routine_data: newRoutineData })
       .eq('id', activeRoutineId);
-      
+
     fetchHistory(); // Refresh progress in history list
   };
 
@@ -240,17 +241,17 @@ export default function PlannerPage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-50 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-white bg-slate-950 lg:border lg:border-slate-200 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Panel: Inputs & History (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative">
-          
+
           <div className="absolute top-0 right-0 bg-gradient-to-l from-emerald-500 to-teal-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
              <ShieldCheck size={12}/> {t.proBadge}
           </div>
@@ -310,9 +311,9 @@ export default function PlannerPage() {
                 historyList.map((item) => {
                   const progress = getProgress(item.routine_data);
                   const isActive = activeRoutineId === item.id;
-                  
+
                   return (
-                    <div 
+                    <div
                       key={item.id}
                       onClick={() => { setActiveRoutineId(item.id); setRoutineData(item.routine_data); }}
                       className={`group p-4 rounded-xl cursor-pointer transition-all shadow-sm border ${isActive ? 'bg-teal-500/10 border-teal-500/50' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}`}
@@ -321,12 +322,12 @@ export default function PlannerPage() {
                         <h4 className={`text-sm font-bold truncate pr-2 ${isActive ? 'text-teal-300' : 'text-slate-300'}`}>{item.topic}</h4>
                         <button onClick={(e) => deleteRoutine(item.id, e)} className="text-slate-600 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
                       </div>
-                      
+
                       <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase">
                         <span className="flex items-center gap-1"><Target size={10}/> {calculateDays(item.exam_date)} {t.daysLeft}</span>
                         <span className="text-teal-500">{progress}%</span>
                       </div>
-                      
+
                       {/* Mini Progress Bar */}
                       <div className="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
                         <div className="bg-teal-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${progress}%` }}></div>
@@ -341,7 +342,7 @@ export default function PlannerPage() {
 
         {/* Right Panel: The Checklist Area */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-950 lg:bg-slate-50">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-20 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-teal-500/30 shadow-[0_0_15px_rgba(20,184,166,0.1)]`}>
             <div className="flex flex-col">
@@ -365,7 +366,7 @@ export default function PlannerPage() {
               </div>
             ) : (
               <div className="flex flex-col h-full relative">
-                
+
                 {/* Header */}
                 <div className="bg-slate-900 lg:bg-white border-b border-slate-800 lg:border-slate-200 p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-4 shadow-sm z-10 sticky top-0 lg:static">
                   <div>
@@ -387,18 +388,18 @@ export default function PlannerPage() {
               <div className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar space-y-4 lg:space-y-6">
                 {routineData.routine.map((day: any, dIndex: number) => {
                   const dayCompleted = day.tasks.every((t: any) => t.completed);
-                  
+
                   return (
                     <div key={dIndex} className={`bg-slate-900 lg:bg-white border rounded-2xl p-5 lg:p-6 transition-all duration-300 shadow-sm ${dayCompleted ? 'border-teal-500/30 lg:border-teal-200 bg-teal-500/10 lg:bg-teal-50/30' : 'border-slate-800 lg:border-slate-200'}`}>
                       <h3 className="text-base lg:text-lg font-black text-slate-200 lg:text-slate-800 mb-4 flex items-center gap-3">
                         <span className={`px-2.5 py-1 lg:px-3 lg:py-1 rounded-lg text-xs lg:text-sm ${dayCompleted ? 'bg-teal-500 text-white' : 'bg-slate-700 lg:bg-slate-800 text-white'}`}>Day {day.day}</span>
                         <span className={dayCompleted ? 'text-teal-400 lg:text-teal-700' : ''}>{day.title}</span>
                       </h3>
-                      
+
                       <div className="space-y-2 lg:space-y-3">
                         {day.tasks.map((task: any, tIndex: number) => (
-                          <div 
-                            key={tIndex} 
+                          <div
+                            key={tIndex}
                             onClick={() => toggleTask(dIndex, tIndex)}
                             className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all border ${task.completed ? 'bg-teal-500/10 lg:bg-teal-50 border-teal-500/30 lg:border-teal-200' : 'bg-slate-950 lg:bg-slate-50 border-slate-800 lg:border-slate-100 hover:border-slate-700 lg:hover:border-slate-300 hover:bg-slate-800 lg:hover:bg-slate-100'}`}
                           >
@@ -423,14 +424,14 @@ export default function PlannerPage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(20,184,166,0.3)] transition-all active:scale-95 border border-teal-400/50"
               >
@@ -448,7 +449,7 @@ export default function PlannerPage() {
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
               {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-teal-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-teal-400"/> New Planner</>}
@@ -465,9 +466,9 @@ export default function PlannerPage() {
                     const progress = getProgress(item.routine_data);
                     const isActive = activeRoutineId === item.id;
                     return (
-                      <div 
-                        key={item.id} 
-                        onClick={() => { setActiveRoutineId(item.id); setRoutineData(item.routine_data); setIsMobileDrawerOpen('none'); }} 
+                      <div
+                        key={item.id}
+                        onClick={() => { setActiveRoutineId(item.id); setRoutineData(item.routine_data); setIsMobileDrawerOpen('none'); }}
                         className={`group p-4 bg-slate-950 border rounded-xl cursor-pointer hover:shadow-md transition-all ${isActive ? 'border-teal-500/50' : 'border-slate-800'}`}
                       >
                         <div className="flex justify-between items-start">

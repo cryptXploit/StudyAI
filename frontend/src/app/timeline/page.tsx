@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -8,7 +9,7 @@ import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import dynamic from 'next/dynamic';
 
-const Chrono = dynamic(() => import('react-chrono').then(mod => mod.Chrono), { 
+const Chrono = dynamic(() => import('react-chrono').then(mod => mod.Chrono), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex flex-col items-center justify-center bg-transparent opacity-60">
@@ -109,7 +110,7 @@ export default function TimelinePage() {
       refreshTokens();
       fetchHistory();
     } catch (error: any) {
-      alert(`🚨 Time Paradox: ${error.message}`);
+      showPublicError();
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +174,7 @@ export default function TimelinePage() {
       <OutOfTokensModal isOpen={showTokenModal} onClose={() => setShowTokenModal(false)} requiredTokens={requiredTokensForModal} />
       <div className={`min-h-[calc(100vh-80px)] p-0 lg:p-4 transition-colors duration-1000 ${dynamicBackgroundClass}`}>
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden rounded-none lg:rounded-3xl shadow-none lg:shadow-2xl relative border-0 lg:border lg:border-slate-800/50">
-        
+
         {timelineData && (
           <div className="hidden lg:flex w-full lg:w-80 bg-slate-950/80 backdrop-blur-xl border-r border-slate-800/50 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative z-10 shadow-xl transition-all duration-700 animate-in slide-in-from-left">
             <div className="flex items-center gap-3 mb-6 mt-2">

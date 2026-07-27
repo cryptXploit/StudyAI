@@ -14,6 +14,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import 'katex/dist/katex.min.css';
 import { useTokens } from '@/hooks/useTokens';
+import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 
 // 🟢 Local i18n Dictionary
@@ -303,15 +304,15 @@ function MoleculePageContent() {
           refreshTokens(); // Refresh in case tokens were deducted
       } else if (data && data.error) {
           console.error("Backend AI Error:", data.error);
-          setAiInsight(`⚠️ Error: ${data.error}`);
+          const message = getPublicErrorMessage(data);
+          setAiInsight(message);
+          showPublicError(data);
       }
     } catch (e: any) {
-      if (e.name === 'AbortError') {
-        setAiInsight("⚠️ Connection timeout: AI Assistant took too long to respond.");
-      } else {
-        console.error("AI Insight Error:", e);
-        setAiInsight("⚠️ Connection error to AI Assistant.");
-      }
+      console.error("AI Insight Error:", e);
+      const message = getPublicErrorMessage();
+      setAiInsight(message);
+      showPublicError();
     } finally {
       setIsInsightLoading(false);
     }

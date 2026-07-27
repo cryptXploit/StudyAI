@@ -6,6 +6,7 @@ import { Search, History, BookOpen, AlertCircle, CheckCircle2, Target, Loader2, 
 import SecureLayout from '@/components/layout/SecureLayout';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 
 const translations = {
   English: {
@@ -225,10 +226,14 @@ export default function BookJumperPage() {
       if (data.success) {
         setExplanation(data.explanation);
       } else {
-        setExplanation(data.error || "Failed to generate explanation.");
+        const message = getPublicErrorMessage(data);
+        setExplanation(message);
+        showPublicError(data);
       }
     } catch (e) {
-      setExplanation("Network error while generating explanation.");
+      const message = getPublicErrorMessage();
+      setExplanation(message);
+      showPublicError();
     } finally {
       setIsExplaining(false);
     }
@@ -276,10 +281,14 @@ export default function BookJumperPage() {
         }
         fetchHistory();
       } else { 
-        setSearchFeedback({ message: data.error || "Failed to scan book.", type: 'error' }); 
+        const message = getPublicErrorMessage(data);
+        setSearchFeedback({ message, type: 'error' });
+        showPublicError(data);
       }
     } catch (error) { 
-      setSearchFeedback({ message: "Server connection error.", type: 'error' }); 
+      const message = getPublicErrorMessage();
+      setSearchFeedback({ message, type: 'error' });
+      showPublicError();
     } 
     finally { setIsLoading(false); }
   };
@@ -342,7 +351,9 @@ export default function BookJumperPage() {
       }
     } catch (err: any) {
       console.error("Share failed:", err);
-      setSearchFeedback({ message: `Share Failed: ${err.message}`, type: 'error' });
+      const message = getPublicErrorMessage();
+      setSearchFeedback({ message, type: 'error' });
+      showPublicError();
     }
     setIsSharing(false);
   };

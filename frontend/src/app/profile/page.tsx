@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -9,7 +10,7 @@ import { User, GraduationCap, MapPin, Calendar, Loader2, Save } from 'lucide-rea
 export default function ProfilePage() {
   const supabase = createClient();
   const router = useRouter();
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,24 +24,24 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       // 🟢 FIXED: Wait for session to be fully loaded
       if (!session?.access_token) {
         console.warn("Session not found or expired. Please log in again.");
         setLoading(false);
         return;
       }
-      
+
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/profile` : `${apiUrlBase}/api/profile`;
-      
+
       const response = await fetch(fetchUrl, {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
 
       if (!response.ok) {
         if (response.status === 401) throw new Error("Session expired. Please log out and log back in.");
-        
+
         // 🟢 FIXED: Fetch the exact error message from the backend!
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.error || `Server returned ${response.status}`);
@@ -56,11 +57,11 @@ export default function ProfilePage() {
           dob: data.profile.dob || ''
         });
       }
-    } catch (err: any) { 
-      console.error("Profile Fetch Error:", err); 
-      alert(err.message);
-    } finally { 
-      setLoading(false); 
+    } catch (err: any) {
+      console.error("Profile Fetch Error:", err);
+      showPublicError();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,12 +70,12 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       // 🟢 FIXED: Strict session check before saving
       if (!session?.access_token) {
         throw new Error("Authentication failed. Please log out and log back in.");
       }
-      
+
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/profile` : `${apiUrlBase}/api/profile`;
 
@@ -86,7 +87,7 @@ export default function ProfilePage() {
 
       if (!response.ok) {
         if (response.status === 401) throw new Error("Session expired. Please log out and log back in.");
-        
+
         // 🟢 FIXED: Fetch the exact error message from the backend!
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.error || `Server returned ${response.status}`);
@@ -95,15 +96,15 @@ export default function ProfilePage() {
       const data = await response.json();
       if (data.success) {
         alert("Profile Saved Successfully!");
-        router.push('/quests'); 
+        router.push('/quests');
       } else {
-        alert(data.error || "Failed to save profile.");
+        showPublicError(data);
       }
-    } catch (err: any) { 
+    } catch (err: any) {
       console.error(err);
-      alert(err.message); 
-    } finally { 
-      setSaving(false); 
+      showPublicError();
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -126,7 +127,7 @@ export default function ProfilePage() {
               <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2">Full Name</label>
               <input type="text" required value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} className="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl outline-none focus:border-indigo-500 transition-colors font-medium text-slate-800" placeholder="John Doe"/>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><GraduationCap size={14}/> University/School</label>

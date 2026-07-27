@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -46,7 +47,7 @@ export default function GeoMapperPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [mapData, setMapData] = useState<any>(null);
   const [showTokenModal, setShowTokenModal] = useState(false);
-  
+
   const [historyList, setHistoryList] = useState<any[]>([]);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +81,7 @@ export default function GeoMapperPage() {
   const fetchHistory = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/geomapper/history` : `${apiUrlBase}/api/geomapper/history`;
       const res = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${session?.access_token}` } });
       const data = await res.json();
@@ -95,15 +96,15 @@ export default function GeoMapperPage() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/geomapper/generate` : `${apiUrlBase}/api/geomapper/generate`;
-      
+
       const response = await fetch(apiUrl, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
         body: JSON.stringify({ topic, language })
       });
       const data = await response.json();
-      
+
       if (data.success) {
         setMapData(data.data);
         fetchHistory();
@@ -111,12 +112,12 @@ export default function GeoMapperPage() {
         if (data.error === 'INSUFFICIENT_TOKENS' || response.status === 402) {
           setShowTokenModal(true);
         } else {
-          alert(data.error || "Failed to generate map");
+          showPublicError(data);
         }
       }
-    } catch (error) { 
-      alert("Server connection error."); 
-    } 
+    } catch (error) {
+      showPublicError();
+    }
     finally { setIsLoading(false); }
   };
 
@@ -142,8 +143,8 @@ export default function GeoMapperPage() {
   const mappedCountries = useMemo(() => {
     if (!mapData || !mapData.countries) return {};
     const map: Record<string, any> = {};
-    mapData.countries.forEach((c: any) => { 
-      if(c.id) map[String(c.id).toLowerCase()] = c; 
+    mapData.countries.forEach((c: any) => {
+      if(c.id) map[String(c.id).toLowerCase()] = c;
       if(c.name) map[String(c.name).toLowerCase()] = c;
     });
     return map;
@@ -179,7 +180,7 @@ export default function GeoMapperPage() {
   return (
     <SecureLayout>
       <div className="flex flex-col md:flex-row h-[calc(100vh-80px)] max-w-7xl mx-auto overflow-hidden bg-slate-950 lg:border lg:border-slate-800 lg:rounded-3xl lg:shadow-2xl lg:mt-4 font-sans relative">
-        
+
         {/* Mobile Smart Header */}
         <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0`}>
           <div className="flex flex-col">
@@ -205,7 +206,7 @@ export default function GeoMapperPage() {
 
         {/* Right Area: Interactive Map Rendering */}
         <div onScroll={handleScroll} className="flex-1 relative bg-[#020617] flex flex-col items-center justify-center overflow-y-auto custom-scrollbar">
-          
+
           {isLoading && (
             <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
                <Loader2 size={48} className="animate-spin text-cyan-500 mb-4" />
@@ -220,7 +221,7 @@ export default function GeoMapperPage() {
             </div>
           ) : mapData && (
             <div ref={mapContainerRef} className="w-full h-full min-h-[500px] md:min-h-0 relative flex flex-col p-2 md:p-6 pb-24 md:pb-12 animate-in zoom-in-95 duration-500">
-              
+
               {/* Map Header Overlay */}
               <div className="absolute top-4 left-4 md:top-8 md:left-8 z-20 max-w-[65%] md:max-w-sm pointer-events-none">
                 <h1 className="text-lg md:text-3xl font-black text-white mb-1 md:mb-2 drop-shadow-lg leading-tight">{mapData.title}</h1>
@@ -247,7 +248,7 @@ export default function GeoMapperPage() {
 
               {/* 🟢 Export Button (Intelligently Hidden on Mobile) */}
               <button onClick={exportAsImage} className="absolute top-4 right-4 md:top-8 md:right-8 z-20 flex items-center gap-2 bg-slate-800/80 md:bg-cyan-600/90 hover:bg-cyan-500 backdrop-blur-md border border-slate-600 md:border-cyan-400/50 text-white p-2.5 md:px-4 md:py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 group">
-                <Download size={16} className="text-slate-300 md:text-white group-hover:text-white" /> 
+                <Download size={16} className="text-slate-300 md:text-white group-hover:text-white" />
                 <span className="hidden md:inline">{t.exportMap}</span>
               </button>
 
@@ -327,7 +328,7 @@ export default function GeoMapperPage() {
 
                 {/* Custom Tooltip (Desktop Only Hover) */}
                 {tooltipContent && !('ontouchstart' in window) && (
-                  <div 
+                  <div
                     className="fixed z-50 bg-slate-900 border border-cyan-500/50 text-white px-3 py-2 rounded-xl text-xs font-bold shadow-xl pointer-events-none transform -translate-x-1/2 -translate-y-full mt-[-15px]"
                     style={{ left: tooltipPos.x, top: tooltipPos.y }}
                   >
@@ -342,14 +343,14 @@ export default function GeoMapperPage() {
         {/* Mobile Floating Input Dock */}
         <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-[#020617] via-[#020617]/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
           <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-            <button 
-              onClick={() => setIsMobileDrawerOpen('history')} 
+            <button
+              onClick={() => setIsMobileDrawerOpen('history')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-slate-200 font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all active:scale-95 border border-slate-700"
             >
               <History size={18} /> {t.history}
             </button>
-            <button 
-              onClick={() => setIsMobileDrawerOpen('search')} 
+            <button
+              onClick={() => setIsMobileDrawerOpen('search')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all active:scale-95 border border-cyan-400/50"
             >
               <Search size={18} /> Query
@@ -360,7 +361,7 @@ export default function GeoMapperPage() {
         {/* 🟢 MOBILE BOTTOM SHEET DRAWERS 🟢 */}
         <div className={`fixed inset-0 z-[100] lg:hidden transition-all duration-300 ${isMobileDrawerOpen !== 'none' ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
           <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           {/* Search Drawer */}
           <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen === 'search' ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
@@ -375,13 +376,13 @@ export default function GeoMapperPage() {
         </div>
 
       </div>
-      
+
       {showTokenModal && (
-        <OutOfTokensModal 
-          isOpen={showTokenModal} 
-          onClose={() => setShowTokenModal(false)} 
-           
-          requiredTokens={15} 
+        <OutOfTokensModal
+          isOpen={showTokenModal}
+          onClose={() => setShowTokenModal(false)}
+
+          requiredTokens={15}
         />
       )}
     </SecureLayout>

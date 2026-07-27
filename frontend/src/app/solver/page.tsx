@@ -11,6 +11,7 @@ import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import 'katex/dist/katex.min.css';
 import { useTokens } from '@/hooks/useTokens';
+import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import { Mafs, Coordinates, Plot, Theme } from 'mafs';
 import * as math from 'mathjs';
@@ -323,7 +324,8 @@ export default function SolverPage() {
                    setIsLoading(false);
                    return;
                  }
-                 targetTextRef.current += `\n\n🚨 **AI Processing Error:** ${data.error}`;
+                 targetTextRef.current += `\n\n${getPublicErrorMessage(data)}`;
+                 showPublicError(data);
                } else if (data.content) {
                  targetTextRef.current += data.content; 
                }
@@ -334,7 +336,8 @@ export default function SolverPage() {
       refreshTokens();
       setTimeout(() => fetchHistory(), 1500);
     } catch (error: any) {
-      targetTextRef.current = error.name === 'AbortError' ? `🚨 Error: Server took too long. Please try again.` : `🚨 Error: ${error.message}`;
+      targetTextRef.current = getPublicErrorMessage();
+      showPublicError();
     } finally { 
       setIsLoading(false); 
     }

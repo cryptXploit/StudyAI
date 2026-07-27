@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -159,15 +160,15 @@ export default function WallpaperPage() {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      
+
       refreshTokens();
       fetchHistory(); // Refresh library layout safely
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert("🚨 Render Error: Server took too long to generate the wallpaper.");
+        showPublicError();
       } else {
-        alert(`🚨 Render Error: ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -185,14 +186,14 @@ export default function WallpaperPage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-50 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-slate-50 bg-slate-950 lg:border lg:border-slate-200 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Input Section (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-cyan-500 to-blue-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -224,8 +225,8 @@ export default function WallpaperPage() {
 
             <div>
               <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Palette size={12}/> {t.themeLabel}</label>
-              <select 
-                value={theme} 
+              <select
+                value={theme}
                 onChange={(e) => setTheme(e.target.value)}
                 className="w-full p-4 bg-slate-900 border border-slate-800 rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none font-bold text-slate-200 cursor-pointer"
               >
@@ -263,7 +264,7 @@ export default function WallpaperPage() {
                 <p className="text-xs text-slate-600 text-center py-4 bg-slate-900 rounded-xl">{t.noHistory}</p>
               ) : (
                 historyList.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
                     onClick={() => {
                       setTopic(item.topic);
@@ -286,7 +287,7 @@ export default function WallpaperPage() {
 
         {/* Right Panel: Live Mobile Wallpaper Mockup Preview */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-950">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-20 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.1)]`}>
             <div className="flex flex-col">
@@ -297,18 +298,18 @@ export default function WallpaperPage() {
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col items-center justify-center p-4 lg:p-8 relative">
-          
+
           <div className="absolute top-6 left-8 flex items-center gap-2 text-slate-500 font-bold text-xs uppercase tracking-wider hidden lg:flex">
              <Smartphone size={16}/> {t.previewTitle}
           </div>
 
           {/* Realistic Smartphone Chassis Layout Container */}
           <div className={`w-[320px] h-[580px] rounded-[48px] border-[10px] shadow-2xl p-6 relative overflow-hidden transition-all duration-500 flex flex-col ${
-            theme === 'cyberpunk' ? 'bg-slate-950 border-cyan-500/30' : 
-            theme === 'aesthetic' ? 'bg-indigo-950 border-purple-500/30' : 
+            theme === 'cyberpunk' ? 'bg-slate-950 border-cyan-500/30' :
+            theme === 'aesthetic' ? 'bg-indigo-950 border-purple-500/30' :
             'bg-slate-900 border-slate-700/60'
           }`}>
-             
+
              {/* Notch/Dynamic Island Filter element */}
              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-4 bg-black rounded-full z-20"></div>
 
@@ -346,14 +347,14 @@ export default function WallpaperPage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all active:scale-95 border border-cyan-400/50"
               >
@@ -361,7 +362,7 @@ export default function WallpaperPage() {
               </button>
             </div>
           </div>
-          
+
         </div>
 
         </div>
@@ -372,7 +373,7 @@ export default function WallpaperPage() {
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
               {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-cyan-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-cyan-400"/> New Wallpaper</>}
@@ -386,14 +387,14 @@ export default function WallpaperPage() {
                   <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">{t.noHistory}</p>
                 ) : (
                   historyList.map(item => (
-                    <div 
-                      key={item.id} 
-                      onClick={() => { 
+                    <div
+                      key={item.id}
+                      onClick={() => {
                         setTopic(item.topic);
                         setTheme(item.theme);
                         try { setRawFormulas(JSON.parse(item.formulas_text).join('\n')); } catch(e){}
-                        setIsMobileDrawerOpen('none'); 
-                      }} 
+                        setIsMobileDrawerOpen('none');
+                      }}
                       className="group p-4 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:shadow-md transition-all hover:border-cyan-500/50"
                     >
                       <div className="flex justify-between items-start mb-2">
@@ -423,8 +424,8 @@ export default function WallpaperPage() {
 
                 <div>
                   <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Palette size={12}/> {t.themeLabel}</label>
-                  <select 
-                    value={theme} 
+                  <select
+                    value={theme}
                     onChange={(e) => setTheme(e.target.value)}
                     className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none font-bold text-slate-200 cursor-pointer"
                   >

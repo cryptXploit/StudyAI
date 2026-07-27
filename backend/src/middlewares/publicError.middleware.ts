@@ -6,6 +6,21 @@ const SERVICE_MESSAGE = 'We could not complete this request right now. Please tr
 
 const PROVIDER_SIGNATURE = /(google(?:generativeai)?|gemini|groq|deepseek|openai|anthropic|model|embedding|provider|api\s*(?:key|error)|quota|rate.?limit|service unavailable|generativelanguage\.googleapis\.com|fetching from)/i;
 
+// These are intentional application states, not infrastructure/provider failures.
+// Preserve them so central token/payment UX can respond correctly.
+const SAFE_PUBLIC_ERROR_CODES = new Set([
+  'INSUFFICIENT_TOKENS',
+  'OUT_OF_TOKENS',
+  'UNAUTHORIZED',
+  'FORBIDDEN',
+  'NOT_FOUND',
+  'VALIDATION_ERROR',
+]);
+
+function isSafePublicError(payload: Record<string, unknown>): boolean {
+  return typeof payload.error === 'string' && SAFE_PUBLIC_ERROR_CODES.has(payload.error);
+}
+
 type PublicError = {
   error: string;
   message: string;
@@ -39,6 +54,8 @@ function sanitizePayload(req: Request, statusCode: number, payload: unknown, for
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return payload;
 
   const responseBody = payload as Record<string, unknown>;
+  if (isSafePublicError(responseBody)) return payload;
+
   const rawError = rawErrorFromPayload(responseBody);
   const shouldSanitize = force || statusCode >= 500 || responseBody.state === 'failed' || isProviderError(rawError);
   if (!shouldSanitize) return payload;
@@ -65,7 +82,7 @@ function sanitizeSseChunk(req: Request, chunk: unknown): unknown {
   return chunk.replace(/(data:\s*)([^\n]+)(\n\n)/g, (_match, prefix: string, rawData: string, suffix: string) => {
     try {
       const parsed = JSON.parse(rawData) as Record<string, unknown>;
-      if (!Object.prototype.hasOwnProperty.call(parsed, 'error')) return _match;
+      if (!Object.prototype.hasOwnProperty.call(parsed, 'error') || isSafePublicError(parsed)) return _match;
       return `${prefix}${JSON.stringify(sanitizePayload(req, 503, parsed, true))}${suffix}`;
     } catch {
       return `${prefix}${JSON.stringify(publicErrorFor(503, rawData))}${suffix}`;

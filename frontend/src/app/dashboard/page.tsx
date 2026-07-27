@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useEffect, useState } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -35,7 +36,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({ totalFiles: 0, indexedFiles: 0, totalSize: 0 });
   const [optimisticFiles, setOptimisticFiles] = useState<Set<string>>(new Set());
   const [uploadCategory, setUploadCategory] = useState<'source' | 'syllabus'>('source');
-  
+
   const [courseName, setCourseName] = useState('');
   const [chapterList, setChapterList] = useState<{id: string, chapterName: string, topics: string[]}[]>([]);
   const [tempChapterName, setTempChapterName] = useState('');
@@ -52,11 +53,11 @@ export default function DashboardPage() {
   const [activeWorkspaceTab, setActiveWorkspaceTab] = useState<WorkspaceTab>('upload');
 
   useEffect(() => {
-    const loadSettings = () => { 
-      const savedLang = localStorage.getItem('Prepia_language'); if (savedLang) setLanguage(savedLang as LanguageType); 
+    const loadSettings = () => {
+      const savedLang = localStorage.getItem('Prepia_language'); if (savedLang) setLanguage(savedLang as LanguageType);
       const savedTheme = localStorage.getItem('Prepia_theme'); if (savedTheme) setUiTheme(savedTheme as 'dark'|'light');
     };
-    loadSettings(); 
+    loadSettings();
     window.addEventListener('languageChanged', loadSettings);
     window.addEventListener('settingsChanged', loadSettings);
     return () => { window.removeEventListener('languageChanged', loadSettings); window.removeEventListener('settingsChanged', loadSettings); };
@@ -78,7 +79,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user?.id) return;
     const loadPacks = async () => {
-      try { setIsLoadingPacks(true); const packs = await fetchUserContextPacks(user.id); setContextPacks(packs); } 
+      try { setIsLoadingPacks(true); const packs = await fetchUserContextPacks(user.id); setContextPacks(packs); }
       catch (err) {} finally { setIsLoadingPacks(false); }
     };
     loadPacks();
@@ -86,7 +87,7 @@ export default function DashboardPage() {
 
   const fetchSyllabuses = async () => {
     try {
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/syllabus/list` : `${apiUrlBase}/api/syllabus/list`;
       const res = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${session?.access_token}` } });
       const data = await res.json();
@@ -125,7 +126,7 @@ export default function DashboardPage() {
     if (!courseName.trim() || chapterList.length === 0) return;
     setIsSubmittingSyllabus(true);
     try {
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/syllabus/create` : `${apiUrlBase}/api/syllabus/create`;
       const res = await fetch(apiUrl, {
         method: 'POST',
@@ -145,7 +146,7 @@ export default function DashboardPage() {
     if (!window.confirm("Are you sure you want to delete this Syllabus? All forged chapters and progress will be lost forever.")) return;
     setSyllabuses(prev => prev.filter(s => s.id !== id));
     try {
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/syllabus/${id}` : `${apiUrlBase}/api/syllabus/${id}`;
       const res = await fetch(apiUrl, { method: 'DELETE', headers: { 'Authorization': `Bearer ${session?.access_token}` } });
       const data = await res.json();
@@ -170,7 +171,7 @@ export default function DashboardPage() {
     if (!courseName.trim() || chapterList.length === 0 || !editingSyllabusId) return;
     setIsSubmittingSyllabus(true);
     try {
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/syllabus/${editingSyllabusId}` : `${apiUrlBase}/api/syllabus/${editingSyllabusId}`;
       const res = await fetch(apiUrl, {
         method: 'PUT',
@@ -191,7 +192,7 @@ export default function DashboardPage() {
     const optimisticFileId = `optimistic-${Date.now()}`;
     setOptimisticFiles((prev) => new Set([...prev, optimisticFileId]));
 
-    const optimisticFile: DBFile = { id: optimisticFileId, name: file.name, status: 'uploading', created_at: new Date().toISOString(), file_type: file.type, file_size: file.size, user_id: user?.id || '' } as any; 
+    const optimisticFile: DBFile = { id: optimisticFileId, name: file.name, status: 'uploading', created_at: new Date().toISOString(), file_type: file.type, file_size: file.size, user_id: user?.id || '' } as any;
     setFiles((prev) => [optimisticFile, ...prev]);
 
     try {
@@ -201,7 +202,7 @@ export default function DashboardPage() {
     } catch (error: any) {
       setOptimisticFiles((prev) => { const next = new Set(prev); next.delete(optimisticFileId); return next; });
       setFiles((prev) => prev.filter((f) => f.id !== optimisticFileId));
-      alert(error.message || "Failed to upload file");
+      showPublicError();
     }
   };
 
@@ -221,14 +222,14 @@ export default function DashboardPage() {
       <SecureLayout>
         <div className={`min-h-[calc(100vh-80px)] pb-24 transition-colors duration-500 ${uiTheme === 'dark' ? 'bg-[#0A0A0A]' : 'bg-slate-50'}`}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 md:p-8 max-w-7xl mx-auto font-sans flex flex-col gap-8">
-            
+
             {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mt-4">
               <div>
                 <h1 className={`text-3xl font-black tracking-tight ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t.welcome}</h1>
                 <p className={`font-medium mt-1 ${uiTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{user?.email ? `${t.signedInAs} ${user.email}` : t.welcomeSubtitle}</p>
               </div>
-              
+
               <div className="flex gap-3">
                 <button onClick={() => setIsNeuralFeedOpen(true)} className={`group relative overflow-hidden px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg transition-all active:scale-95 ${uiTheme === 'dark' ? 'bg-slate-800 text-white border border-slate-700 hover:border-slate-500' : 'bg-white text-slate-800 border border-slate-200 hover:border-slate-300'}`}>
                   <Play size={16} className="text-emerald-500" />
@@ -255,7 +256,7 @@ export default function DashboardPage() {
               {latestSyllabus ? (
                 <div className={`relative overflow-hidden rounded-[2rem] p-8 border shadow-2xl flex flex-col md:flex-row justify-between items-center gap-8 ${uiTheme === 'dark' ? 'bg-gradient-to-br from-slate-900 to-indigo-950 border-indigo-900/50' : 'bg-gradient-to-br from-white to-indigo-50 border-indigo-100'}`}>
                   <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/20 blur-[100px] rounded-full pointer-events-none"></div>
-                  
+
                   <div className="flex-1 relative z-10">
                     <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/20 text-indigo-400 mb-4">
                       Active Quest
@@ -321,7 +322,7 @@ export default function DashboardPage() {
                         <h3 className={`text-xl font-black mb-1 ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{t.uploadTitle}</h3>
                         <p className={`text-sm font-medium ${uiTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{t.uploadDesc}</p>
                       </div>
-                      
+
                       <div className={`flex p-1 rounded-xl ${uiTheme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
                         <button onClick={() => setUploadCategory('source')} className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${uploadCategory === 'source' ? (uiTheme === 'dark' ? 'bg-slate-700 text-white' : 'bg-white text-slate-800 shadow-sm') : 'text-slate-400'}`}>PDF</button>
                         <button onClick={() => setUploadCategory('syllabus')} className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${uploadCategory === 'syllabus' ? (uiTheme === 'dark' ? 'bg-slate-700 text-white' : 'bg-white text-slate-800 shadow-sm') : 'text-slate-400'}`}>Text</button>
@@ -353,7 +354,7 @@ export default function DashboardPage() {
                               {courseName.length >= 2 && (
                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={`pt-6 border-t ${uiTheme === 'dark' ? 'border-slate-800' : 'border-slate-200/60'}`}>
                                   <label className={`block text-[10px] font-black uppercase tracking-widest mb-4 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Step 2: Build Syllabus Nodes</label>
-                                  
+
                                   <div className={`p-5 md:p-6 rounded-2xl border shadow-sm space-y-4 mb-8 ${uiTheme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                                     <input value={tempChapterName} onChange={e => setTempChapterName(e.target.value)} placeholder="Chapter Title (e.g., Wave Functions)" className={`w-full border p-3.5 rounded-xl text-sm font-bold focus:ring-4 outline-none transition-all ${uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-200 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-indigo-500'}`} />
                                     <textarea value={tempTopicsText} onChange={e => setTempTopicsText(e.target.value)} placeholder="Topics (One per line)" rows={3} className={`w-full border p-3.5 rounded-xl text-sm font-medium focus:ring-4 outline-none resize-none transition-all custom-scrollbar ${uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-indigo-500'}`} />
@@ -394,7 +395,7 @@ export default function DashboardPage() {
                 {activeWorkspaceTab === 'vault' && (
                   <motion.div key="vault" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}} className={`rounded-[2rem] border p-6 md:p-8 min-h-[400px] ${uiTheme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                     <h3 className={`text-xl font-black mb-6 flex items-center gap-2 ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}><ListTree size={20}/> Syllabus Vault</h3>
-                    
+
                     {syllabuses.length === 0 ? (
                       <div className="h-48 flex flex-col items-center justify-center text-center">
                         <ListTree size={40} className="text-slate-400 mb-4" />
@@ -438,7 +439,7 @@ export default function DashboardPage() {
             </section>
 
           </motion.div>
-          
+
           <RewardClaimer />
         </div>
       </SecureLayout>
@@ -449,7 +450,7 @@ export default function DashboardPage() {
           <NeuralFeedModal onClose={() => setIsNeuralFeedOpen(false)} supabase={supabase} />
         )}
       </AnimatePresence>
-      
+
       {/* 🟢 Conversational / Assistant FAB (Mobile friendly) */}
       <div className="fixed bottom-6 right-6 z-40 md:hidden">
         <Link href="/chat" className="w-14 h-14 bg-indigo-600 rounded-full shadow-[0_10px_30px_rgba(79,70,229,0.5)] flex items-center justify-center text-white active:scale-90 transition-transform">
@@ -476,7 +477,7 @@ const SuggestedCard = ({ title, desc, icon, color, bg, link, uiTheme }: any) => 
 );
 
 const WorkspaceTabButton = ({ active, onClick, icon, label, uiTheme }: any) => (
-  <button 
+  <button
     onClick={onClick}
     className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${active ? (uiTheme === 'dark' ? 'bg-slate-800 text-white shadow-sm' : 'bg-white text-indigo-600 shadow-sm') : (uiTheme === 'dark' ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700')}`}
   >
@@ -507,8 +508,8 @@ function NeuralFeedModal({ onClose, supabase }: { onClose: () => void, supabase:
   const [referralData, setReferralData] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
 
-  const PREMIUM_TRIGGER_INTERVAL = 5; 
-  
+  const PREMIUM_TRIGGER_INTERVAL = 5;
+
   // Check if neural feed is unlocked via referral
   const isUnlocked = isPro || (referralData?.neuralUnlockedUntil && new Date(referralData.neuralUnlockedUntil) > new Date());
 
@@ -565,7 +566,7 @@ function NeuralFeedModal({ onClose, supabase }: { onClose: () => void, supabase:
           setCards(prev => [...prev, ...shuffleArray(formattedData)]);
         }
       } else if (offset === 0) {
-        setCards(shuffleArray([...FALLBACK_CHUNKS, ...FALLBACK_CHUNKS, ...FALLBACK_CHUNKS])); 
+        setCards(shuffleArray([...FALLBACK_CHUNKS, ...FALLBACK_CHUNKS, ...FALLBACK_CHUNKS]));
       }
     } catch (error) {
       if (offset === 0) setCards(shuffleArray([...FALLBACK_CHUNKS, ...FALLBACK_CHUNKS, ...FALLBACK_CHUNKS]));
@@ -635,7 +636,7 @@ function NeuralFeedModal({ onClose, supabase }: { onClose: () => void, supabase:
              <ChevronUp size={24} className="text-white mb-[-10px]" />
              <span className="text-[9px] text-white font-bold uppercase tracking-widest">Swipe to learn</span>
           </div>
-          
+
           {isLoadingMore && (
             <div className="absolute top-24 left-1/2 -translate-x-1/2 z-50 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full border border-slate-700/50 flex items-center gap-2 shadow-xl">
                <Loader2 size={14} className="text-emerald-400 animate-spin" />

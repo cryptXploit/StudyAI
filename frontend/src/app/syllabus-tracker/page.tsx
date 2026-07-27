@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -88,7 +89,7 @@ export default function SyllabusQuestPage() {
   useEffect(() => {
     const loadLanguage = () => { const savedLang = localStorage.getItem('Prepia_language'); if (savedLang) setLanguage(savedLang as LanguageType); };
     loadLanguage(); window.addEventListener('languageChanged', loadLanguage);
-    
+
     const savedTopics = localStorage.getItem('syllabus_completed_topics');
     if (savedTopics) {
       try { setCompletedTopics(JSON.parse(savedTopics)); } catch (e) {}
@@ -102,12 +103,12 @@ export default function SyllabusQuestPage() {
     setIsLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/syllabus/list` : `${apiUrlBase}/api/syllabus/list`;
-      
+
       const res = await fetch(apiUrl, { headers: { 'Authorization': `Bearer ${session?.access_token}` } });
-      const text = await res.text(); 
-      
+      const text = await res.text();
+
       try {
         const data = JSON.parse(text);
         if (data.success) {
@@ -141,15 +142,15 @@ export default function SyllabusQuestPage() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/syllabus/create` : `${apiUrlBase}/api/syllabus/create`;
-      
+
       const res = await fetch(apiUrl, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
         body: JSON.stringify({ courseName, chapters: chapterList })
       });
       const data = await res.json();
-      
+
       if (data.success) {
         setCourseName(''); setChapterList([]);
         await fetchQuests();
@@ -158,11 +159,11 @@ export default function SyllabusQuestPage() {
         setActiveQuest(newQuest);
       } else {
         console.error("Syllabus Create Error:", data.error);
-        alert(data.error || 'Failed to create syllabus');
+        showPublicError(data);
       }
     } catch (e: any) {
       console.error("Syllabus Create Exception:", e);
-      alert(e.message || 'Failed to connect to server');
+      showPublicError();
     }
     setIsSubmitting(false);
   };
@@ -220,7 +221,7 @@ export default function SyllabusQuestPage() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/syllabus/complete` : `${apiUrlBase}/api/syllabus/complete`;
       await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }, body: JSON.stringify({ chapterId: chapter.id, isCompleted: newStatus }) });
     } catch (e) { fetchQuests(); }
@@ -229,7 +230,7 @@ export default function SyllabusQuestPage() {
   const toggleTopicCompletion = async (chapter: any, topicName: string, e: React.MouseEvent) => {
     const currentTopics = completedTopics[chapter.id] || [];
     const isCurrentlyDone = currentTopics.includes(topicName);
-    
+
     let updatedChapterTopics: string[];
     if (isCurrentlyDone) {
       updatedChapterTopics = currentTopics.filter(t => t !== topicName);
@@ -242,11 +243,11 @@ export default function SyllabusQuestPage() {
 
     // If all topics are completed, automatically complete the chapter!
     const allTopicsCompleted = chapter.topics && chapter.topics.length > 0 && chapter.topics.every((t: string) => updatedChapterTopics.includes(t));
-    
+
     // If completing this topic triggers chapter completion (and it wasn't already completed)
     if (allTopicsCompleted && !chapter.is_completed) {
       await toggleChapterCompletion(chapter, e);
-    } 
+    }
     // Or if un-completing this topic triggers chapter un-completion (and it was completed)
     else if (!allTopicsCompleted && chapter.is_completed) {
       await toggleChapterCompletion(chapter, e);
@@ -268,7 +269,7 @@ export default function SyllabusQuestPage() {
     <>
       <div className="flex flex-col gap-3 mb-4">
          <h3 className="text-sm font-black tracking-widest text-slate-400 uppercase flex items-center gap-2"><Swords size={16} className="text-amber-500"/> {t.forgeMethod}</h3>
-         
+
          {/* Toggle Buttons */}
          <div className="flex gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
             <button onClick={() => setForgeMode('manual')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${forgeMode === 'manual' ? 'bg-indigo-500 text-white shadow-md' : 'text-slate-500 hover:text-slate-300'}`}>
@@ -408,7 +409,7 @@ export default function SyllabusQuestPage() {
   return (
     <SecureLayout>
       <div className="flex flex-col md:flex-row h-[calc(100vh-80px)] max-w-7xl mx-auto overflow-hidden bg-slate-950 lg:border lg:border-slate-800 lg:rounded-3xl lg:shadow-2xl lg:mt-4 font-sans text-slate-200 relative">
-        
+
         {/* Mobile Smart Header */}
         <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0`}>
           <div className="flex flex-col">
@@ -450,7 +451,7 @@ export default function SyllabusQuestPage() {
         {/* Right Panel: RPG Quest Map Engine */}
         <div ref={scrollRef} onScroll={handleScroll} className="flex-1 lg:w-2/3 h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] relative overflow-y-auto custom-scrollbar flex flex-col">
           <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/90 to-slate-950 pointer-events-none"></div>
-          
+
           {!activeQuest ? (
             <div className="flex-1 flex flex-col items-center justify-center z-10 opacity-50 h-[600px] lg:h-auto">
                <MapPin size={64} className="mb-4 text-slate-600"/>
@@ -458,7 +459,7 @@ export default function SyllabusQuestPage() {
             </div>
           ) : (
             <div className="z-10 p-6 md:p-10 flex flex-col items-center w-full pb-32">
-               
+
                <div className="text-center mb-12 md:mb-16 animate-in slide-in-from-top-10 mt-6 md:mt-0">
                  <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-600 drop-shadow-sm mb-2">{activeQuest.course_name}</h1>
                  <p className="text-amber-500/70 font-bold uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2"><Trophy size={16}/> Epic Quest Line</p>
@@ -467,7 +468,7 @@ export default function SyllabusQuestPage() {
                {/* Map Path Generation */}
                <div className="relative w-full max-w-md mx-auto">
                  <div className="absolute top-0 bottom-0 left-1/2 w-1.5 bg-slate-800 -translate-x-1/2 rounded-full overflow-hidden">
-                    <div className="w-full bg-amber-500 transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.5)]" 
+                    <div className="w-full bg-amber-500 transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
                          style={{ height: `${(activeQuest.chapters?.filter((c:any)=>c.is_completed).length / (activeQuest.chapters?.length || 1)) * 100}%` }}>
                     </div>
                  </div>
@@ -476,7 +477,7 @@ export default function SyllabusQuestPage() {
                    {activeQuest.chapters?.map((chapter: any, index: number) => {
                      const isLeft = index % 2 === 0;
                      const isDone = chapter.is_completed;
-                     
+
                      return (
                        <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1, type: "spring" }} key={chapter.id} className={`relative flex items-center w-full ${isLeft ? 'justify-start' : 'justify-end'}`}>
                          <button onClick={(e) => toggleChapterCompletion(chapter, e)} className={`absolute left-1/2 -translate-x-1/2 z-20 w-10 md:w-12 h-10 md:h-12 rounded-full border-4 flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${isDone ? 'bg-amber-500 border-amber-200 text-slate-900 shadow-[0_0_30px_rgba(245,158,11,0.6)]' : 'bg-slate-900 border-slate-700 text-slate-500 hover:border-amber-500/50 hover:text-amber-500'}`}>
@@ -487,7 +488,7 @@ export default function SyllabusQuestPage() {
                            <div className={`p-3 md:p-4 rounded-2xl border transition-all duration-500 ${isDone ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/10' : 'bg-slate-900 border-slate-800 opacity-70'}`}>
                              <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest block mb-1 ${isDone ? 'text-amber-400' : 'text-slate-500'}`}>Chapter {index + 1}</span>
                              <h3 className={`font-bold text-xs md:text-base mb-2 transition-colors ${isDone ? 'text-white' : 'text-slate-400'}`}>{chapter.title}</h3>
-                             
+
                              {/* 🟢 TOPICS AS HIERARCHICAL SUBNODES */}
                              {chapter.topics && chapter.topics.length > 0 && (
                                <div className="mt-4 space-y-2">
@@ -514,7 +515,7 @@ export default function SyllabusQuestPage() {
                    })}
                  </div>
                </div>
-               
+
                {activeQuest.chapters?.every((c:any) => c.is_completed) && activeQuest.chapters?.length > 0 && (
                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-20 flex flex-col items-center bg-gradient-to-t from-amber-500/20 to-transparent p-10 rounded-full">
                     <Trophy size={80} className="text-amber-400 drop-shadow-[0_0_40px_rgba(251,191,36,0.8)] animate-pulse mb-4"/>
@@ -529,14 +530,14 @@ export default function SyllabusQuestPage() {
         {/* Mobile Floating Input Dock */}
         <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
           <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-            <button 
-              onClick={() => setIsMobileDrawerOpen('quests')} 
+            <button
+              onClick={() => setIsMobileDrawerOpen('quests')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-slate-200 font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all active:scale-95 border border-slate-700"
             >
               <Shield size={18} /> {t.myQuests}
             </button>
-            <button 
-              onClick={() => setIsMobileDrawerOpen('forge')} 
+            <button
+              onClick={() => setIsMobileDrawerOpen('forge')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all active:scale-95 border border-amber-400/50"
             >
               <Swords size={18} /> Forge
@@ -547,7 +548,7 @@ export default function SyllabusQuestPage() {
         {/* 🟢 MOBILE BOTTOM SHEET DRAWERS 🟢 */}
         <div className={`fixed inset-0 z-[100] lg:hidden transition-all duration-300 ${isMobileDrawerOpen !== 'none' ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
           <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           {/* Forge Drawer */}
           <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen === 'forge' ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />

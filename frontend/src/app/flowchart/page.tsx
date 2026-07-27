@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -63,7 +64,7 @@ const MermaidDiagram = React.memo(({ chart }: { chart: string }) => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const renderChart = async () => {
       if (ref.current && chart) {
         ref.current.innerHTML = '';
@@ -71,14 +72,14 @@ const MermaidDiagram = React.memo(({ chart }: { chart: string }) => {
           // Dynamic import prevents initial page load blocking
           const mermaidModule = await import('mermaid');
           const mermaid = mermaidModule.default;
-          
-          mermaid.initialize({ 
-            startOnLoad: false, 
-            theme: 'dark', 
+
+          mermaid.initialize({
+            startOnLoad: false,
+            theme: 'dark',
             securityLevel: 'loose',
             fontFamily: 'monospace'
           });
-          
+
           const { svg } = await mermaid.render(`mermaid-svg-${Math.random().toString(36).substring(7)}`, chart);
           if (isMounted && ref.current) {
             ref.current.innerHTML = svg;
@@ -91,9 +92,9 @@ const MermaidDiagram = React.memo(({ chart }: { chart: string }) => {
         }
       }
     };
-    
+
     renderChart();
-    
+
     return () => { isMounted = false; };
   }, [chart]);
 
@@ -105,13 +106,13 @@ MermaidDiagram.displayName = "MermaidDiagram";
 export default function FlowchartPage() {
   const supabase = createClient();
   const [codeSnippet, setCodeSnippet] = useState('');
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [activeChartId, setActiveChartId] = useState<string | null>(null);
   const [chartData, setChartData] = useState<{title: string, mermaid: string} | null>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
-  
+
   const { tokens, tier, refreshTokens } = useTokens();
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [requiredTokensForModal, setRequiredTokensForModal] = useState(15);
@@ -159,7 +160,7 @@ export default function FlowchartPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase.from('code_flowcharts').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      
+
       if (data) {
         setHistoryList(data);
         sessionStorage.setItem('Prepia_flowchart_history', JSON.stringify(data));
@@ -188,7 +189,7 @@ export default function FlowchartPage() {
       const { data: { session } } = await supabase.auth.getSession();
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/flowchart/generate` : `${apiUrlBase}/api/flowchart/generate`;
-      
+
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
@@ -209,22 +210,22 @@ export default function FlowchartPage() {
       }
 
       const data = await response.json();
-      
+
       if (data.error) throw new Error(data.error);
       if (!data.valid || !data.flowchart) throw new Error("Failed to format diagram properly.");
 
       setChartData(data.flowchart);
       if (data.savedId) setActiveChartId(data.savedId);
-      
+
       refreshTokens();
       sessionStorage.removeItem('Prepia_flowchart_history'); // 🟢 Bust Cache
       setTimeout(() => fetchHistory(), 1500); // Slight delay for DB Trigger
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert("🚨 Timeout: Server took too long to analyze the code. Try a shorter snippet.");
+        showPublicError();
       } else {
-        alert(`🚨 Oops! ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -252,14 +253,14 @@ export default function FlowchartPage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-50 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-slate-50 bg-slate-950 lg:border lg:border-slate-200 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Panel: Code Input (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-cyan-500 to-blue-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -309,7 +310,7 @@ export default function FlowchartPage() {
                 historyList.map((item) => {
                   const isActive = activeChartId === item.id;
                   return (
-                    <div 
+                    <div
                       key={item.id}
                       onClick={() => { setActiveChartId(item.id); setChartData({title: item.title, mermaid: item.mermaid_data}); setCodeSnippet(item.code_snippet); }}
                       className={`group p-4 rounded-xl cursor-pointer transition-all shadow-sm border ${isActive ? 'bg-cyan-500/10 border-cyan-500/50' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}`}
@@ -328,7 +329,7 @@ export default function FlowchartPage() {
 
         {/* Right Panel: Diagram Viewer */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-950">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-20 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.1)]`}>
             <div className="flex flex-col">
@@ -352,7 +353,7 @@ export default function FlowchartPage() {
             </div>
           ) : (
             <div className="flex flex-col h-full animate-in fade-in zoom-in-95 duration-500">
-              
+
               <div className="flex justify-between items-end mb-6 border-b border-slate-800 pb-4">
                 <h2 className="text-2xl font-black text-white tracking-tight">{chartData?.title}</h2>
                 <button onClick={handleCopy} className="p-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-300 rounded-lg shadow-sm transition-all flex items-center gap-2">
@@ -367,7 +368,7 @@ export default function FlowchartPage() {
                   <MermaidDiagram chart={chartData.mermaid} />
                 )}
               </div>
-              
+
             </div>
           )}
           </div>
@@ -375,14 +376,14 @@ export default function FlowchartPage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all active:scale-95 border border-cyan-400/50"
               >
@@ -400,7 +401,7 @@ export default function FlowchartPage() {
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
               {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-cyan-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-cyan-400"/> New Flowchart</>}
@@ -416,9 +417,9 @@ export default function FlowchartPage() {
                   historyList.map(item => {
                     const isActive = activeChartId === item.id;
                     return (
-                      <div 
-                        key={item.id} 
-                        onClick={() => { setActiveChartId(item.id); setChartData({title: item.title, mermaid: item.mermaid_data}); setCodeSnippet(item.code_snippet); setIsMobileDrawerOpen('none'); }} 
+                      <div
+                        key={item.id}
+                        onClick={() => { setActiveChartId(item.id); setChartData({title: item.title, mermaid: item.mermaid_data}); setCodeSnippet(item.code_snippet); setIsMobileDrawerOpen('none'); }}
                         className={`group p-4 bg-slate-950 border rounded-xl cursor-pointer hover:shadow-md transition-all ${isActive ? 'border-cyan-500/50' : 'border-slate-800'}`}
                       >
                         <div className="flex justify-between items-start mb-2">

@@ -12,6 +12,7 @@ import remarkBreaks from 'remark-breaks';
 // @ts-ignore: CSS module import for KaTeX styling
 import 'katex/dist/katex.min.css';
 import { useTokens } from '@/hooks/useTokens';
+import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 
 // 🟢 Local i18n Dictionary
@@ -337,11 +338,9 @@ export default function StoryGeneratorPage() {
       setTimeout(() => fetchStoryHistory(), 1500);
 
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        setStory(`🚨 Error: Server took too long to respond. Please try again with fewer files.`);
-      } else {
-        setStory(`🚨 Error generating story: ${error.message}`);
-      }
+      const message = getPublicErrorMessage();
+      setStory(message);
+      showPublicError();
     } finally {
       setIsLoading(false);
       targetTextRef.current = '';

@@ -12,6 +12,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import 'katex/dist/katex.min.css';
 import { useTokens } from '@/hooks/useTokens';
+import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 
 // 🟢 Local i18n Dictionary
@@ -328,11 +329,9 @@ export default function NightBeforePage() {
       if (displayContent.trim().length > 10) await saveToHistory(action, currentTopic, currentFiles, displayContent, currentGlossary);
       refreshTokens();
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        setResults([{ action, content: `🚨 ${t.actionFailed}: Server took too long to respond. Try fewer files.`, glossary: {} }]);
-      } else {
-        setResults([{ action, content: `🚨 ${t.actionFailed}: ${error.message}`, glossary: {} }]);
-      }
+      const message = getPublicErrorMessage();
+      setResults([{ action, content: message, glossary: {} }]);
+      showPublicError();
     } finally { 
       setIsLoading(false); setActiveAction(null); 
     }

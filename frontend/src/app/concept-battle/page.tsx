@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -96,7 +97,7 @@ function ConceptBattleContent() {
       }
     }
   }, [contextParam]);
-  
+
   const [activeBattleId, setActiveBattleId] = useState<string | null>(null);
   const [battleData, setBattleData] = useState<any>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
@@ -148,7 +149,7 @@ function ConceptBattleContent() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase.from('concept_battles').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      
+
       if (data) {
         setHistoryList(data);
         sessionStorage.setItem('Prepia_concept_battle_history', JSON.stringify(data));
@@ -202,7 +203,7 @@ function ConceptBattleContent() {
 
       setBattleData(data.battleData);
       if (data.savedId) setActiveBattleId(data.savedId);
-      
+
       refreshTokens();
       sessionStorage.removeItem('Prepia_concept_battle_history'); // 🟢 Bust Cache
       setTimeout(() => fetchHistory(), 1500); // Slight delay for DB Trigger
@@ -215,9 +216,9 @@ function ConceptBattleContent() {
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert("🚨 Timeout: Server took too long to analyze the concepts. Please try again.");
+        showPublicError();
       } else {
-        alert(`🚨 Battle Error: ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -239,14 +240,14 @@ function ConceptBattleContent() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-950 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-slate-950 bg-slate-950 lg:border lg:border-slate-700 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Panel: Inputs (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative z-10">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-rose-500 to-red-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -310,11 +311,11 @@ function ConceptBattleContent() {
                 <p className="text-xs text-slate-400 text-center py-4 bg-slate-900 rounded-xl">{t.noHistory}</p>
               ) : (
                 historyList.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
-                    onClick={() => { 
-                      setActiveBattleId(item.id); 
-                      setBattleData(item.battle_data); 
+                    onClick={() => {
+                      setActiveBattleId(item.id);
+                      setBattleData(item.battle_data);
                       setConceptA(item.concept_a);
                       setConceptB(item.concept_b);
                     }}
@@ -336,7 +337,7 @@ function ConceptBattleContent() {
 
         {/* Right Panel: Premium Output Viewport */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-950">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)]`}>
             <div className="flex flex-col">
@@ -347,7 +348,7 @@ function ConceptBattleContent() {
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col p-0 relative bg-slate-950">
-          
+
           {!battleData && !isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60 p-10">
               <Swords size={80} className="text-slate-300 mb-6" />
@@ -361,7 +362,7 @@ function ConceptBattleContent() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-700 overflow-y-auto custom-scrollbar">
-               
+
                {/* 🟢 BATTLE HEADER */}
                <div className="p-6 md:p-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 bg-slate-900 border-b border-slate-700 relative overflow-hidden shrink-0">
                   <div className="absolute top-4 left-4 z-50">
@@ -369,7 +370,7 @@ function ConceptBattleContent() {
                   </div>
                   <div className="absolute -left-32 -top-32 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl"></div>
                   <div className="absolute -right-32 -top-32 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
-                  
+
                   <div className="text-center md:text-right z-10 w-full md:w-1/3">
                      <h2 className="text-3xl md:text-4xl font-black text-rose-600 truncate">{battleData.conceptA}</h2>
                   </div>
@@ -380,7 +381,7 @@ function ConceptBattleContent() {
                </div>
 
                <div className="p-8 space-y-8 flex-1">
-                 
+
                  {/* 🟢 COMPARISON MATRIX TABLE */}
                  <div className="bg-slate-900 rounded-3xl border border-slate-700 shadow-sm overflow-hidden">
                      <div className="bg-slate-900 px-6 py-4 flex items-center gap-2">
@@ -414,7 +415,7 @@ function ConceptBattleContent() {
                      {/* Concept A Pros/Cons */}
                      <div className="bg-rose-50/50 border border-rose-100 rounded-3xl p-6 shadow-sm">
                         <h3 className="text-lg font-black text-rose-700 mb-4">{battleData.conceptA}</h3>
-                        
+
                         <div className="mb-6">
                            <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-1"><Check size={14}/> {t.pros}</p>
                            <ul className="space-y-2">
@@ -425,7 +426,7 @@ function ConceptBattleContent() {
                               ))}
                            </ul>
                         </div>
-                        
+
                         <div>
                            <p className="text-xs font-black text-rose-600 uppercase tracking-widest mb-3 flex items-center gap-1"><X size={14}/> {t.cons}</p>
                            <ul className="space-y-2">
@@ -441,7 +442,7 @@ function ConceptBattleContent() {
                      {/* Concept B Pros/Cons */}
                      <div className="bg-blue-50/50 border border-blue-100 rounded-3xl p-6 shadow-sm">
                         <h3 className="text-lg font-black text-blue-700 mb-4">{battleData.conceptB}</h3>
-                        
+
                         <div className="mb-6">
                            <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-1"><Check size={14}/> {t.pros}</p>
                            <ul className="space-y-2">
@@ -452,7 +453,7 @@ function ConceptBattleContent() {
                               ))}
                            </ul>
                         </div>
-                        
+
                         <div>
                            <p className="text-xs font-black text-rose-600 uppercase tracking-widest mb-3 flex items-center gap-1"><X size={14}/> {t.cons}</p>
                            <ul className="space-y-2">
@@ -470,7 +471,7 @@ function ConceptBattleContent() {
                  <div className="bg-slate-900 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-8 opacity-10"><Target size={120}/></div>
                      <h3 className="text-sm font-black text-amber-400 uppercase tracking-widest mb-6 flex items-center gap-2 relative z-10"><Lightbulb size={16}/> {t.whenToUse}</h3>
-                     
+
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                         <div>
                            <h4 className="text-lg font-black text-rose-400 mb-2">{battleData.conceptA}</h4>
@@ -492,14 +493,14 @@ function ConceptBattleContent() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(225,29,72,0.3)] transition-all active:scale-95 border border-rose-400/50"
               >
@@ -507,7 +508,7 @@ function ConceptBattleContent() {
               </button>
             </div>
           </div>
-          
+
         </div>
 
         {/* 🟢 MOBILE BOTTOM SHEET DRAWERS 🟢 */}
@@ -515,7 +516,7 @@ function ConceptBattleContent() {
           <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
           <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-            
+
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
                 {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-rose-400"/> {t.historyTitle}</> : <><Swords size={18} className="text-rose-400"/> New Battle</>}
@@ -529,15 +530,15 @@ function ConceptBattleContent() {
                     <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">{t.noHistory}</p>
                   ) : (
                     historyList.map(item => (
-                      <div 
-                        key={item.id} 
-                        onClick={() => { 
-                          setActiveBattleId(item.id); 
-                          setBattleData(item.battle_data); 
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          setActiveBattleId(item.id);
+                          setBattleData(item.battle_data);
                           setConceptA(item.concept_a);
                           setConceptB(item.concept_b);
-                          setIsMobileDrawerOpen('none'); 
-                        }} 
+                          setIsMobileDrawerOpen('none');
+                        }}
                         className="group p-4 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:shadow-md transition-all flex justify-between items-center"
                       >
                         <div className="flex items-center gap-2 pr-2">
@@ -592,7 +593,7 @@ function ConceptBattleContent() {
             </div>
           </div>
         </div>
-        
+
         </div>
       </div>
     </SecureLayout>

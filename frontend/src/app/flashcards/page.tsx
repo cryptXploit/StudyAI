@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
@@ -104,11 +105,11 @@ interface Flashcard { q: string; a: string; }
 function FlashcardsPageContent() {
   const supabase = createClient();
   const router = useRouter();
-  
+
   const [files, setFiles] = useState<any[]>([]);
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [topic, setTopic] = useState('');
-  
+
   const searchParams = useSearchParams();
   const contextParam = searchParams.get('context');
   const fileParamsString = searchParams.getAll('file').join(',');
@@ -124,13 +125,13 @@ function FlashcardsPageContent() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [rawStream, setRawStream] = useState('');
-  
+
   const [deck, setDeck] = useState<Flashcard[]>([]);
   const [glossary, setGlossary] = useState<Record<string, string>>({});
-  
+
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  
+
   const [historyList, setHistoryList] = useState<any[]>([]);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false); // Mobile Context Files Toggle
@@ -162,9 +163,9 @@ function FlashcardsPageContent() {
   const [matchedPairs, setMatchedPairs] = useState<number[]>([]);
   const [wrongMatch, setWrongMatch] = useState<number | null>(null);
 
-  useEffect(() => { 
-    fetchFiles(); 
-    fetchHistory(); 
+  useEffect(() => {
+    fetchFiles();
+    fetchHistory();
 
     const loadLanguage = () => {
       const savedLang = localStorage.getItem('Prepia_language');
@@ -208,7 +209,7 @@ function FlashcardsPageContent() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     const { data } = await supabase.from('flashcard_decks').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-    
+
     if (data) {
       setHistoryList(data);
       sessionStorage.setItem('Prepia_flashcards_history', JSON.stringify(data));
@@ -243,7 +244,7 @@ function FlashcardsPageContent() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, ''); 
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrl.endsWith('/api') ? `${apiUrl}/flashcards` : `${apiUrl}/api/flashcards`;
 
       const response = await fetch(fetchUrl, {
@@ -258,13 +259,13 @@ function FlashcardsPageContent() {
       const reader = response.body!.getReader();
       const decoder = new TextDecoder('utf-8');
       let fullJSON = '';
-      
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const dataStr = line.slice(6).trim();
@@ -296,8 +297,8 @@ function FlashcardsPageContent() {
       } catch (err: any) {
         // Fallback robust parser for malformed JSON from AI
         let extractedCards: any[] = [];
-        const blocks = fullJSON.match(/\{[\s\S]*?\}/g) || [];
-        blocks.forEach((block) => {
+        const blocks: string[] = fullJSON.match(/\{[\s\S]*?\}/g) ?? [];
+        blocks.forEach((block: string) => {
            let q = "", a = "";
            const qMatch = block.match(/(?:"|')?q(?:"|')?\s*:\s*(["'])((?:(?=(\\?))\3[\s\S])*?)\1/i);
            if (qMatch) q = qMatch[2];
@@ -305,37 +306,37 @@ function FlashcardsPageContent() {
            if (aMatch) a = aMatch[2];
            if (q && a) extractedCards.push({ q, a });
         });
-        
+
         if (extractedCards.length > 0) {
            parsedData = { cards: extractedCards, glossary: {} };
         } else {
            throw new Error("Invalid format received. " + err.message);
         }
       }
-      
+
       const generatedCards = parsedData.cards || parsedData;
       const generatedGlossary = parsedData.glossary || {};
-      
+
       if (Array.isArray(generatedCards) && generatedCards.length > 0) {
         setDeck(generatedCards);
         setGlossary(generatedGlossary);
         refreshTokens();
-        
+
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data } = await supabase.from('flashcard_decks').insert([{ 
-            user_id: user.id, 
-            topic: currentTopic, 
-            file_ids: currentFiles, 
-            cards: { cards: generatedCards, glossary: generatedGlossary } 
+          const { data } = await supabase.from('flashcard_decks').insert([{
+            user_id: user.id,
+            topic: currentTopic,
+            file_ids: currentFiles,
+            cards: { cards: generatedCards, glossary: generatedGlossary }
           }]).select();
-          
+
           if (data) {
             setHistoryList(prev => [data[0], ...prev]);
             sessionStorage.removeItem('Prepia_flashcards_history'); // 🟢 Bust Cache
           }
         }
-        
+
         // 🟢 Reset states and clear URL for clean UI after generation
         setTopic('');
         setSelectedFileIds([]);
@@ -347,9 +348,9 @@ function FlashcardsPageContent() {
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert("🚨 Timeout: Server took too long to generate flashcards. Try fewer files.");
+        showPublicError();
       } else {
-        alert(`Generation failed: ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -390,7 +391,7 @@ function FlashcardsPageContent() {
     e.stopPropagation();
     const newTopic = prompt('Enter new topic name:', currentTopic);
     if (!newTopic || newTopic.trim() === currentTopic) return;
-    
+
     setHistoryList(prev => prev.map(h => h.id === id ? { ...h, topic: newTopic.trim() } : h));
     sessionStorage.removeItem('Prepia_flashcards_history');
     await supabase.from('flashcard_decks').update({ topic: newTopic.trim() }).eq('id', id);
@@ -408,7 +409,7 @@ function FlashcardsPageContent() {
   const handleDrop = (e: React.DragEvent, questionIndex: number) => {
     e.preventDefault();
     const draggedIndex = parseInt(e.dataTransfer.getData('cardIndex'));
-    
+
     if (draggedIndex === questionIndex) {
       // Correct Match
       setMatchedPairs(prev => [...prev, questionIndex]);
@@ -421,13 +422,13 @@ function FlashcardsPageContent() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-80px)] w-full max-w-[1440px] mx-auto overflow-y-auto lg:overflow-hidden bg-slate-900 lg:bg-slate-950 lg:border-slate-700/60 lg:border lg:rounded-3xl shadow-2xl mt-0 lg:mt-4 custom-scrollbar transition-colors duration-500">
-        
+
         {/* Left Panel (Desktop Only) */}
         <div className="hidden lg:flex lg:w-[35%] bg-slate-900 lg:border-r border-slate-700/60 p-5 lg:p-8 flex-col h-auto lg:h-full lg:overflow-y-auto custom-scrollbar relative shrink-0 z-10 shadow-[0_4px_30px_rgba(0,0,0,0.05)]">
           <div className="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
@@ -448,7 +449,7 @@ function FlashcardsPageContent() {
 
         {/* Main Interface */}
         <div ref={scrollRef} onScroll={handleScroll} className="w-full lg:w-[65%] flex flex-col min-h-[calc(100vh-60px)] lg:min-h-0 lg:h-full relative lg:overflow-y-auto custom-scrollbar bg-slate-950/50">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-20 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} border-slate-700/50 bg-slate-900/90`}>
             <div className="flex flex-col">
@@ -459,12 +460,12 @@ function FlashcardsPageContent() {
 
           <div className="hidden lg:flex p-4 md:p-6 border-b border-slate-700 flex-col md:flex-row gap-4 items-center bg-slate-900 z-10 shadow-sm shrink-0">
              <div className="flex flex-1 gap-4 w-full">
-               <input 
-                 type="text" 
-                 value={topic} 
-                 onChange={e => setTopic(e.target.value)} 
-                 placeholder={t.placeholder} 
-                 className="flex-1 p-4 rounded-xl border border-slate-300 bg-slate-950 text-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-bold placeholder:font-medium" 
+               <input
+                 type="text"
+                 value={topic}
+                 onChange={e => setTopic(e.target.value)}
+                 placeholder={t.placeholder}
+                 className="flex-1 p-4 rounded-xl border border-slate-300 bg-slate-950 text-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none font-bold placeholder:font-medium"
                />
                <button onClick={() => setIsLibraryOpen(true)} className="flex items-center gap-2 px-4 py-4 rounded-xl font-black uppercase tracking-wider border bg-slate-900 text-slate-400 border-slate-300 hover:bg-slate-950 hover:text-indigo-600 shadow-sm shrink-0">
                  <History size={18} />
@@ -478,7 +479,7 @@ function FlashcardsPageContent() {
           </div>
 
           <div className="flex-1 overflow-auto relative p-4 md:p-8 flex flex-col items-center custom-scrollbar pb-40 lg:pb-8">
-             
+
              {deck.length === 0 && !isLoading && (
                 <div className="m-auto text-center animate-in fade-in zoom-in duration-500">
                    <div className="w-24 h-24 bg-slate-900 shadow-xl rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-700 transform rotate-3">
@@ -503,24 +504,24 @@ function FlashcardsPageContent() {
 
              {deck.length > 0 && !isLoading && (
                <div className={`w-full ${viewMode === 'match' ? 'max-w-6xl' : 'max-w-2xl'} flex flex-col items-center animate-in fade-in zoom-in duration-500`}>
-                 
+
                  {/* Mode Toggle Buttons & Back to Chat */}
                  <div className="flex flex-col md:flex-row w-full justify-between items-center mb-8 gap-4">
-                    <button 
+                    <button
                       onClick={() => router.push('/chat')}
                       className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-sm bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-md uppercase tracking-wider"
                     >
                       💬 Back to AI Chat
                     </button>
                     <div className="flex bg-slate-700/60 p-1.5 rounded-2xl shadow-inner">
-                      <button 
-                      onClick={() => setViewMode('flip')} 
+                      <button
+                      onClick={() => setViewMode('flip')}
                       className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${viewMode === 'flip' ? 'bg-slate-900 text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-200'}`}
                     >
                       <BookOpen size={16} /> {t.classicFlip}
                     </button>
-                    <button 
-                      onClick={() => setViewMode('match')} 
+                    <button
+                      onClick={() => setViewMode('match')}
                       className={`flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all ${viewMode === 'match' ? 'bg-slate-900 text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-200'}`}
                     >
                       <Puzzle size={16} /> {t.matchGame}
@@ -540,7 +541,7 @@ function FlashcardsPageContent() {
 
                      <div className="relative w-full h-80 cursor-pointer group [perspective:1000px]" onClick={() => setIsFlipped(!isFlipped)}>
                        <div className={`w-full h-full transition-transform duration-500 [transform-style:preserve-3d] shadow-2xl rounded-3xl ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
-                         
+
                          <div className="absolute inset-0 w-full h-full bg-slate-900 border-2 border-slate-700 rounded-3xl p-10 flex flex-col items-center justify-center text-center [backface-visibility:hidden]">
                             <span className="absolute top-6 left-6 text-slate-300"><RefreshCcw size={24}/></span>
                             <h2 className="text-3xl font-black text-slate-200 leading-tight">
@@ -556,7 +557,7 @@ function FlashcardsPageContent() {
                                   strong: ({node, children, ...props}) => {
                                     const term = String(children);
                                     const defKey = Object.keys(glossary).find(k => k.toLowerCase() === term.toLowerCase());
-                                    
+
                                     if (defKey) {
                                       return (
                                         <span className="relative group inline-block font-bold text-indigo-200 border-b border-dashed border-indigo-300 cursor-help transition-colors hover:text-white hover:border-white">
@@ -617,20 +618,20 @@ function FlashcardsPageContent() {
                          {/* LEFT: Questions & Drop Zones */}
                          <div className="space-y-4">
                            {deck.map((card, i) => (
-                             <div 
-                               key={`q-${i}`} 
+                             <div
+                               key={`q-${i}`}
                                className={`p-5 rounded-2xl border-2 transition-all duration-300 ${
-                                 matchedPairs.includes(i) 
-                                   ? 'bg-emerald-50 border-emerald-500 shadow-sm' 
-                                   : wrongMatch === i 
-                                     ? 'bg-red-50 border-red-500 shake-animation' 
+                                 matchedPairs.includes(i)
+                                   ? 'bg-emerald-50 border-emerald-500 shadow-sm'
+                                   : wrongMatch === i
+                                     ? 'bg-red-50 border-red-500 shake-animation'
                                      : 'bg-slate-900 border-slate-700'
                                }`}
                              >
                                <h3 className="font-bold text-slate-200 text-lg mb-3">
                                  <ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}>{card.q}</ReactMarkdown>
                                </h3>
-                               
+
                                {matchedPairs.includes(i) ? (
                                  <div className="p-4 bg-emerald-600 text-white rounded-xl font-medium animate-in zoom-in duration-300">
                                    <div className="flex items-center gap-2 mb-1 opacity-80 text-sm">
@@ -639,7 +640,7 @@ function FlashcardsPageContent() {
                                    <ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}>{card.a}</ReactMarkdown>
                                  </div>
                                ) : (
-                                 <div 
+                                 <div
                                    onDragOver={handleDragOver}
                                    onDrop={(e) => handleDrop(e, i)}
                                    className="w-full h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-950 flex items-center justify-center text-slate-400 font-medium transition hover:border-indigo-400 hover:bg-indigo-50/50"
@@ -658,7 +659,7 @@ function FlashcardsPageContent() {
                          {/* RIGHT: Draggable Answers */}
                          <div className="space-y-4 lg:sticky lg:top-8 h-fit">
                            {shuffledAnswers.filter(ans => !matchedPairs.includes(ans.originalIndex)).map((ans, idx) => (
-                             <div 
+                             <div
                                key={`ans-${ans.originalIndex}`}
                                draggable
                                onDragStart={(e) => handleDragStart(e, ans.originalIndex)}
@@ -720,7 +721,7 @@ function FlashcardsPageContent() {
         <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[75vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col bg-slate-900 border-t border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-slate-200">
               {isMobileDrawerOpen === 'files' && <><BookOpen size={18} className="text-indigo-500"/> Knowledge Base</>}

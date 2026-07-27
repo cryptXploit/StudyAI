@@ -1,4 +1,5 @@
 'use client';
+import { showPublicError } from '@/lib/errors/publicError';
 
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
@@ -79,11 +80,11 @@ export default function LogicFlowPage() {
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<GenMode>('graph');
-  
+
   // States for Graph Mode
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  
+
   // States for Animator Mode
   const [animatorSteps, setAnimatorSteps] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -185,8 +186,8 @@ export default function LogicFlowPage() {
 
     // 🟢 CONNECTION KEEPALIVE PROTECTOR: Long-polling support
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); 
-    
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
@@ -215,7 +216,7 @@ export default function LogicFlowPage() {
       if (!data.valid || !data.graph) throw new Error(data.error || "Generation error");
 
       setWorkspaceTitle(data.graph.title);
-      
+
       if (data.graph.mode === 'animator') {
         setDisplayView('animator');
         setAnimatorSteps(data.graph.steps);
@@ -224,7 +225,7 @@ export default function LogicFlowPage() {
         setNodes(data.graph.nodes);
         setEdges(data.graph.edges);
       }
-      
+
       refreshTokens();
       sessionStorage.removeItem('Prepia_logicflow_history'); // Bust Cache
       setTimeout(() => fetchHistory(), 1500); // Slight delay to ensure DB triggers
@@ -233,7 +234,7 @@ export default function LogicFlowPage() {
       if (error.name === 'AbortError') {
         alert(`🚨 Timeout: Server took too long to build the architecture. Please try a simpler prompt.`);
       } else {
-        alert(`🚨 Architecture Error: ${error.message}`);
+        showPublicError();
       }
     } finally {
       setIsLoading(false);
@@ -252,7 +253,7 @@ export default function LogicFlowPage() {
     setIsPlaying(false);
     setCurrentStep(0);
     setWorkspaceTitle(item.title);
-    
+
     // Check if it's an animator payload embedded inside nodes_json
     if (item.nodes_json && !Array.isArray(item.nodes_json) && item.nodes_json.mode === 'animator') {
       setDisplayView('animator');
@@ -268,14 +269,14 @@ export default function LogicFlowPage() {
 
   return (
     <SecureLayout>
-      <OutOfTokensModal 
-        isOpen={showTokenModal} 
-        onClose={() => setShowTokenModal(false)} 
-        requiredTokens={requiredTokensForModal} 
+      <OutOfTokensModal
+        isOpen={showTokenModal}
+        onClose={() => setShowTokenModal(false)}
+        requiredTokens={requiredTokensForModal}
       />
       <div className="min-h-[calc(100vh-80px)] p-0 lg:p-4 bg-slate-950 lg:bg-slate-50 transition-colors duration-500">
         <div className="flex flex-col lg:flex-row h-[calc(100vh-60px)] lg:h-[calc(100vh-120px)] w-full max-w-7xl mx-auto overflow-y-auto lg:overflow-hidden lg:bg-slate-50 bg-slate-950 lg:border lg:border-slate-200 lg:rounded-3xl shadow-none lg:shadow-sm relative custom-scrollbar">
-        
+
         {/* Left Input Sidebar Panel (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-indigo-500 to-blue-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
@@ -341,7 +342,7 @@ export default function LogicFlowPage() {
                 <p className="text-xs text-slate-600 text-center py-4 bg-slate-900 rounded-xl">{t.noHistory}</p>
               ) : (
                 historyList.map((item) => (
-                  <div 
+                  <div
                     key={item.id}
                     onClick={() => loadHistoryItem(item)}
                     className="group p-3 bg-slate-900 border border-slate-800 rounded-xl cursor-pointer hover:border-indigo-500/40 flex justify-between items-center transition-all"
@@ -360,7 +361,7 @@ export default function LogicFlowPage() {
 
         {/* Right Panel: Infinite ReactFlow OR Algorithm Animator */}
         <div className="flex-1 flex flex-col relative overflow-hidden bg-slate-950">
-          
+
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-20 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]`}>
             <div className="flex flex-col">
@@ -384,7 +385,7 @@ export default function LogicFlowPage() {
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in duration-500">
-               
+
                {/* Top Bar Workspace Header Title info */}
                <div className="bg-slate-900 border-b border-slate-800 p-4 flex justify-between items-center z-10 shadow-md">
                   <h3 className="text-md font-black text-slate-200 tracking-wide uppercase flex items-center gap-2">
@@ -396,7 +397,7 @@ export default function LogicFlowPage() {
                {/* 🟢 VIEW 1: ALGORITHM ANIMATOR */}
                {displayView === 'animator' && animatorSteps.length > 0 && (
                  <div className="flex-1 w-full h-full bg-slate-950 flex flex-col items-center justify-center p-8 relative">
-                   
+
                    {/* Data Visualization Bars */}
                    <div className="flex-1 w-full flex items-end justify-center gap-3 pb-20 pt-10">
                       <AnimatePresence>
@@ -406,7 +407,7 @@ export default function LogicFlowPage() {
                           return (
                             <motion.div
                               layout
-                              key={val} 
+                              key={val}
                               initial={{ opacity: 0.5, y: 50 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -427,18 +428,18 @@ export default function LogicFlowPage() {
                      <p className="text-center text-lg font-bold text-slate-200 mb-6 h-8 flex items-center justify-center">
                        {animatorSteps[currentStep]?.description}
                      </p>
-                     
+
                      <div className="flex items-center justify-between gap-6">
                         <button onClick={() => setIsPlaying(!isPlaying)} className="w-14 h-14 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-indigo-600/30 transition-transform active:scale-95">
                           {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
                         </button>
 
                         <div className="flex-1 flex flex-col">
-                           <input 
-                             type="range" 
-                             min={0} 
-                             max={animatorSteps.length - 1} 
-                             value={currentStep} 
+                           <input
+                             type="range"
+                             min={0}
+                             max={animatorSteps.length - 1}
+                             value={currentStep}
                              onChange={(e) => { setCurrentStep(Number(e.target.value)); setIsPlaying(false); }}
                              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
                            />
@@ -483,14 +484,14 @@ export default function LogicFlowPage() {
           {/* Mobile Floating Input Dock */}
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-              <button 
-                onClick={() => setIsMobileDrawerOpen('history')} 
+              <button
+                onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
                 <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-400 hover:to-blue-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all active:scale-95 border border-indigo-400/50"
               >
@@ -508,7 +509,7 @@ export default function LogicFlowPage() {
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity" onClick={() => setIsMobileDrawerOpen('none')} />
         <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen !== 'none' ? 'translate-y-0' : 'translate-y-full'}`}>
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
-          
+
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
               {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-indigo-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-indigo-400"/> New Logic Flow</>}
@@ -524,9 +525,9 @@ export default function LogicFlowPage() {
                   historyList.map(item => {
                     const isActive = workspaceTitle === item.title;
                     return (
-                      <div 
-                        key={item.id} 
-                        onClick={() => { loadHistoryItem(item); setIsMobileDrawerOpen('none'); }} 
+                      <div
+                        key={item.id}
+                        onClick={() => { loadHistoryItem(item); setIsMobileDrawerOpen('none'); }}
                         className={`group p-4 bg-slate-950 border rounded-xl cursor-pointer hover:shadow-md transition-all ${isActive ? 'border-indigo-500/50' : 'border-slate-800'}`}
                       >
                         <div className="flex justify-between items-start mb-2">
