@@ -31,11 +31,15 @@ function LoginPageContent() {
     }
 
     try {
-      await signIn(email, password);
+      await signIn(email.trim().toLowerCase(), password);
       router.push(redirectTo);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Sign in failed';
-      setError(message);
+      setError(
+        message === 'Invalid login credentials'
+          ? 'Email or password did not match. If you just confirmed your email, use Forgot password to set a new password, then sign in.'
+          : message
+      );
     }
   };
 
