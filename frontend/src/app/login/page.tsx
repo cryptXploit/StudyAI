@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthContext';
 import { useI18n } from '@/components/providers/I18nContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 function LoginPageContent() {
   const router = useRouter();
@@ -19,6 +19,7 @@ function LoginPageContent() {
   const [error, setError] = useState<string | null>(null);
 
   const redirectTo = searchParams.get('redirectTo') || '/dashboard';
+  const confirmationStatus = searchParams.get('confirmation');
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +134,19 @@ function LoginPageContent() {
             variants={itemVariants}
             className="bg-white/[0.02] backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative"
           >
+            {confirmationStatus === 'success' && (
+              <div className="mb-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300 flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                <p>Your email has been confirmed. Sign in to start using Prepia.</p>
+              </div>
+            )}
+
+            {confirmationStatus === 'failed' && (
+              <div className="mb-5 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">
+                This confirmation link is invalid or has expired. Please request a new confirmation email.
+              </div>
+            )}
+
             <form onSubmit={handleEmailSignIn} className="space-y-5">
               
               {/* Email Field */}

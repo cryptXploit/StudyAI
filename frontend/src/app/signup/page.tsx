@@ -42,7 +42,8 @@ function SignUpForm() {
         password,
         options: {
           data: { full_name: fullName, tier: 'Free' },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          // Keep email-confirmation UX separate from OAuth sign-in callbacks.
+          emailRedirectTo: `${window.location.origin}/auth/callback?flow=signup`,
         },
       });
 
@@ -53,7 +54,17 @@ function SignUpForm() {
         text: 'Registration successful! Please check your email to confirm your account.',
       });
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message });
+      // A browser can lose the final Auth response after Supabase has already
+      // accepted the signup and queued the confirmation email. Do not expose a
+      // technical browser error to the user in that case.
+      if (error?.message === 'Failed to fetch') {
+        setMessage({
+          type: 'error',
+          text: 'We could not confirm the final response. If you received a confirmation email, your account was created—please open the link in that email.',
+        });
+      } else {
+        setMessage({ type: 'error', text: error?.message || 'Unable to create your account. Please try again.' });
+      }
     } finally {
       setIsLoading(false);
     }
