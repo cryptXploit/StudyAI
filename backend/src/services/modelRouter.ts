@@ -12,6 +12,14 @@ let cachedConfigs: any[] | null = null;
 let lastConfigFetchTime = 0;
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 Minutes cache
 
+// Called after an admin saves central routing configuration so new embedding
+// keys/models apply immediately instead of waiting for the worker cache TTL.
+export function invalidateEmbeddingConfigCache() {
+  cachedConfigs = null;
+  cachedModelName = null;
+  lastConfigFetchTime = 0;
+}
+
 async function logMetrics(provider: string, status: 'success' | 'error', latency: number, tokens = 0) {
   if (!supabase) return; 
   try {
@@ -92,7 +100,10 @@ export const modelRouter = {
             return { vector: data.embedding.values };
           }
         } catch (routeError: any) {
-          console.warn(`[Embedding] Route ${provider} failed. Cascading...`);
+          console.warn(
+            `[Embedding] Route ${provider} (${modelName || 'auto'}) failed. Cascading...`,
+            routeError instanceof Error ? routeError.message : routeError
+          );
           await logMetrics(provider, 'error', Date.now() - startTime);
           continue; 
         }

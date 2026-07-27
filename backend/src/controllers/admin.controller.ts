@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { requireAdmin } from '../middlewares/admin.middleware';
+import { invalidateEmbeddingConfigCache } from '../services/modelRouter';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 
@@ -37,6 +38,7 @@ export function registerAdminRoutes(app: any): void {
       const { error } = await query;
       if (error) return res.status(400).json({ error: error.message });
     }
+    invalidateEmbeddingConfigCache();
     res.json({ success: true });
   });
 
