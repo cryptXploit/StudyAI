@@ -3,12 +3,16 @@ import { ProviderAdapter, ChatMessage, CompletionOptions, CompletionResult } fro
 
 export class DeepSeekAdapter implements ProviderAdapter {
   providerName = 'deepseek';
-  private client: OpenAI;
 
-  constructor() {
-    this.client = new OpenAI({
+  private getClient(): OpenAI {
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      throw new Error('DeepSeek API key is not configured for the selected route.');
+    }
+
+    return new OpenAI({
       baseURL: 'https://api.deepseek.com/v1',
-      apiKey: process.env.DEEPSEEK_API_KEY,
+      apiKey,
     });
   }
 
@@ -17,7 +21,7 @@ export class DeepSeekAdapter implements ProviderAdapter {
     model: string,
     options?: CompletionOptions
   ): Promise<CompletionResult> {
-    const response = await this.client.chat.completions.create({
+    const response = await this.getClient().chat.completions.create({
       model,
       messages: messages as any[], // openai types match role: 'user'|'assistant'|'system'
       temperature: options?.temperature ?? 0.7,
@@ -33,5 +37,24 @@ export class DeepSeekAdapter implements ProviderAdapter {
       provider: this.providerName,
       model,
     };
+  }
+
+  async *generateStream(
+    messages: ChatMessage[],
+    model: string,
+    options?: CompletionOptions
+  ): AsyncIterable<string> {
+    const stream = await this.getClient().chat.completions.create({
+      model,
+      messages: messages as any[],
+      temperature: options?.temperature ?? 0.7,
+      max_tokens: options?.maxTokens,
+      stream: true,
+    });
+
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) yield content;
+    }
   }
 }

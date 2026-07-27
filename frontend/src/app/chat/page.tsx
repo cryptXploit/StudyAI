@@ -395,7 +395,12 @@ export default function ChatPage() {
       }
     } catch (error: any) {
       const partialContent = targetTextRef.current ? `${targetTextRef.current}\n\n` : '';
-      setMessages(prev => [...prev, { role: 'assistant', content: fixMissingSpaces(`${partialContent}🚨 Error: ${error.message}`) }]);
+      const busyMessage = language === 'Bangla'
+        ? 'আমাদের AI Study Engine এই মুহূর্তে একটু ব্যস্ত। কয়েক সেকেন্ড পরে একই প্রশ্নটি আবার চেষ্টা করুন।'
+        : language === 'Hindi'
+          ? 'हमारा AI Study Engine इस समय थोड़ा व्यस्त है। कृपया कुछ सेकंड बाद अपना प्रश्न फिर से पूछें।'
+          : 'Our AI Study Engine is handling high demand right now. Please try the same question again in a few moments.';
+      setMessages(prev => [...prev, { role: 'assistant', content: fixMissingSpaces(`${partialContent}✨ ${busyMessage}`) }]);
     } finally { 
       setIsLoading(false); 
       setDisplayedAIResponse(''); 

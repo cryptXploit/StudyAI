@@ -7,6 +7,7 @@ import { requireAuth } from '../middlewares/auth.middleware';
 import { createClient } from '@supabase/supabase-js'; 
 import { TOKEN_COSTS } from '../config/tokenCosts';
 import { applyCreditMutation } from '../services/creditLedger.service';
+import logger from '../core/logger';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 
@@ -17,6 +18,8 @@ interface ChatRequest {
 }
 
 interface CacheEntry { answer: string; chunks: string[]; timestamp: number; ttl: number; }
+
+const AI_BUSY_MESSAGE = 'Our AI study engine is handling high demand right now. Please try your question again in a few moments.';
 
 export async function chatHandler(req: Request, res: Response): Promise<void> {
   const startTime = Date.now(); let cacheHit = false; let retrievalTime = 0; let memoryTime = 0;
@@ -209,8 +212,16 @@ async function streamSSEResponse(res: Response, streamResponse: AsyncIterable<st
     }
     res.end();
   } catch (err) {
-    clearTimeout(timeoutHandle!); 
-    if (!res.writableEnded) { res.write(`data: ${JSON.stringify({ error: err instanceof Error ? err.message : 'Stream connection interrupted', status: 'failed', length: fullResponse.length })}\n\n`); flush(); }
+    clearTimeout(timeoutHandle!);
+    logger.error('chat.stream.failed', {
+      error: err instanceof Error ? err.message : String(err),
+      userId: metadata.userId,
+      fileIds: metadata.fileIds,
+    });
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ error: AI_BUSY_MESSAGE, code: 'AI_TEMPORARILY_BUSY', status: 'failed', length: fullResponse.length })}\n\n`);
+      flush();
+    }
     res.end();
   }
 }
@@ -229,9 +240,9 @@ async function serveSSEResponse(res: Response, cachedAnswer: string, metadata: R
 }
 
 function handleStreamError(res: Response, error: any): void {
+  logger.error('chat.request.failed', { error: error instanceof Error ? error.message : String(error) });
   if (!res.headersSent) { res.setHeader('Content-Type', 'text-event-stream'); res.setHeader('Cache-Control', 'no-cache, no-transform'); res.setHeader('Connection', 'keep-alive'); res.flushHeaders(); }
-  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-  res.write(`data: ${JSON.stringify({ error: errorMessage, status: 'failed', timestamp: Date.now() })}\n\n`);
+  res.write(`data: ${JSON.stringify({ error: AI_BUSY_MESSAGE, code: 'AI_TEMPORARILY_BUSY', status: 'failed', timestamp: Date.now() })}\n\n`);
   if (typeof (res as any).flush === 'function') (res as any).flush(); res.end();
 }
 
