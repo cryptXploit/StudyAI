@@ -21,7 +21,7 @@ export default function ForgotPasswordPage() {
     setMessage(null);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
         redirectTo: `${window.location.origin}/reset-password`,
       });
 
@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
       
       setMessage({
         type: 'success',
-        text: 'Password reset link sent! Check your email inbox.',
+        text: 'If an account exists for this email, a reset link will arrive shortly.',
       });
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message });
@@ -131,8 +131,8 @@ export default function ForgotPasswordPage() {
                 <CheckCircle2 className="w-8 h-8 text-emerald-400" />
               </div>
               <h3 className="text-xl font-bold text-white">Check Your Email</h3>
-              <p className="text-emerald-400 font-medium">Reset link sent successfully.</p>
-              <p className="text-gray-400 text-sm mt-2">Please check your email inbox to reset your password.</p>
+              <p className="text-emerald-400 font-medium">Check your email for a reset link.</p>
+              <p className="text-gray-400 text-sm mt-2">Check Spam and Promotions too. The link expires after a limited time.</p>
               <Link href="/login" className="mt-6 px-6 py-3 w-full bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold transition-all">
                 Return to Login
               </Link>
