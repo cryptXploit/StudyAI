@@ -9,6 +9,7 @@ import { Sparkles, Radar, Target, UploadCloud, Lock, ShieldAlert, BrainCircuit, 
 import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import { useRouter } from 'next/navigation';
+import { showPublicError } from '@/lib/errors/publicError';
 
 export default function ExamOraclePage() {
   const { user } = useAuth();
@@ -84,7 +85,7 @@ export default function ExamOraclePage() {
           setIsCooking(false);
           setExtractingJobId(null);
           clearInterval(interval);
-          alert('Our AI Study Engine could not complete this extraction. Please try again in a few moments.');
+          showPublicError();
           return;
         }
 
@@ -106,7 +107,7 @@ export default function ExamOraclePage() {
           setIsCooking(false);
           setExtractingJobId(null);
           clearInterval(interval);
-          alert(data.message || data.error || 'Our AI Study Engine could not complete this extraction. Please try again in a few moments.');
+          showPublicError(data);
         }
       } catch (err) {
         console.error("Polling error", err);
@@ -208,7 +209,7 @@ export default function ExamOraclePage() {
       setPredictions(generatedPredictions);
       refreshTokens();
     } catch (err: any) {
-      alert('Our AI Study Engine could not complete this request. Please try again in a few moments.');
+      showPublicError();
     } finally {
       setIsScanning(false);
     }
@@ -314,7 +315,7 @@ export default function ExamOraclePage() {
                           });
 
                           if (res.status === 429) {
-                            alert("Server is busy. Please try again in a moment.");
+                            showPublicError();
                             setIsCooking(false);
                             return;
                           }
@@ -325,7 +326,7 @@ export default function ExamOraclePage() {
                             data = JSON.parse(text);
                           } catch (e) {
                             console.error("Invalid JSON during extraction start:", e);
-                            alert("Something went wrong. Please try again.");
+                            showPublicError();
                             setIsCooking(false);
                             return;
                           }
@@ -603,7 +604,7 @@ export default function ExamOraclePage() {
                           });
 
                           if (res.status === 429) {
-                            alert("Server is busy. Please try again in a moment.");
+                            showPublicError();
                             setIsCooking(false);
                             return;
                           }
@@ -614,7 +615,7 @@ export default function ExamOraclePage() {
                             data = JSON.parse(text);
                           } catch (e) {
                             console.error("Invalid JSON during extraction start:", e);
-                            alert("Something went wrong. Please try again.");
+                            showPublicError();
                             setIsCooking(false);
                             return;
                           }
