@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useI18n } from '@/components/providers/I18nContext';
 import { createClient } from '@/lib/supabase/client';
@@ -14,6 +14,15 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('reset') === 'expired') {
+      setMessage({
+        type: 'error',
+        text: 'This reset link has expired or was already used. Request a new one below.',
+      });
+    }
+  }, []);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -20,6 +20,7 @@ function LoginPageContent() {
 
   const redirectTo = searchParams.get('redirectTo') || '/dashboard';
   const confirmationStatus = searchParams.get('confirmation');
+  const passwordResetStatus = searchParams.get('passwordReset');
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,6 +143,11 @@ function LoginPageContent() {
               <div className="mb-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300 flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
                 <p>Your email has been confirmed. Sign in to start using Prepia.</p>
+              </div>
+            )}{passwordResetStatus === 'success' && (
+              <div className="mb-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-300 flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+                <p>Your password was updated. Sign in with your new password.</p>
               </div>
             )}
 

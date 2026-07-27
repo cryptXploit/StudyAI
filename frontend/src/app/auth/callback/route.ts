@@ -18,13 +18,9 @@ export async function GET(request: NextRequest) {
             return cookieStore.getAll();
           },
           setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options as CookieOptions)
-              );
-            } catch {
-              // Handle errors during cookie setting
-            }
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options as CookieOptions)
+            );
           },
         },
       }
@@ -33,18 +29,23 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
-      return NextResponse.redirect(new URL('/login?confirmation=failed', request.url));
+      const failurePath = flow === 'recovery'
+        ? '/forgot-password?reset=expired'
+        : '/login?confirmation=failed';
+      return NextResponse.redirect(new URL(failurePath, request.url));
     }
 
     // Email sign-up confirmation should show a clear success state and let the
-    // user sign in deliberately. OAuth continues to use the existing dashboard
-    // redirect below.
+    // user sign in deliberately. OAuth continues to use the dashboard redirect.
     if (flow === 'signup') {
       await supabase.auth.signOut({ scope: 'local' });
       return NextResponse.redirect(new URL('/login?confirmation=success', request.url));
     }
+
+    if (flow === 'recovery') {
+      return NextResponse.redirect(new URL('/reset-password', request.url));
+    }
   }
 
-  // URL to redirect to after sign in process completes
   return NextResponse.redirect(new URL('/dashboard', request.url));
 }
