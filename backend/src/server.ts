@@ -31,6 +31,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { traceMiddleware } from './core/tracing';
+import { publicErrorFor, publicErrorSanitizer } from './middlewares/publicError.middleware';
 import { connection } from './queue/connection';
 import { createClient } from '@supabase/supabase-js';
 import logger from './core/logger';
@@ -149,6 +150,7 @@ const sanitizeInput = (req: any, res: any, next: any) => {
   next();
 };
 app.use(sanitizeInput);
+app.use(publicErrorSanitizer);
 
 // ==========================================
 // HEALTH CHECK ROUTE (Skips rate limiting)
@@ -419,11 +421,11 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   });
 
   const statusCode = err.statusCode || 500;
+  const publicError = publicErrorFor(statusCode, err?.message);
   res.status(statusCode).json({
     status: 'error',
     statusCode,
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    ...publicError,
   });
 });
 

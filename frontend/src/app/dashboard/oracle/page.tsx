@@ -84,7 +84,7 @@ export default function ExamOraclePage() {
           setIsCooking(false);
           setExtractingJobId(null);
           clearInterval(interval);
-          alert("Extraction failed: Job was lost or expired on the server.");
+          alert('Our AI Study Engine could not complete this extraction. Please try again in a few moments.');
           return;
         }
 
@@ -106,7 +106,7 @@ export default function ExamOraclePage() {
           setIsCooking(false);
           setExtractingJobId(null);
           clearInterval(interval);
-          alert('Extraction failed: ' + (data.failedReason || 'Unknown error'));
+          alert(data.message || data.error || 'Our AI Study Engine could not complete this extraction. Please try again in a few moments.');
         }
       } catch (err) {
         console.error("Polling error", err);
@@ -183,7 +183,7 @@ export default function ExamOraclePage() {
           setShowTokenModal(true);
           return;
         }
-        throw new Error(data.details || data.error || 'Failed to predict');
+        throw new Error(data.message || data.error || 'Our AI Study Engine could not complete this request. Please try again in a few moments.');
       }
 
       const generatedPredictions = data.predictions;
@@ -208,7 +208,7 @@ export default function ExamOraclePage() {
       setPredictions(generatedPredictions);
       refreshTokens();
     } catch (err: any) {
-      alert("Oracle Error: " + err.message);
+      alert('Our AI Study Engine could not complete this request. Please try again in a few moments.');
     } finally {
       setIsScanning(false);
     }
