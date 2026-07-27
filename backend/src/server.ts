@@ -158,6 +158,7 @@ app.get('/health', async (req: Request, res: Response) => {
 
   try {
     const pong = await connection.ping();    
+    results.redis.ok = !!pong;
     results.bullmq.ok = !!pong;
   } catch (err: any) {
     logger.error('health.redis', { error: err?.message || String(err) });
