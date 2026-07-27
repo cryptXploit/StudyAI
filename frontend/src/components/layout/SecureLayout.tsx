@@ -175,28 +175,28 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col relative selection:bg-emerald-500/30">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-slate-950 flex flex-col relative selection:bg-emerald-500/30">
       
       {/* 🟢 Top Navigation Bar */}
-        <header className="h-[60px] bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60 flex items-center px-6 justify-between sticky top-0 z-30 shadow-sm transition-all duration-300">
+        <header className="h-[60px] min-w-0 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/60 flex items-center px-2 sm:px-6 justify-between sticky top-0 z-30 shadow-sm transition-all duration-300">
           
           {/* Interactive Logo Area */}
           <div 
-            className="flex items-center gap-3 cursor-pointer group px-3 py-2 rounded-xl hover:bg-slate-900 transition-colors"
+            className="flex min-w-0 shrink items-center gap-2 sm:gap-3 cursor-pointer group px-1.5 sm:px-3 py-2 rounded-xl hover:bg-slate-900 transition-colors"
             onClick={() => setIsSidebarOpen(true)}
             onMouseEnter={() => setIsSidebarOpen(true)}
             onMouseDown={() => setIsSidebarOpen(false)}
           >
-            <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
                <span className="text-white font-black text-lg leading-none">AI</span>
             </div>
-            <div className="flex items-center gap-1">
-               <span className="text-xl font-black text-white tracking-tight">Prepia</span>
-               <ChevronRight size={18} className="text-slate-500 group-hover:translate-x-1 transition-transform" />
+            <div className="flex min-w-0 items-center gap-1">
+               <span className="text-lg sm:text-xl font-black text-white tracking-tight">Prepia</span>
+               <ChevronRight size={18} className="hidden sm:block text-slate-500 group-hover:translate-x-1 transition-transform" />
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-4">
             <Omnibar />
             
             {/* 💎 TOKEN BALANCE (NEW) */}
@@ -219,10 +219,11 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
             {/* 🔴 THE PANIC BUTTON (FEAR HOOK) 🔴 */}
             <Link 
               href="/dashboard/panic"
-              className="relative overflow-hidden group flex items-center gap-2 bg-rose-100 hover:bg-rose-600 border border-rose-500/50 text-rose-600 hover:text-white px-4 py-2 rounded-xl font-black tracking-widest uppercase text-xs transition-all shadow-[0_0_15px_rgba(225,29,72,0.3)] animate-pulse"
+              aria-label="Open Panic Mode"
+              className="relative overflow-hidden group flex items-center gap-2 bg-rose-100 hover:bg-rose-600 border border-rose-500/50 text-rose-600 hover:text-white px-2 sm:px-4 py-2 rounded-xl font-black tracking-widest uppercase text-xs transition-all shadow-[0_0_15px_rgba(225,29,72,0.3)] animate-pulse"
             >
               <Zap size={16} className="group-hover:animate-bounce" />
-              <span>Panic Mode</span>
+              <span className="hidden sm:inline">Panic Mode</span>
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>

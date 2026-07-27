@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body {
+  min-height: 100%;
+  background: #020617;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
