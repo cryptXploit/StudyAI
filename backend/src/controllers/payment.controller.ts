@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { PRICING_TIERS } from '../config/pricing.config';
 import { TOKEN_COSTS } from '../config/tokenCosts';
-import { claimBangladeshPayment } from '../services/creditLedger.service';
+import { claimBangladeshPayment, claimBdPaymentAndActivateFamilyPlan } from '../services/creditLedger.service';
 
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL || '',
@@ -72,14 +72,26 @@ export const verifyBdPaymentHandler = async (req: Request, res: Response): Promi
   periodEnd.setDate(periodEnd.getDate() + tier.durationDays);
 
   try {
-    await claimBangladeshPayment({
-      userId,
-      transactionId,
-      expectedAmount: tier.bdPrice,
-      credits: tier.tokens,
-      planType: tier.id,
-      periodEnd: periodEnd.toISOString(),
-    });
+    if (tier.planKind === 'family') {
+      await claimBdPaymentAndActivateFamilyPlan({
+        userId,
+        transactionId,
+        expectedAmount: tier.bdPrice,
+        planType: tier.id,
+        memberLimit: tier.memberLimit!,
+        tokensPerMember: tier.tokensPerMember!,
+        periodEnd: periodEnd.toISOString(),
+      });
+    } else {
+      await claimBangladeshPayment({
+        userId,
+        transactionId,
+        expectedAmount: tier.bdPrice,
+        credits: tier.tokens,
+        planType: tier.id,
+        periodEnd: periodEnd.toISOString(),
+      });
+    }
 
     res.status(200).json({ status: 'success', message: `${tier.title} activated successfully.` });
   } catch (error: any) {

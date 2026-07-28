@@ -14,6 +14,8 @@ interface CheckoutModalProps {
     title: string;
     bdPrice: number;
     intPrice: number;
+    originalBdPrice?: number;
+    originalIntPrice?: number;
     paddlePriceId?: string;
   } | null;
   currency?: 'BDT' | 'USD';
@@ -172,6 +174,11 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
           <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-center">
               <p className="text-emerald-400 text-sm font-medium mb-1">Send exactly {selectedTier.bdPrice} BDT to</p>
+              {selectedTier.originalBdPrice && (
+                <p className="text-slate-400 text-xs mb-2">
+                  Regularly <span className="line-through">{selectedTier.originalBdPrice} BDT</span>
+                </p>
+              )}
               <p className="text-2xl font-black text-white tracking-widest">01639326220</p>
               <p className="text-emerald-400/60 text-xs mt-1">bKash Personal Account (Send money Only)</p>
             </div>
@@ -232,7 +239,12 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
             </div>
             
             <div>
-              <h3 className="text-white font-black text-xl mb-2">${selectedTier.intPrice} USD</h3>
+              <h3 className="text-white font-black text-xl mb-1">${selectedTier.intPrice} USD</h3>
+              {selectedTier.originalIntPrice && (
+                <p className="text-slate-400 text-xs mb-3">
+                  Regularly <span className="line-through">${selectedTier.originalIntPrice} USD</span>
+                </p>
+              )}
               <p className="text-slate-400 text-sm max-w-[250px] mx-auto">
                 Securely pay via Credit Card, PayPal, or Apple Pay through Paddle.
               </p>

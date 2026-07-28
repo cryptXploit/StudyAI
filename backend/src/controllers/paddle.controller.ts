@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Environment, LogLevel, Paddle } from '@paddle/paddle-node-sdk';
 import { PRICING_TIERS } from '../config/pricing.config';
-import { grantPaidEntitlement } from '../services/creditLedger.service';
+import { grantPaidEntitlement, activateFamilyPlan } from '../services/creditLedger.service';
 
 const paddle = new Paddle(process.env.PADDLE_API_KEY || '', {
   environment: process.env.PADDLE_ENV === 'sandbox' ? Environment.sandbox : Environment.production,
@@ -45,14 +45,26 @@ export const handlePaddleWebhook = async (req: Request, res: Response): Promise<
     const periodEnd = new Date();
     periodEnd.setDate(periodEnd.getDate() + tier.durationDays);
 
-    await grantPaidEntitlement({
-      userId,
-      credits: tier.tokens,
-      planType: tier.id,
-      periodEnd: periodEnd.toISOString(),
-      idempotencyKey: `paddle-transaction:${transaction.id}`,
-      reason: `Purchased ${tier.title} via Paddle (TXN: ${transaction.id})`,
-    });
+    if (tier.planKind === 'family') {
+      await activateFamilyPlan({
+        ownerId: userId,
+        planType: tier.id,
+        memberLimit: tier.memberLimit!,
+        tokensPerMember: tier.tokensPerMember!,
+        periodEnd: periodEnd.toISOString(),
+        idempotencyKey: `paddle-transaction:${transaction.id}`,
+        reason: `Purchased ${tier.title} via Paddle (TXN: ${transaction.id})`,
+      });
+    } else {
+      await grantPaidEntitlement({
+        userId,
+        credits: tier.tokens,
+        planType: tier.id,
+        periodEnd: periodEnd.toISOString(),
+        idempotencyKey: `paddle-transaction:${transaction.id}`,
+        reason: `Purchased ${tier.title} via Paddle (TXN: ${transaction.id})`,
+      });
+    }
 
     res.status(200).send('Webhook processed');
   } catch (error: any) {

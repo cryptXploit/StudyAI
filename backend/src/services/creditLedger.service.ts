@@ -80,3 +80,95 @@ export async function claimBangladeshPayment(input: {
   if (error) throw new Error(`Bangladesh payment verification failed: ${error.message}`);
   return Number(data);
 }
+
+export async function activateFamilyPlan(input: {
+  ownerId: string;
+  planType: string;
+  memberLimit: number;
+  tokensPerMember: number;
+  periodEnd: string;
+  idempotencyKey: string;
+  reason: string;
+}): Promise<any> {
+  const { data, error } = await supabaseAdmin.rpc('activate_family_plan', {
+    p_owner_id: input.ownerId,
+    p_plan_type: input.planType,
+    p_member_limit: input.memberLimit,
+    p_tokens_per_member: input.tokensPerMember,
+    p_period_end: input.periodEnd,
+    p_idempotency_key: input.idempotencyKey,
+    p_reason: input.reason,
+  });
+
+  if (error) throw new Error(`Family plan activation failed: ${error.message}`);
+  return data;
+}
+
+export async function claimBdPaymentAndActivateFamilyPlan(input: {
+  userId: string;
+  transactionId: string;
+  expectedAmount: number;
+  planType: string;
+  memberLimit: number;
+  tokensPerMember: number;
+  periodEnd: string;
+}): Promise<any> {
+  const { data, error } = await supabaseAdmin.rpc('claim_bd_payment_and_activate_family_plan', {
+    p_user_id: input.userId,
+    p_transaction_id: input.transactionId,
+    p_expected_amount: input.expectedAmount,
+    p_plan_type: input.planType,
+    p_member_limit: input.memberLimit,
+    p_tokens_per_member: input.tokensPerMember,
+    p_period_end: input.periodEnd,
+  });
+
+  if (error) throw new Error(`Family BD payment verification failed: ${error.message}`);
+  return data;
+}
+
+export async function consumeFamilyInvite(input: {
+  userId: string;
+  inviteTokenHash: string;
+}): Promise<any> {
+  const { data, error } = await supabaseAdmin.rpc('consume_family_invite', {
+    p_user_id: input.userId,
+    p_invite_token_hash: input.inviteTokenHash,
+  });
+
+  if (error) throw new Error(`Consume invite failed: ${error.message}`);
+  return data;
+}
+
+export async function rotateFamilyInvite(input: {
+  ownerId: string;
+  groupId: string;
+  slotNumber: number;
+  inviteTokenHash: string;
+}): Promise<string> {
+  const { data, error } = await supabaseAdmin.rpc('rotate_family_invite', {
+    p_owner_id: input.ownerId,
+    p_group_id: input.groupId,
+    p_slot_number: input.slotNumber,
+    p_invite_token_hash: input.inviteTokenHash,
+  });
+
+  if (error) throw new Error(`Rotate invite failed: ${error.message}`);
+  return data as string;
+}
+
+export async function revokeFamilyMember(input: {
+  ownerId: string;
+  groupId: string;
+  memberUserId: string;
+  freeTokens: number;
+}): Promise<void> {
+  const { error } = await supabaseAdmin.rpc('revoke_family_member', {
+    p_owner_id: input.ownerId,
+    p_group_id: input.groupId,
+    p_member_user_id: input.memberUserId,
+    p_free_tokens: input.freeTokens,
+  });
+
+  if (error) throw new Error(`Revoke member failed: ${error.message}`);
+}

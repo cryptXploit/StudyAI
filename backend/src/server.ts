@@ -55,6 +55,7 @@ import paymentRoutes from './routes/payment.routes';
 import paddleRoutes from './routes/paddle.routes';
 import feedbackRoutes from './routes/feedback.routes';
 import marketingRoutes from './routes/marketing.routes';
+import familyRoutes from './routes/family.routes';
 
 import fileRoutes from './routes/file.route';
 import {registerBookJumperRoutes} from './controllers/bookjumper.controller'; // 🟢 একদম উপরে ইমপোর্ট করুন
@@ -402,6 +403,7 @@ app.use('/api/files', fileRoutes);
 registerBookJumperRoutes(app);
 app.use('/api/oracle', requireAuth, oracleRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/family', familyRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/marketing', marketingRoutes);
 

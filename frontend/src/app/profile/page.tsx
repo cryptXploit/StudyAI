@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
 import { User, GraduationCap, MapPin, Calendar, Loader2, Save } from 'lucide-react';
+import FamilyManagement from '@/components/profile/FamilyManagement';
 
 export default function ProfilePage() {
   const supabase = createClient();
@@ -155,6 +156,8 @@ export default function ProfilePage() {
             </button>
           </form>
         </div>
+
+        <FamilyManagement />
       </div>
     </SecureLayout>
   );

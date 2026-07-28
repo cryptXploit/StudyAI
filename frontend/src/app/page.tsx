@@ -54,6 +54,7 @@ export default function LandingPage() {
   const [selectedTier, setSelectedTier] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currency, setCurrency] = useState<'BDT' | 'USD'>('BDT');
+  const [planType, setPlanType] = useState<'solo' | 'family'>('solo');
 
   useEffect(() => {
     if (Intl.DateTimeFormat().resolvedOptions().timeZone !== 'Asia/Dhaka') {
@@ -342,8 +343,9 @@ export default function LandingPage() {
         {/* PRICING CARDS */}
         <div className="max-w-7xl mx-auto px-4 md:px-8 -mt-20 relative z-20">
           
-          {/* Currency Toggle */}
-          <div className="flex justify-center mb-10">
+          {/* Currency & Plan Type Toggles */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-10">
+            {/* Currency Toggle */}
             <div className="flex bg-slate-900 rounded-full p-1 border border-slate-800 shadow-xl">
               <button 
                 onClick={() => setCurrency('BDT')}
@@ -358,6 +360,22 @@ export default function LandingPage() {
                 USD (International)
               </button>
             </div>
+
+            {/* Plan Type Toggle */}
+            <div className="flex bg-slate-900 rounded-full p-1 border border-slate-800 shadow-xl">
+              <button 
+                onClick={() => setPlanType('solo')}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${planType === 'solo' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
+              >
+                Solo Plans
+              </button>
+              <button 
+                onClick={() => setPlanType('family')}
+                className={`px-6 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${planType === 'family' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}`}
+              >
+                <Users size={16} /> Family Plans
+              </button>
+            </div>
           </div>
 
           {isLoadingPricing ? (
@@ -368,6 +386,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               
               {/* FREE PLAN */}
+              {planType === 'solo' && (
               <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="p-8 md:p-10 rounded-[2.5rem] bg-slate-900 border border-slate-800 shadow-xl shadow-slate-950/50 flex flex-col">
                 <h3 className="text-2xl font-black text-white mb-2">Free Starter</h3>
                 <p className="text-slate-400 text-sm mb-8 font-medium leading-relaxed">Experience the ecosystem. Good for light research and casual assignments.</p>
@@ -387,9 +406,10 @@ export default function LandingPage() {
                   Your Current Plan
                 </button>
               </motion.div>
+              )}
 
               {/* DYNAMIC PRO TIERS */}
-              {tiers.map((tier, idx) => (
+              {tiers.filter(t => planType === 'family' ? t.planKind === 'family' : (!t.planKind || t.planKind === 'solo')).map((tier, idx) => (
                 <motion.div 
                   key={tier.id}
                   initial={{ y: 40, opacity: 0 }} 
@@ -416,11 +436,19 @@ export default function LandingPage() {
                     Access to {tier.tokens.toLocaleString()} Premium AI Tokens for high-compute micro-apps.
                   </p>
                   
-                  <div className="mb-8 flex items-baseline gap-2">
-                    <span className="text-5xl font-black text-white">
-                      {currency === 'BDT' ? `৳ ${tier.bdPrice}` : `$${tier.intPrice}`}
-                    </span>
-                    <span className="text-slate-500 font-bold">/{tier.durationDays} days</span>
+                  <div className="mb-8 flex flex-col gap-1">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-5xl font-black text-white">
+                        {currency === 'BDT' ? `৳ ${tier.bdPrice}` : `$${tier.intPrice}`}
+                      </span>
+                      <span className="text-slate-500 font-bold">/{tier.durationDays} days</span>
+                    </div>
+                    {/* Strikethrough pricing */}
+                    {(currency === 'BDT' ? tier.originalBdPrice : tier.originalIntPrice) && (
+                      <div className="text-slate-500 font-bold text-sm">
+                        Regularly <span className="line-through">{currency === 'BDT' ? `৳ ${tier.originalBdPrice}` : `$${tier.originalIntPrice}`}</span>
+                      </div>
+                    )}
                   </div>
                   
                   <ul className="space-y-5 mb-10 flex-1">
