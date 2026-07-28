@@ -44,7 +44,7 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
       setHasSession(!!session);
       setUserEmail(session?.user?.email || '');
       
-      const publicPaths = ['/pricing', '/privacy-policy', '/docs'];
+      const publicPaths = ['/pricing', '/privacy-policy', '/terms-of-service', '/refund-policy', '/docs'];
       const isPublicPath = publicPaths.some(p => pathname === p || pathname.startsWith(`${p}/`));
 
       if (!session && !isPublicPath) {
@@ -160,7 +160,7 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
 { name: 'Alumni Bounty Board', path: '/dashboard/bounty-board', icon: <Medal size={20}/>, color: 'text-amber-500' },
   ];
 
-  const publicPaths = ['/pricing', '/privacy-policy', '/docs'];
+  const publicPaths = ['/pricing', '/privacy-policy', '/terms-of-service', '/refund-policy', '/docs'];
   const isPublicPath = publicPaths.some(p => pathname === p || pathname.startsWith(`${p}/`));
   const shouldBlockContent = !isCheckingAuth && !hasSession && !isPublicPath;
   const profileLabel = profile.full_name?.trim() || userEmail.split('@')[0] || 'My Profile';

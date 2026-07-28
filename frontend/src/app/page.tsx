@@ -561,8 +561,10 @@ export default function LandingPage() {
       <footer className="bg-slate-950 text-slate-400 py-12 text-center border-t border-slate-900">
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
           <div className="text-2xl font-black tracking-tight text-white mb-6">Prepia<span className="text-emerald-500">.</span></div>
-          <div className="flex gap-6 mb-8">
+          <div className="flex flex-wrap justify-center gap-6 mb-8">
             <Link href="/privacy-policy" className="hover:text-white transition-colors font-bold text-sm">Privacy Policy</Link>
+            <Link href="/terms-of-service" className="hover:text-white transition-colors font-bold text-sm">Terms of Service</Link>
+            <Link href="/refund-policy" className="hover:text-white transition-colors font-bold text-sm">Refund Policy</Link>
             <Link href="/docs" className="hover:text-white transition-colors font-bold text-sm">Documentation</Link>
             <Link href="/pricing" className="hover:text-white transition-colors font-bold text-sm">Pricing</Link>
           </div>
