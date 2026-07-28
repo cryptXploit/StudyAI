@@ -25,6 +25,7 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
   const [region, setRegion] = useState<'BD' | 'INT'>('INT');
   const [trxId, setTrxId] = useState('');
   const [bKashNumber, setBkashNumber] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'bKash' | 'Nagad' | 'Rocket'>('bKash');
   const [isVerifying, setIsVerifying] = useState(false);
   const [paddle, setPaddle] = useState<Paddle | undefined>(undefined);
 
@@ -84,7 +85,7 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
   const handleBdSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!trxId || !bKashNumber) {
-      toast.error('Please enter both bKash number and TrxID');
+      toast.error('Please enter your mobile number and TrxID');
       return;
     }
     
@@ -159,7 +160,7 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
             onClick={() => setRegion('BD')}
             className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${region === 'BD' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-slate-300'}`}
           >
-            Bangladesh (bKash)
+            Bangladesh (Manual)
           </button>
           <button 
             onClick={() => setRegion('INT')}
@@ -171,21 +172,47 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
 
         {/* --- BANGLADESH VIEW --- */}
         {region === 'BD' && (
-          <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 text-center">
-              <p className="text-emerald-400 text-sm font-medium mb-1">Send exactly {selectedTier.bdPrice} BDT to</p>
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            {/* BD Payment Method Toggle */}
+            <div className="flex bg-slate-950 rounded-xl p-1 border border-slate-800">
+              <button 
+                onClick={() => setPaymentMethod('bKash')}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${paymentMethod === 'bKash' ? 'bg-pink-600 text-white' : 'text-slate-400 hover:text-slate-300'}`}
+              >
+                bKash
+              </button>
+              <button 
+                onClick={() => setPaymentMethod('Nagad')}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${paymentMethod === 'Nagad' ? 'bg-orange-600 text-white' : 'text-slate-400 hover:text-slate-300'}`}
+              >
+                Nagad
+              </button>
+              <button 
+                onClick={() => setPaymentMethod('Rocket')}
+                className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${paymentMethod === 'Rocket' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-slate-300'}`}
+              >
+                Rocket
+              </button>
+            </div>
+
+            <div className={`${paymentMethod === 'bKash' ? 'bg-pink-500/10 border-pink-500/20' : paymentMethod === 'Nagad' ? 'bg-orange-500/10 border-orange-500/20' : 'bg-purple-500/10 border-purple-500/20'} border rounded-xl p-4 text-center transition-colors`}>
+              <p className={`${paymentMethod === 'bKash' ? 'text-pink-400' : paymentMethod === 'Nagad' ? 'text-orange-400' : 'text-purple-400'} text-sm font-medium mb-1`}>Send exactly {selectedTier.bdPrice} BDT to</p>
               {selectedTier.originalBdPrice && (
                 <p className="text-slate-400 text-xs mb-2">
                   Regularly <span className="line-through">{selectedTier.originalBdPrice} BDT</span>
                 </p>
               )}
-              <p className="text-2xl font-black text-white tracking-widest">01639326220</p>
-              <p className="text-emerald-400/60 text-xs mt-1">bKash Personal Account (Send money Only)</p>
+              <p className="text-2xl font-black text-white tracking-widest">
+                {paymentMethod === 'Nagad' ? '01521731704' : '01639326220'}
+              </p>
+              <p className={`${paymentMethod === 'bKash' ? 'text-pink-400/60' : paymentMethod === 'Nagad' ? 'text-orange-400/60' : 'text-purple-400/60'} text-xs mt-1`}>
+                {paymentMethod} Personal (Send Money Only)
+              </p>
             </div>
 
             <form onSubmit={handleBdSubmit} className="space-y-3">
               <div>
-                <label className="block text-slate-400 text-xs font-bold mb-2">Your bKash Number</label>
+                <label className="block text-slate-400 text-xs font-bold mb-2">Your {paymentMethod} Number</label>
                 <div className="relative">
                   <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
                   <input 
@@ -222,7 +249,11 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
               <button 
                 type="submit" 
                 disabled={isVerifying}
-                className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+                className={`w-full py-3.5 text-white font-black rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${
+                  paymentMethod === 'bKash' ? 'bg-pink-600 hover:bg-pink-700 shadow-[0_0_15px_rgba(219,39,119,0.3)]' :
+                  paymentMethod === 'Nagad' ? 'bg-orange-600 hover:bg-orange-700 shadow-[0_0_15px_rgba(234,88,12,0.3)]' :
+                  'bg-purple-600 hover:bg-purple-700 shadow-[0_0_15px_rgba(147,51,234,0.3)]'
+                }`}
               >
                 {isVerifying ? <Loader2 className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
                 {isVerifying ? 'Verifying...' : `Verify ${selectedTier.bdPrice} BDT`}
