@@ -116,6 +116,7 @@ export const modelRouter = {
     }
   },
 
+
   async emergencyFallback(safeText: string, outputDimensions = 1536) {
     try {
       console.warn("Triggering Embedding Emergency Fallback to .env...");
@@ -149,5 +150,34 @@ export const modelRouter = {
     const imagePart = { inlineData: { data: buffer.toString("base64"), mimeType: "image/jpeg" } };
     const result = await model.generateContent(["Describe this diagram or image in detail:", imagePart]);
     return { description: result.response.text() };
+  },
+
+  async extractDocument(buffer: Buffer) {
+    let apiKey = process.env.GEMINI_API_KEY;
+
+    // 🟢 As requested: Check DB for embedding fallback AI if not in .env
+    if (!apiKey && supabase) {
+      const { data } = await supabase
+        .from('api_configurations')
+        .select('api_key')
+        .eq('is_active', true)
+        .eq('task_type', 'embedding')
+        .order('priority', { ascending: true })
+        .limit(1)
+        .single();
+      
+      if (data && data.api_key) apiKey = data.api_key;
+    }
+
+    if (!apiKey) throw new Error("API Key for Gemini is completely missing from .env and Database.");
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const pdfPart = { inlineData: { data: buffer.toString("base64"), mimeType: "application/pdf" } };
+    
+    const prompt = "Extract all text, readable content, diagrams, and handwriting from this document perfectly. Return ONLY the raw extracted text in clean markdown format without any intro or outro.";
+    
+    const result = await model.generateContent([prompt, pdfPart]);
+    return result.response.text();
   }
 };

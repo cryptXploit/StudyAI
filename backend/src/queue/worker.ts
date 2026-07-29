@@ -6,7 +6,6 @@ import { IdempotencyManager } from './idempotency';
 import logger from '../core/logger';
 import { runWithTraceId } from '../core/tracing';
 import { createClient } from '@supabase/supabase-js';
-import Tesseract from 'tesseract.js';
 import { modelRouter } from '../services/modelRouter';
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
@@ -31,7 +30,9 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
       const docs = await loader.load();
       const extractedText = docs.map(doc => doc.pageContent).join('\n\n');
 
-      return extractedText.trim().length < 50 ? await performOCR(buffer) : extractedText;
+      // 🟢 HYBRID ARCHITECTURE: If text is < 50 chars, assume it's a scanned/image PDF
+      // and redirect to Gemini Flash for Multimodal OCR and equation extraction.
+      return extractedText.trim().length < 50 ? await modelRouter.extractDocument(buffer) : extractedText;
     } catch (error: any) {
       logger.error('LangChain PDF extraction error', { error: error.message });
       throw new Error(`PDF parse failed: ${error.message}`);
@@ -63,14 +64,8 @@ async function downloadFromR2(storagePath: string) {
   return await getStreamAsBuffer(r2Response.Body);
 }
 
-async function performOCR(buffer: Buffer): Promise<string> {
-  const { data: { text } } = await Tesseract.recognize(buffer, 'eng');
-  return text;
-}
-
 async function performVisionAnalysis(buffer: Buffer): Promise<string> {
-  const response = await modelRouter.analyzeImage(buffer);
-  return `Diagram Analysis: ${response.description}`;
+  return await modelRouter.extractDocument(buffer);
 }
 
 function splitTextIntoChunks(text: string, size: number): string[] {
