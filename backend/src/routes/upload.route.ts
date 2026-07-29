@@ -225,6 +225,7 @@ router.post('/r2-confirm', requireAuth, async (req: Request, res: Response) => {
       .insert({
         user_id: userId,
         storage_path: r2Key, // Fallback for old schema compatibility
+        file_url: r2Key, // Fallback for legacy NOT NULL constraint
         r2_key: r2Key,
         storage_provider: 'r2',
         status: 'uploading',
