@@ -1,6 +1,8 @@
 export async function uploadDocumentToR2(file: File, supabaseAccessToken: string) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  
   // 1. Get Presigned URL
-  const urlRes = await fetch('/api/upload/r2-url', {
+  const urlRes = await fetch(`${apiUrl}/upload/r2-url`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -22,7 +24,7 @@ export async function uploadDocumentToR2(file: File, supabaseAccessToken: string
   if (!putRes.ok) throw new Error('Failed to upload file to R2');
 
   // 3. Confirm upload with our backend to trigger BullMQ Document Worker
-  const confirmRes = await fetch('/api/upload/r2-confirm', {
+  const confirmRes = await fetch(`${apiUrl}/upload/r2-confirm`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
