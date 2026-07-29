@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client';
+import { uploadDocumentToR2 } from '../lib/r2Upload';
 
 // 🟢 FIXED: Properly closed the function bracket
 export const fetchDashboardData = async () => {
@@ -49,27 +50,12 @@ export async function uploadFile(
   file: globalThis.File,
   sessionToken: string
 ): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/upload`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-      },
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Upload failed');
+  try {
+    const result = await uploadDocumentToR2(file, sessionToken);
+    return result.fileId || result.file_id;
+  } catch (error: any) {
+    throw new Error(error.message || 'R2 Upload failed');
   }
-
-  const data = await response.json();
-  return data.file_id;
 }
 
 /**

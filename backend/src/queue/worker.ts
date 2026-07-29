@@ -10,6 +10,33 @@ import Tesseract from 'tesseract.js';
 import { modelRouter } from '../services/modelRouter';
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+
+const s3Client = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+  },
+});
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+
+// 🟢 FIX: Enterprise-grade LangChain PDF Extraction
+async function extractContent(buffer: Buffer, mimetype: string, path: string): Promise<string> {
+  if (mimetype === 'application/pdf') {
+    try {
+      const blob = new Blob([buffer as any], { type: 'application/pdf' });
+      const loader = new PDFLoader(blob, { splitPages: false });
+      const docs = await loader.load();
+      const extractedText = docs.map(doc => doc.pageContent).join('\n\n');
+
+      return extractedText.trim().length < 50 ? await performOCR(buffer) : extractedText;
+    } catch (error: any) {
+      logger.error('LangChain PDF extraction error', { error: error.message });
+      throw new Error(`PDF parse failed: ${error.message}`);
+    }
+});
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 
 // 🟢 FIX: Enterprise-grade LangChain PDF Extraction
@@ -32,10 +59,25 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
   return "";
 }
 
+async function getStreamAsBuffer(stream: any): Promise<Buffer> {
+  const chunks = [];
+  for await (const chunk of stream) chunks.push(chunk);
+  return Buffer.concat(chunks);
+}
+
 async function downloadFromSupabase(storagePath: string) {
   const { data, error } = await supabase.storage.from('documents').download(storagePath);
   if (error) throw error;
   return Buffer.from(await data.arrayBuffer());
+}
+
+async function downloadFromR2(storagePath: string) {
+  const command = new GetObjectCommand({
+    Bucket: process.env.R2_BUCKET_NAME || '',
+    Key: storagePath,
+  });
+  const r2Response = await s3Client.send(command);
+  return await getStreamAsBuffer(r2Response.Body);
 }
 
 async function performOCR(buffer: Buffer): Promise<string> {
@@ -73,12 +115,31 @@ async function generateEmbedding(text: string, outputDimensions = 1536): Promise
 }
 
 async function processDocument(job: Job) {
-  const { fileId, userId, storagePath, mimetype } = job.data;
+  let { fileId, userId, storagePath, mimetype, storageProvider } = job.data;
+
+  // DB lookup if storageProvider is missing (Legacy/Race Condition Safety)
+  if (!storageProvider) {
+    const { data: fileData } = await supabase.from('files').select('storage_provider, r2_key').eq('id', fileId).single();
+    if (fileData) {
+      storageProvider = fileData.storage_provider;
+      if (storageProvider === 'r2' && fileData.r2_key) {
+        storagePath = fileData.r2_key;
+      }
+    } else {
+      storageProvider = 'supabase';
+    }
+  }
+
   const safeMimetype = mimetype || (storagePath.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
 
-  logger.info('worker.document.started', { fileId, safeMimetype });
+  logger.info('worker.document.started', { fileId, safeMimetype, storageProvider });
 
-  const fileBuffer = await downloadFromSupabase(storagePath);
+  let fileBuffer: Buffer;
+  if (storageProvider === 'r2') {
+    fileBuffer = await downloadFromR2(storagePath);
+  } else {
+    fileBuffer = await downloadFromSupabase(storagePath);
+  }
   const text = await extractContent(fileBuffer, safeMimetype, storagePath);
   const chunks = splitTextIntoChunks(text, 1000);
 

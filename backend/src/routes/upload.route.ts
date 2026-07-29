@@ -4,6 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 import { documentQueue } from '../queue/connection';
 import { TOKEN_COSTS } from '../config/tokenCosts';
 import { requireAuth } from '../middlewares/auth.middleware';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const router = Router();
 
@@ -133,6 +135,9 @@ router.post('/upload', requireAuth, upload.single('file') as any, async (req: Re
 
     // 4. Return 202 Accepted for Async UX
     return res.status(202).json({
+
+    // 4. Return 202 Accepted for Async UX
+    return res.status(202).json({
       message: 'File accepted for processing',
       fileId,
     });
@@ -142,6 +147,150 @@ router.post('/upload', requireAuth, upload.single('file') as any, async (req: Re
     if (req.file && req.file.buffer) {
       req.file.buffer = Buffer.alloc(0);
     }
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// ==========================================
+// R2 CLOUDFLARE STORAGE MIGRATION ROUTES
+// ==========================================
+
+const s3Client = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+  },
+});
+
+// 1. POST /api/upload/r2-url (Generate Presigned PUT URL)
+router.post('/r2-url', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'UNAUTHORIZED' });
+
+    const { filename, contentType } = req.body;
+    if (!filename || !contentType) {
+      return res.status(400).json({ error: 'Missing filename or contentType' });
+    }
+
+    // Rate-limit Check for Free Users
+    if (userId !== 'anonymous') {
+      const { data: userProfile } = await supabase.from('profiles').select('tier').eq('id', userId).single();
+      const tier = userProfile?.tier || 'Free';
+      
+      if (tier.toLowerCase() !== 'pro') {
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        
+        const { count, error: countErr } = await supabase
+          .from('files')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .gte('created_at', sevenDaysAgo.toISOString());
+          
+        if (!countErr && (count || 0) >= TOKEN_COSTS.FREE_USER_WEEKLY_FILE_LIMIT) {
+          return res.status(403).json({ error: `FREE_LIMIT_REACHED`, message: `Free users can only upload ${TOKEN_COSTS.FREE_USER_WEEKLY_FILE_LIMIT} files per week. Please wait or upgrade to Pro.` });
+        }
+      }
+    }
+
+    const fileExt = contentType.includes('pdf') ? '.pdf' : '.jpg';
+    const r2Key = `documents/${userId}/${Date.now()}-${Math.random().toString(36).substring(7)}${fileExt}`;
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME || '',
+      Key: r2Key,
+      ContentType: contentType,
+    });
+
+    const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
+    return res.json({ uploadUrl, r2Key });
+  } catch (error) {
+    console.error('[R2 Presign Error]:', error);
+    return res.status(500).json({ error: 'Failed to generate presigned URL' });
+  }
+});
+
+// 2. POST /api/upload/r2-confirm (Confirm Upload & Trigger RAG Pipeline)
+router.post('/r2-confirm', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'UNAUTHORIZED' });
+
+    const { r2Key, filename, fileType, fileSize, contentType } = req.body;
+    if (!r2Key || !filename) return res.status(400).json({ error: 'Missing required file data' });
+
+    // Insert into `files` table
+    const { data: fileRecord, error: dbError } = await supabase
+      .from('files')
+      .insert({
+        user_id: userId,
+        storage_path: r2Key, // Fallback for old schema compatibility
+        r2_key: r2Key,
+        storage_provider: 'r2',
+        status: 'uploading',
+        name: filename,
+        file_type: fileType,
+        file_size: fileSize || 0,
+      })
+      .select('id')
+      .single();
+
+    if (dbError && dbError.code !== 'PGRST116') {
+      console.error('[R2 Confirm DB Error]:', dbError);
+      return res.status(500).json({ error: 'Failed to save record' });
+    }
+
+    const fileId = fileRecord?.id || `mock-${Date.now()}`;
+
+    // CRITICAL: Push to canonical document-processing queue
+    await documentQueue.add('extract-and-embed', {
+      fileId,
+      userId,
+      storagePath: r2Key,
+      mimetype: contentType,
+      storageProvider: 'r2', // Pass provider to worker
+    }, { jobId: `document:${fileId}`, removeOnComplete: 500, removeOnFail: 1000 });
+
+    return res.status(202).json({
+      message: 'File accepted for processing',
+      fileId,
+    });
+  } catch (error) {
+    console.error('[R2 Confirm Error]:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// 3. GET /api/upload/r2-view/:fileId (Generate Presigned GET URL)
+router.get('/r2-view/:fileId', requireAuth, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'UNAUTHORIZED' });
+
+    const { data, error } = await supabase
+      .from('files')
+      .select('*')
+      .eq('id', req.params.fileId)
+      .eq('user_id', userId) // Security Check
+      .single();
+
+    if (error || !data) return res.status(404).json({ error: 'File not found' });
+    if (data.storage_provider !== 'r2' || !data.r2_key) {
+      return res.status(400).json({ error: 'Not an R2 file' });
+    }
+
+    const command = new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET_NAME || '',
+      Key: data.r2_key,
+    });
+
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    return res.json({ url });
+  } catch (error) {
+    console.error('[R2 View Error]:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
