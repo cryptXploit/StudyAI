@@ -172,12 +172,27 @@ export const modelRouter = {
     if (!apiKey) throw new Error("API Key for Gemini is completely missing from .env and Database.");
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const pdfPart = { inlineData: { data: buffer.toString("base64"), mimeType: mimeType } };
-    
     const prompt = "Extract all text, readable content, diagrams, and handwriting from this document perfectly. Return ONLY the raw extracted text in clean markdown format without any intro or outro.";
     
-    const result = await model.generateContent([prompt, pdfPart]);
-    return result.response.text();
+    // Try multiple models in case the user's API key doesn't support the latest one
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-pro-vision"];
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent([prompt, pdfPart]);
+        return result.response.text();
+      } catch (err: any) {
+        lastError = err;
+        if (err.message && err.message.includes('404')) {
+          console.warn(`Model ${modelName} not found or supported, trying next...`);
+          continue;
+        }
+        throw err; // If it's a 400 Bad Request (invalid key), throw immediately
+      }
+    }
+    throw new Error(`All Gemini models failed: ${lastError?.message}`);
   }
 };
