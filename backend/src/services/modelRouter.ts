@@ -152,7 +152,7 @@ export const modelRouter = {
     return { description: result.response.text() };
   },
 
-  async extractDocument(buffer: Buffer) {
+  async extractDocument(buffer: Buffer, mimeType = "application/pdf") {
     let apiKey = process.env.GEMINI_API_KEY;
 
     // 🟢 As requested: Check DB for embedding fallback AI if not in .env
@@ -173,7 +173,7 @@ export const modelRouter = {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const pdfPart = { inlineData: { data: buffer.toString("base64"), mimeType: "application/pdf" } };
+    const pdfPart = { inlineData: { data: buffer.toString("base64"), mimeType: mimeType } };
     
     const prompt = "Extract all text, readable content, diagrams, and handwriting from this document perfectly. Return ONLY the raw extracted text in clean markdown format without any intro or outro.";
     

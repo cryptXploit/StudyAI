@@ -20,19 +20,48 @@ const s3Client = new S3Client({
   },
 });
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { PDFDocument } from 'pdf-lib';
 
-// 🟢 FIX: Enterprise-grade LangChain PDF Extraction
+// 🟢 FIX: Page-Level Hybrid AI Architecture
 async function extractContent(buffer: Buffer, mimetype: string, path: string): Promise<string> {
   if (mimetype === 'application/pdf') {
     try {
       const blob = new Blob([buffer as any], { type: 'application/pdf' });
-      const loader = new PDFLoader(blob, { splitPages: false });
+      const loader = new PDFLoader(blob, { splitPages: true }); // Splitting pages
       const docs = await loader.load();
-      const extractedText = docs.map(doc => doc.pageContent).join('\n\n');
+      
+      let finalExtractedText = "";
+      let pdfDocRef: PDFDocument | null = null; // Lazy load only if needed
 
-      // 🟢 HYBRID ARCHITECTURE: If text is < 50 chars, assume it's a scanned/image PDF
-      // and redirect to Gemini Flash for Multimodal OCR and equation extraction.
-      return extractedText.trim().length < 50 ? await modelRouter.extractDocument(buffer) : extractedText;
+      for (let i = 0; i < docs.length; i++) {
+        const pageText = docs[i].pageContent;
+        const pageNum = docs[i].metadata?.loc?.pageNumber || (i + 1);
+        
+        // 🟢 Smart Decision Gate: If text is < 100 chars, it's likely an image/graph page
+        if (pageText.trim().length < 100) {
+          logger.info(`[Page ${pageNum}] Suspiciously low text. Routing to Gemini Flash OCR...`);
+          
+          if (!pdfDocRef) {
+            pdfDocRef = await PDFDocument.load(buffer);
+          }
+          
+          // Slice this specific page (0-indexed in pdf-lib)
+          const miniPdf = await PDFDocument.create();
+          const [copiedPage] = await miniPdf.copyPages(pdfDocRef, [i]);
+          miniPdf.addPage(copiedPage);
+          
+          const miniPdfBytes = await miniPdf.save();
+          const miniBuffer = Buffer.from(miniPdfBytes);
+          
+          const geminiText = await modelRouter.extractDocument(miniBuffer);
+          finalExtractedText += `\n\n[Page ${pageNum}]\n${geminiText.trim()}`;
+        } else {
+          // Free Fast Lane: Normal digital text
+          finalExtractedText += `\n\n[Page ${pageNum}]\n${pageText.trim()}`;
+        }
+      }
+
+      return finalExtractedText;
     } catch (error: any) {
       logger.error('LangChain PDF extraction error', { error: error.message });
       throw new Error(`PDF parse failed: ${error.message}`);

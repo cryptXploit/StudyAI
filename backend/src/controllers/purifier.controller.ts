@@ -1,9 +1,9 @@
 import { Request, Response, Router } from 'express';
 import { ModelRouter } from '../ai/ModelRouter';
+import { modelRouter as aiServiceRouter } from '../services/modelRouter';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { createClient } from '@supabase/supabase-js';
 import multer from 'multer';
-import Tesseract from 'tesseract.js';
 import { TOKEN_COSTS } from '../config/tokenCosts';
 import { applyCreditMutation } from '../services/creditLedger.service';
 
@@ -39,24 +39,17 @@ export async function purifyNotesHandler(req: Request, res: Response): Promise<v
         res.status(402).json({ error: 'INSUFFICIENT_TOKENS', required: cost });
         return;
       }
-      
-      
     }
 
-    // 🟢 1. Local ZERO-COST OCR using Tesseract.js (RAM PROTECTOR: Sequential Processing)
     let rawText = "";
     try {
       // 🟢 MAGICAL FIX: Changed Promise.all to Sequential 'for...of' loop
-      // এটি একসাথে ৫টি ছবি প্রসেস না করে একটি একটি করে করবে, ফলে সার্ভার ক্র্যাশ করবে না।
       for (const file of files) {
-        const result = await Tesseract.recognize(file.buffer, 'eng+ben');
-        rawText += result.data.text + '\n\n';
-
-        // 🟢 AGGRESSIVE RAM CLEANUP: OCR শেষ হওয়ার সাথে সাথেই বাফার খালি করে র‍্যাম রিলিজ করা
+        const extractedChunk = await aiServiceRouter.extractDocument(file.buffer, file.mimetype);
+        rawText += extractedChunk + '\n\n';
         file.buffer = Buffer.alloc(0); 
       }
     } catch (ocrError) {
-      // এরর খেলেও যেন RAM আটকে না থাকে
       files.forEach(f => f.buffer = Buffer.alloc(0));
       throw new Error("Failed to extract text from images. Ensure images are clear.");
     }
@@ -105,13 +98,12 @@ RULES:
       if (savedRow) savedId = savedRow.id;
     } catch (dbEx) {}
 
+    // 🟢 DEDUCT TOKENS ONLY ON SUCCESS
+    if (tier.toLowerCase() !== 'pro') {
+      await applyCreditMutation({ userId, amount: -cost, reason: 'Notes Purifier', idempotencyKey: `notes-purifier:${userId}:${savedId || Date.now()}`, tier });
+    }
     
-      // 🟢 DEDUCT TOKENS ONLY ON SUCCESS
-      if (tier.toLowerCase() !== 'pro') {
-        await applyCreditMutation({ userId, amount: -cost, reason: 'Notes Purifier', idempotencyKey: `notes-purifier:${userId}:${savedId || Date.now()}`, tier });
-      }
-      
-      res.json({ valid: true, title, content: finalContent, savedId });
+    res.json({ valid: true, title, content: finalContent, savedId });
 
   } catch (error: any) {
     // 🟢 গ্লোবাল ফলব্যাকেও যেন RAM রিলিজ হয়ে যায়
