@@ -131,7 +131,7 @@ router.post('/upload', requireAuth, upload.single('file') as any, async (req: Re
       userId,
       storagePath: fileName,
       mimetype: file.mimetype,
-    }, { jobId: `document:${fileId}`, removeOnComplete: 500, removeOnFail: 1000 });
+    }, { jobId: `document-${fileId}`, removeOnComplete: 500, removeOnFail: 1000 });
 
     // 4. Return 202 Accepted for Async UX
     return res.status(202).json({
@@ -250,7 +250,7 @@ router.post('/r2-confirm', requireAuth, async (req: Request, res: Response) => {
       storagePath: r2Key,
       mimetype: contentType,
       storageProvider: 'r2', // Pass provider to worker
-    }, { jobId: `document:${fileId}`, removeOnComplete: 500, removeOnFail: 1000 });
+    }, { jobId: `document-${fileId}`, removeOnComplete: 500, removeOnFail: 1000 });
 
     return res.status(202).json({
       message: 'File accepted for processing',
