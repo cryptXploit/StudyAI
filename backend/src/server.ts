@@ -58,6 +58,7 @@ import marketingRoutes from './routes/marketing.routes';
 import familyRoutes from './routes/family.routes';
 
 import fileRoutes from './routes/file.route';
+import uploadRoutes from './routes/upload.route';
 import {registerBookJumperRoutes} from './controllers/bookjumper.controller'; // 🟢 একদম উপরে ইমপোর্ট করুন
 // import { registerCitationRoutes } from './controllers/citation.controller'; // 🟢 একদম উপরে ইমপোর্ট করুন
 import { registerGamificationRoutes } from './controllers/gamification.controller'; // 🟢 একদম উপরে ইমপোর্ট করুন
@@ -406,6 +407,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/family', familyRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/marketing', marketingRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // dYY Serve uploaded files natively in development (Optional);
 registerGamificationRoutes(app);
