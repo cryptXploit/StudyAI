@@ -59,7 +59,7 @@ router.post('/upload', requireAuth, upload.single('file') as any, async (req: Re
       return res.status(400).json({ error: 'Invalid file type. Only PDF and JPEG are allowed.' });
     }
 
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ error: 'UNAUTHORIZED' });
     
     // 🟢 NEW: File Upload Limit Check for Free Users
@@ -135,9 +135,6 @@ router.post('/upload', requireAuth, upload.single('file') as any, async (req: Re
 
     // 4. Return 202 Accepted for Async UX
     return res.status(202).json({
-
-    // 4. Return 202 Accepted for Async UX
-    return res.status(202).json({
       message: 'File accepted for processing',
       fileId,
     });
@@ -167,7 +164,7 @@ const s3Client = new S3Client({
 // 1. POST /api/upload/r2-url (Generate Presigned PUT URL)
 router.post('/r2-url', requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ error: 'UNAUTHORIZED' });
 
     const { filename, contentType } = req.body;
@@ -216,7 +213,7 @@ router.post('/r2-url', requireAuth, async (req: Request, res: Response) => {
 // 2. POST /api/upload/r2-confirm (Confirm Upload & Trigger RAG Pipeline)
 router.post('/r2-confirm', requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ error: 'UNAUTHORIZED' });
 
     const { r2Key, filename, fileType, fileSize, contentType } = req.body;
@@ -267,7 +264,7 @@ router.post('/r2-confirm', requireAuth, async (req: Request, res: Response) => {
 // 3. GET /api/upload/r2-view/:fileId (Generate Presigned GET URL)
 router.get('/r2-view/:fileId', requireAuth, async (req: Request, res: Response) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     if (!userId) return res.status(401).json({ error: 'UNAUTHORIZED' });
 
     const { data, error } = await supabase

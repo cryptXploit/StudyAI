@@ -36,23 +36,6 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
       logger.error('LangChain PDF extraction error', { error: error.message });
       throw new Error(`PDF parse failed: ${error.message}`);
     }
-});
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
-
-// 🟢 FIX: Enterprise-grade LangChain PDF Extraction
-async function extractContent(buffer: Buffer, mimetype: string, path: string): Promise<string> {
-  if (mimetype === 'application/pdf') {
-    try {
-      const blob = new Blob([buffer as any], { type: 'application/pdf' });
-      const loader = new PDFLoader(blob, { splitPages: false });
-      const docs = await loader.load();
-      const extractedText = docs.map(doc => doc.pageContent).join('\n\n');
-
-      return extractedText.trim().length < 50 ? await performOCR(buffer) : extractedText;
-    } catch (error: any) {
-      logger.error('LangChain PDF extraction error', { error: error.message });
-      throw new Error(`PDF parse failed: ${error.message}`);
-    }
   } else if (mimetype.startsWith('image/')) {
     return await performVisionAnalysis(buffer);
   }
