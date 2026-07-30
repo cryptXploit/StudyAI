@@ -70,10 +70,10 @@ const MemoizedMarkdown = React.memo(({ content }: { content: string }) => {
       remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]}
       rehypePlugins={[rehypeKatex]}
       components={{
-        table: ({node, ...props}) => <div className="overflow-x-auto my-4 border border-slate-700 rounded-xl shadow-sm"><table className="min-w-full divide-y divide-slate-200" {...props}/></div>,
-        thead: ({node, ...props}) => <thead className="bg-emerald-50" {...props}/>,
-        th: ({node, ...props}) => <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider border-b" {...props}/>,
-        td: ({node, ...props}) => <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-300 border-b leading-relaxed" { ...props}/>,
+        table: ({node, ...props}) => <div className="overflow-x-auto my-4 border border-slate-700 rounded-xl shadow-sm"><table className="min-w-full divide-y divide-slate-700" {...props}/></div>,
+        thead: ({node, ...props}) => <thead className="bg-slate-800" {...props}/>,
+        th: ({node, ...props}) => <th className="px-6 py-3 text-left text-xs font-bold text-slate-300 uppercase tracking-wider border-b border-slate-700" {...props}/>,
+        td: ({node, ...props}) => <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-300 border-b border-slate-700 leading-relaxed" { ...props}/>,
         p: ({node, ...props}) => <p className="mb-4 leading-relaxed text-slate-300 font-medium" {...props} />
       }}
     >
@@ -404,15 +404,15 @@ export default function PurifierPage() {
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-700 bg-slate-900">
 
-               <div className="p-8 border-b border-slate-700 bg-emerald-50/50 flex justify-between items-start z-10 shadow-sm">
+               <div className="p-8 border-b border-slate-700 bg-slate-900 flex justify-between items-start z-10 shadow-sm">
                   <div>
                     <h2 className="text-3xl font-black text-slate-200 mb-1">{purifiedContent?.title}</h2>
-                    <p className="text-emerald-600 text-xs font-bold uppercase tracking-widest">Digitized & Purified successfully</p>
+                    <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest">Digitized & Purified successfully</p>
                   </div>
                   <div className="flex gap-3">
                     {/* 🟢 NEW: Compare Mode Button (Visible only for active session) */}
                     {sessionImages.length > 0 && (
-                      <button onClick={() => setCompareMode(true)} className="p-2.5 bg-slate-900 border border-emerald-200 hover:bg-emerald-50 text-emerald-700 rounded-xl shadow-sm transition-all flex items-center gap-2">
+                      <button onClick={() => setCompareMode(true)} className="p-2.5 bg-slate-800 border border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 rounded-xl shadow-sm transition-all flex items-center gap-2">
                         <Columns size={16} />
                         <span className="text-xs font-bold hidden md:inline">{t.compareBtn}</span>
                       </button>
@@ -549,12 +549,12 @@ export default function PurifierPage() {
             <div className="h-20 bg-slate-900 border-b border-slate-700 flex items-center justify-between px-8 shadow-sm">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-emerald-500/20 rounded-xl">
-                  <Columns className="text-emerald-600" size={24} />
+                  <Columns className="text-emerald-400" size={24} />
                 </div>
                 <h2 className="text-2xl font-black text-slate-200 tracking-tight">Parallel Comparison</h2>
-                <span className="text-xs font-black text-emerald-600 uppercase tracking-widest ml-4 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">Original vs Purified</span>
+                <span className="text-xs font-black text-emerald-400 uppercase tracking-widest ml-4 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/30">Original vs Purified</span>
               </div>
-              <button onClick={() => setCompareMode(false)} className="px-5 py-2.5 bg-slate-800 border border-slate-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 rounded-xl transition-all flex items-center gap-2 shadow-sm">
+              <button onClick={() => setCompareMode(false)} className="px-5 py-2.5 bg-slate-800 border border-slate-700 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 text-slate-300 rounded-xl transition-all flex items-center gap-2 shadow-sm">
                  <X size={18} />
                  <span className="text-sm font-bold">Close View</span>
               </button>
@@ -563,7 +563,7 @@ export default function PurifierPage() {
             {/* Split View Container */}
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
                {/* Left: Original Images */}
-               <div className="w-full md:w-1/2 h-1/2 md:h-full bg-[#0f172a] p-4 md:p-10 overflow-y-auto custom-scrollbar md:border-r border-b md:border-b-0 border-slate-300 shadow-[inset_0_0_40px_rgba(0,0,0,0.6)] flex flex-col items-center">
+               <div className="w-full md:w-1/2 h-1/2 md:h-full bg-[#0f172a] p-4 md:p-10 overflow-y-auto custom-scrollbar md:border-r border-b md:border-b-0 border-slate-700 shadow-[inset_0_0_40px_rgba(0,0,0,0.6)] flex flex-col items-center">
                   <div className="w-full max-w-2xl">
                      <p className="text-slate-400 font-mono text-sm font-black tracking-widest uppercase mb-8 text-center bg-slate-900 py-3 rounded-xl border border-slate-800">Original Messy Notes</p>
                      {sessionImages.map((src, idx) => (
@@ -578,7 +578,7 @@ export default function PurifierPage() {
                {/* Right: Purified Text */}
                <div className="w-full md:w-1/2 h-1/2 md:h-full bg-slate-900 p-6 md:p-12 overflow-y-auto custom-scrollbar">
                   <div className="w-full max-w-3xl mx-auto">
-                     <p className="text-emerald-600 font-mono text-sm font-black tracking-widest uppercase mb-8 text-center bg-emerald-50 py-3 rounded-xl border border-emerald-200">AI Purified Document</p>
+                     <p className="text-emerald-400 font-mono text-sm font-black tracking-widest uppercase mb-8 text-center bg-emerald-500/10 py-3 rounded-xl border border-emerald-500/30">AI Purified Document</p>
                      <div className="prose prose-slate prose-lg max-w-none prose-headings:font-black prose-headings:text-slate-200 prose-p:leading-relaxed prose-p:text-slate-300 prose-strong:text-white prose-a:text-emerald-600 prose-li:marker:text-emerald-500 bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-xl">
                         <MemoizedMarkdown content={purifiedContent.content} />
                      </div>
