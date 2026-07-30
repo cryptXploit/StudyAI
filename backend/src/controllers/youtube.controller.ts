@@ -11,13 +11,63 @@ async function getTranscript(videoId: string) {
   try {
     return await YoutubeTranscript.fetchTranscript(videoId);
   } catch (err) {
-    console.warn(`YoutubeTranscript failed for ${videoId}, trying scraper...`);
-    const captions = await getSubtitles({ videoID: videoId, lang: 'en' });
-    return captions.map((cap: any) => ({
-      text: cap.text,
-      offset: parseFloat(cap.start) * 1000,
-      duration: parseFloat(cap.dur) * 1000
-    }));
+    console.warn(`YoutubeTranscript failed for ${videoId}, trying custom fallback...`);
+    
+    // Fetch the YouTube page HTML
+    const response = await fetch(`https://youtube.com/watch?v=${videoId}`);
+    const data = await response.text();
+    
+    // Extract captionTracks JSON
+    if (!data.includes('captionTracks')) {
+      throw new Error(`Could not find any captions for video: ${videoId}`);
+    }
+    
+    const regex = /"captionTracks":(\[.*?\])/;
+    const match = regex.exec(data);
+    if (!match) throw new Error(`Could not extract caption tracks for ${videoId}`);
+    
+    const { captionTracks } = JSON.parse(`{${match[0]}}`);
+    if (!captionTracks || captionTracks.length === 0) {
+      throw new Error(`Caption tracks array is empty for ${videoId}`);
+    }
+    
+    // Auto-select the first available caption track (usually the default language)
+    const subtitle = captionTracks[0];
+    if (!subtitle || !subtitle.baseUrl) {
+      throw new Error(`Could not find a valid baseUrl in caption tracks for ${videoId}`);
+    }
+    
+    // Fetch the XML transcript
+    const transcriptResponse = await fetch(subtitle.baseUrl);
+    const transcriptXml = await transcriptResponse.text();
+    
+    // Parse the XML using regex to avoid heavy XML parser dependencies
+    const lines = transcriptXml
+      .replace('<?xml version="1.0" encoding="utf-8" ?><transcript>', '')
+      .replace('</transcript>', '')
+      .split('</text>')
+      .filter(line => line && line.trim())
+      .map(line => {
+        const startMatch = /start="([\d.]+)"/.exec(line);
+        const durMatch = /dur="([\d.]+)"/.exec(line);
+        
+        const htmlText = line
+          .replace(/<text.+?>/, '')
+          .replace(/&amp;/gi, '&')
+          .replace(/&lt;/gi, '<')
+          .replace(/&gt;/gi, '>')
+          .replace(/&quot;/gi, '"')
+          .replace(/&#39;/gi, "'")
+          .replace(/<\/?[^>]+(>|$)/g, '');
+          
+        return {
+          text: htmlText,
+          offset: startMatch ? parseFloat(startMatch[1]) * 1000 : 0,
+          duration: durMatch ? parseFloat(durMatch[1]) * 1000 : 0
+        };
+      });
+      
+    return lines;
   }
 }
 
