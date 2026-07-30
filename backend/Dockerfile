@@ -1,4 +1,4 @@
-FROM node:20-bookworm-slim AS build
+FROM node:22-bookworm-slim AS build
 
 WORKDIR /app
 
@@ -10,7 +10,8 @@ RUN npm ci
 COPY backend ./backend
 RUN npx tsc -p backend/tsconfig.production.json
 
-FROM node:20-bookworm-slim AS production
+FROM node:22-bookworm-slim AS production
+
 
 WORKDIR /app
 ENV NODE_ENV=production
