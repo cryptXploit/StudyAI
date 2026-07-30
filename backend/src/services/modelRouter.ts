@@ -176,7 +176,8 @@ export const modelRouter = {
     const prompt = "Extract all text, readable content, diagrams, and handwriting from this document perfectly. Return ONLY the raw extracted text in clean markdown format without any intro or outro.";
     
     // Try multiple models in case the user's API key doesn't support the latest one
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-pro-vision"];
+    // 🟢 2026 UPDATE: Added gemini-3.1-flash and gemini-2.0-flash as primary models
+    const modelsToTry = ["gemini-3.1-flash", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"];
     let lastError = null;
 
     for (const modelName of modelsToTry) {
