@@ -79,6 +79,9 @@ export default function RewardsPage() {
   const [referralCode, setReferralCode] = useState<string>('');
   const [totalReferred, setTotalReferred] = useState<number>(0);
   const [isCopied, setIsCopied] = useState(false);
+  
+  // 🟢 AdSense Reward State
+  const [isWatchingAd, setIsWatchingAd] = useState(false);
 
   const [language, setLanguage] = useState<LanguageType>('English');
   const t = translations[language] || translations['English'];
@@ -140,6 +143,41 @@ export default function RewardsPage() {
     navigator.clipboard.writeText(link);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const watchAdForTokens = async () => {
+    setIsWatchingAd(true);
+    
+    // Fallback/Simulation for AdSense Rewarded Ad.
+    // When the actual Ad Unit ID is ready, you can integrate: window.adsbygoogle.push({ command: 'generateRewardedAd', ... })
+    // For now, this calls the backend securely after a simulated 3-second ad delay.
+    setTimeout(async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        
+        let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
+        const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/rewards/adsense-reward` : `${apiUrlBase}/api/rewards/adsense-reward`;
+        
+        const response = await fetch(fetchUrl, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${session.access_token}` }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+          fetchRewardsData(); // Refresh balances
+          alert("Success! You earned 3 Aura tokens.");
+        } else {
+          alert("Error claiming reward: " + data.error);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to claim ad reward.");
+      } finally {
+        setIsWatchingAd(false);
+      }
+    }, 3000); // 3 second simulated ad viewing
   };
 
   if (loading) {
@@ -232,6 +270,25 @@ export default function RewardsPage() {
                 >
                   {isCopied ? <CheckCircle2 size={18}/> : <LinkIcon size={18}/>} 
                   {isCopied ? t.copied : t.copyLink}
+                </button>
+              </div>
+            </div>
+
+            {/* 🟢 NEW: AdSense Rewarded Ad Card */}
+            <div className="bg-fuchsia-50 border-2 border-fuchsia-500/20 rounded-3xl p-8 relative overflow-hidden mt-6">
+              <div className="absolute -right-4 -bottom-4 opacity-10 text-fuchsia-500"><Zap size={150} /></div>
+              <div className="relative z-10">
+                <h3 className="text-lg font-black text-fuchsia-800 mb-2">Watch Ad for Aura</h3>
+                <p className="text-fuchsia-600/80 font-medium text-xs leading-relaxed mb-6">
+                  Support us by watching a short video ad and instantly receive 3 Aura tokens!
+                </p>
+                <button 
+                  onClick={watchAdForTokens}
+                  disabled={isWatchingAd}
+                  className="w-full py-4 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-600/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isWatchingAd ? <Loader2 size={18} className="animate-spin" /> : <Zap size={18} fill="currentColor" />}
+                  {isWatchingAd ? 'Watching Ad...' : 'Watch Ad (+3 ✨)'}
                 </button>
               </div>
             </div>

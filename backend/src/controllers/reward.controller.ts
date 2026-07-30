@@ -214,6 +214,8 @@ export async function checkDailyDripHandler(req: Request, res: Response): Promis
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
+}
+
 // 🟢 NEW: AdSense Rewarded Ad Handler
 export async function adsenseRewardHandler(req: Request, res: Response): Promise<void> {
   const userId = (req as any).user?.id;
