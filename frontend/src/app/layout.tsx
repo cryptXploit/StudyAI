@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: 'Prepia - Your AI Study Assistant',
   description: 'Advanced AI-powered study platform with document analysis and smart chat',
   keywords: ['study', 'AI', 'learning', 'education', 'chat'],
+  other: {
+    // Replace this ID with your actual AdSense Publisher ID
+    'google-adsense-account': 'ca-pub-YOUR_ADSENSE_ID'
+  }
 };
 
 import Script from 'next/script';
