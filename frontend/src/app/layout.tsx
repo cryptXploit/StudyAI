@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   keywords: ['study', 'AI', 'learning', 'education', 'chat'],
   other: {
     // Replace this ID with your actual AdSense Publisher ID
-    'google-adsense-account': 'ca-pub-YOUR_ADSENSE_ID'
+    'google-adsense-account': 'ca-pub-7232534846173963'
   }
 };
 
