@@ -9,65 +9,41 @@ import { TOKEN_COSTS } from '../config/tokenCosts';
 
 async function getTranscript(videoId: string) {
   try {
-    return await YoutubeTranscript.fetchTranscript(videoId);
-  } catch (err) {
-    console.warn(`YoutubeTranscript failed for ${videoId}, trying custom fallback...`);
-    
-    // Fetch the YouTube page HTML
-    const response = await fetch(`https://youtube.com/watch?v=${videoId}`);
-    const data = await response.text();
-    
-    // Extract captionTracks JSON
-    if (!data.includes('captionTracks')) {
-      throw new Error(`Could not find any captions for video: ${videoId}`);
+    // 1. Try to fetch the default transcript (usually English or auto-generated)
+    const transcriptList = await YoutubeTranscript.fetchTranscript(videoId);
+    if (transcriptList && transcriptList.length > 0) {
+      return transcriptList;
     }
     
-    const regex = /"captionTracks":(\[.*?\])/;
-    const match = regex.exec(data);
-    if (!match) throw new Error(`Could not extract caption tracks for ${videoId}`);
-    
-    const { captionTracks } = JSON.parse(`{${match[0]}}`);
-    if (!captionTracks || captionTracks.length === 0) {
-      throw new Error(`Caption tracks array is empty for ${videoId}`);
+    // If it returned empty array instead of throwing, force an error to reveal available languages
+    await YoutubeTranscript.fetchTranscript(videoId, { lang: 'zzz' });
+    throw new Error('Captions genuinely disabled'); // Will be caught below
+  } catch (err: any) {
+    // 2. Parse the error message to extract the actual available languages!
+    // Example: "No transcripts are available in en this video... Available languages: bn, hi"
+    if (err.message && err.message.includes('Available languages:')) {
+      const match = err.message.match(/Available languages:\s*(.+)/);
+      if (match) {
+        const langs = match[1].split(',').map((s: string) => s.trim().replace(/['"]/g, ''));
+        if (langs.length > 0) {
+          console.log(`Auto-detected fallback language '${langs[0]}' for video ${videoId}`);
+          try {
+            return await YoutubeTranscript.fetchTranscript(videoId, { lang: langs[0] });
+          } catch (innerErr) {
+            console.error(`Failed to fetch fallback language ${langs[0]} for ${videoId}`, innerErr);
+          }
+        }
+      }
     }
     
-    // Auto-select the first available caption track (usually the default language)
-    const subtitle = captionTracks[0];
-    if (!subtitle || !subtitle.baseUrl) {
-      throw new Error(`Could not find a valid baseUrl in caption tracks for ${videoId}`);
-    }
-    
-    // Fetch the XML transcript
-    const transcriptResponse = await fetch(subtitle.baseUrl);
-    const transcriptXml = await transcriptResponse.text();
-    
-    // Parse the XML using regex to avoid heavy XML parser dependencies
-    const lines = transcriptXml
-      .replace('<?xml version="1.0" encoding="utf-8" ?><transcript>', '')
-      .replace('</transcript>', '')
-      .split('</text>')
-      .filter(line => line && line.trim())
-      .map(line => {
-        const startMatch = /start="([\d.]+)"/.exec(line);
-        const durMatch = /dur="([\d.]+)"/.exec(line);
-        
-        const htmlText = line
-          .replace(/<text.+?>/, '')
-          .replace(/&amp;/gi, '&')
-          .replace(/&lt;/gi, '<')
-          .replace(/&gt;/gi, '>')
-          .replace(/&quot;/gi, '"')
-          .replace(/&#39;/gi, "'")
-          .replace(/<\/?[^>]+(>|$)/g, '');
-          
-        return {
-          text: htmlText,
-          offset: startMatch ? parseFloat(startMatch[1]) * 1000 : 0,
-          duration: durMatch ? parseFloat(durMatch[1]) * 1000 : 0
-        };
-      });
-      
-    return lines;
+    // 3. Absolute last resort fallback (e.g. if the inner API is down or video is English-only and we just want to ensure backward compatibility)
+    console.warn(`All YoutubeTranscript methods failed for ${videoId}, trying scraper...`);
+    const captions = await getSubtitles({ videoID: videoId, lang: 'en' });
+    return captions.map((cap: any) => ({
+      text: cap.text,
+      offset: parseFloat(cap.start) * 1000,
+      duration: parseFloat(cap.dur) * 1000
+    }));
   }
 }
 
