@@ -214,8 +214,24 @@ export async function checkDailyDripHandler(req: Request, res: Response): Promis
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
+// 🟢 NEW: AdSense Rewarded Ad Handler
+export async function adsenseRewardHandler(req: Request, res: Response): Promise<void> {
+  const userId = (req as any).user?.id;
+  try {
+    // Generate a reasonably unique idempotency key for this reward instance.
+    // In a production system with fraud prevention, we'd verify an AdSense callback token.
+    const uniqueId = Math.random().toString(36).substring(2, 15);
+    await applyCreditMutation({
+      userId,
+      amount: 3,
+      reason: 'AdSense Rewarded Ad',
+      idempotencyKey: `adsense-reward:${userId}:${Date.now()}:${uniqueId}`,
+    });
+    res.json({ success: true, tokens: 3, message: 'Reward claimed successfully!' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 }
-
 
 export function registerRewardRoutes(app: any): void {
   const router = Router();
@@ -224,5 +240,6 @@ export function registerRewardRoutes(app: any): void {
   router.get('/referral', requireAuth, async (req: Request, res: Response) => { await getReferralDataHandler(req, res); });
   router.post('/referral/apply', requireAuth, async (req: Request, res: Response) => { await applyReferralHandler(req, res); });
   router.post('/daily-drip', requireAuth, async (req: Request, res: Response) => { await checkDailyDripHandler(req, res); });
+  router.post('/adsense-reward', requireAuth, async (req: Request, res: Response) => { await adsenseRewardHandler(req, res); });
   app.use('/api/rewards', router);
 }
