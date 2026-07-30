@@ -59,14 +59,22 @@ export default function TermsOfServicePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black flex items-center gap-3 text-white"><AlertTriangle className="text-indigo-500" /> Prohibited Conduct</h2>
+            <h2 className="text-2xl font-black flex items-center gap-3 text-white"><AlertTriangle className="text-indigo-500" /> AI Accuracy Disclaimer</h2>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              While Prepia.app uses advanced AI to assist with studies, AI models can occasionally make errors. Users must verify complex mathematical or scientific solutions independently. Prepia.app is not legally liable for incorrect AI-generated answers.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black flex items-center gap-3 text-white"><ShieldAlert className="text-indigo-500" /> Acceptable Use & Prohibited Conduct</h2>
             <p className="text-slate-400 font-medium leading-relaxed">
               To ensure a safe environment, the following actions are strictly prohibited:
             </p>
             <ul className="list-disc pl-5 text-slate-400 font-medium space-y-2">
-              <li>Attempting to bypass our token limits or exploit API vulnerabilities.</li>
-              <li>Sharing your account credentials or providing unauthorized access to premium features.</li>
-              <li>Using our AI models to generate harmful, illegal, or unethical content.</li>
+              <li><strong className="text-slate-300">Content Restrictions:</strong> Uploading illegal, highly sensitive, or copyrighted materials is strictly prohibited.</li>
+              <li><strong className="text-slate-300">Ad-Reward System:</strong> You can earn tokens by watching rewarded ads. Any attempt to cheat, script, or bypass the ad-reward system will result in an immediate account ban.</li>
+              <li><strong className="text-slate-300">Exploitation:</strong> Attempting to bypass our token limits, exploit API vulnerabilities, or sharing unauthorized premium access.</li>
+              <li><strong className="text-slate-300">Malicious AI Usage:</strong> Using our AI models to generate harmful, illegal, or unethical content.</li>
             </ul>
             <p className="text-slate-400 font-medium leading-relaxed mt-4">
               Violating these terms may result in immediate account termination without a refund.

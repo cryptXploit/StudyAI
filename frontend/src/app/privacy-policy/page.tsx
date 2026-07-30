@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
               When you use Prepia, we collect minimal data necessary to provide our service. This includes:
             </p>
             <ul className="list-disc pl-5 text-slate-400 font-medium space-y-2">
-              <li><strong className="text-slate-300">Account Information:</strong> Name, email address, and authentication tokens (managed securely via Supabase Auth).</li>
+              <li><strong className="text-slate-300">Account Information:</strong> Name, email address, and authentication tokens (managed securely via Supabase for secure database management).</li>
               <li><strong className="text-slate-300">Uploaded Documents:</strong> PDFs, images, and text you voluntarily upload for the purpose of generating context packs.</li>
               <li><strong className="text-slate-300">Usage Telemetry:</strong> Anonymized metrics on which features are used to help us improve the platform.</li>
             </ul>
@@ -67,9 +67,19 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-black flex items-center gap-3 text-white"><Lock className="text-emerald-500" /> Third-Party AI Providers</h2>
+            <h2 className="text-2xl font-black flex items-center gap-3 text-white"><Lock className="text-emerald-500" /> Third-Party AI Services</h2>
             <p className="text-slate-400 font-medium leading-relaxed">
-              To provide state-of-the-art responses, we route queries through APIs from OpenAI, Anthropic, and Google DeepMind. We have Zero Data Retention agreements with these providers. They do not store your queries, and they do not use your academic data to train their commercial models.
+              To provide state-of-the-art responses for educational processing, we route queries through APIs from AI providers like Google Gemini and OpenRouter. We have Zero Data Retention agreements with these providers. They do not store your queries, and they do not use your academic data to train their commercial models.
+            </p>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-black flex items-center gap-3 text-white"><ShieldCheck className="text-emerald-500" /> Google AdSense & Third-Party Cookies</h2>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              Third-party vendors, including Google, use cookies to serve ads based on your prior visits to our website or other websites. Google&apos;s use of advertising cookies enables it and its partners to serve ads to you based on your visit to our site and/or other sites on the Internet.
+            </p>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              Users may opt out of personalized advertising by visiting <a href="https://myadcenter.google.com/" target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:underline">Google Ads Settings</a>.
             </p>
           </section>
 
