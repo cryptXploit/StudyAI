@@ -194,6 +194,9 @@ export default function DashboardPage() {
 
     const optimisticFile: DBFile = { id: optimisticFileId, name: file.name, status: 'uploading', created_at: new Date().toISOString(), file_type: file.type, file_size: file.size, user_id: user?.id || '' } as any;
     setFiles((prev) => [optimisticFile, ...prev]);
+    
+    // Auto switch to Sources tab to show upload progress
+    setActiveWorkspaceTab('files');
 
     try {
       const fileId = await uploadFile(file, session.access_token);
