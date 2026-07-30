@@ -112,6 +112,7 @@ export default function YoutubeDecoderPage() {
   const [showModal, setShowModal] = useState(false);
   const [chapters, setChapters] = useState<{id: number, timeLabel: string, selected: boolean}[]>([]);
   const [tempVideoId, setTempVideoId] = useState<string | null>(null);
+  const [transcriptList, setTranscriptList] = useState<any[]>([]);
 
   const [activeCourseId, setActiveCourseId] = useState<string | null>(null);
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
@@ -173,13 +174,23 @@ export default function YoutubeDecoderPage() {
     setUiError(null);
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      
+      const transcriptRes = await fetch('/api/youtube/transcript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoUrl })
+      });
+      const transcriptData = await transcriptRes.json();
+      if (transcriptData.error) throw new Error(transcriptData.error);
+      setTranscriptList(transcriptData.transcriptList);
+
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/youtube/fetch-chapters` : `${apiUrlBase}/api/youtube/fetch-chapters`;
 
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ videoUrl })
+        body: JSON.stringify({ videoUrl, transcriptList: transcriptData.transcriptList, videoId: transcriptData.videoId })
       });
 
       const data = await response.json();
@@ -225,7 +236,7 @@ export default function YoutubeDecoderPage() {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ videoUrl, videoId: tempVideoId, selectedChapterIds, language }),
+        body: JSON.stringify({ videoUrl, videoId: tempVideoId, selectedChapterIds, language, transcriptList }),
         signal: controller.signal // 🟢 Added Safety Signal
       });
 

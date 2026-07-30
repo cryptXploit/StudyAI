@@ -84,14 +84,17 @@ function generateChunks(transcriptList: any[]) {
 
 export async function fetchChaptersHandler(req: Request, res: Response): Promise<void> {
   try {
-    const { videoUrl } = req.body;
+    const { videoUrl, transcriptList: clientTranscript } = req.body;
     const videoId = extractVideoId(videoUrl);
     if (!videoId) {
       res.status(400).json({ error: 'Invalid YouTube URL.' });
       return;
     }
 
-    const transcriptList = await getTranscript(videoId);
+    let transcriptList = clientTranscript;
+    if (!transcriptList) {
+       transcriptList = await getTranscript(videoId);
+    }
     const chapters = generateChunks(transcriptList);
 
     res.json({ valid: true, videoId, chapters: chapters.map(c => ({ id: c.id, timeLabel: c.timeLabel })) }); 
@@ -104,7 +107,7 @@ export async function decodeYoutubeHandler(req: Request, res: Response): Promise
   try {
     const userId = (req as any).user?.id;
     const tier = (req as any).user?.tier || 'Free';
-    const { videoUrl, videoId, selectedChapterIds, language = 'English' } = req.body;
+    const { videoUrl, videoId, selectedChapterIds, language = 'English', transcriptList: clientTranscript } = req.body;
 
     if (!userId || !selectedChapterIds || !Array.isArray(selectedChapterIds)) {
       res.status(400).json({ error: 'Missing chapter selection.' });
@@ -124,7 +127,10 @@ export async function decodeYoutubeHandler(req: Request, res: Response): Promise
       
     }
 
-    const transcriptList = await getTranscript(videoId);
+    let transcriptList = clientTranscript;
+    if (!transcriptList) {
+       transcriptList = await getTranscript(videoId);
+    }
     const allChapters = generateChunks(transcriptList);
     const targetChapters = allChapters.filter(ch => selectedChapterIds.includes(ch.id));
 
