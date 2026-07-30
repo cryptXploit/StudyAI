@@ -2,25 +2,25 @@ import { Request, Response, Router } from 'express';
 import { ModelRouter } from '../ai/ModelRouter';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { createClient } from '@supabase/supabase-js';
-import { Innertube, UniversalCache } from 'youtubei.js';
+import { YoutubeTranscript } from 'youtube-transcript';
+// @ts-ignore
+import { getSubtitles } from 'youtube-captions-scraper';
 import { TOKEN_COSTS } from '../config/tokenCosts';
 
-let yt: Innertube | null = null;
 async function getTranscript(videoId: string) {
-  if (!yt) yt = await Innertube.create({ cache: new UniversalCache(false) });
-  const info = await yt.getInfo(videoId);
-  const transcriptData = await info.getTranscript();
-  const content = transcriptData.transcript?.content as any;
-  if (!transcriptData || !transcriptData.transcript || !content || !content.body || !content.body.initial_segments) {
-    throw new Error("No transcript");
+  try {
+    return await YoutubeTranscript.fetchTranscript(videoId);
+  } catch (err) {
+    console.warn(`YoutubeTranscript failed for ${videoId}, trying scraper...`);
+    const captions = await getSubtitles({ videoID: videoId, lang: 'en' });
+    return captions.map((cap: any) => ({
+      text: cap.text,
+      offset: parseFloat(cap.start) * 1000,
+      duration: parseFloat(cap.dur) * 1000
+    }));
   }
-  const segments = content.body.initial_segments;
-  return segments.map((seg: any) => ({
-    text: seg.snippet.text,
-    offset: parseInt(seg.start_ms, 10),
-    duration: parseInt(seg.end_ms, 10) - parseInt(seg.start_ms, 10)
-  }));
 }
+
 
 import { applyCreditMutation } from '../services/creditLedger.service';
 
