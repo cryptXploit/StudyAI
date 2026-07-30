@@ -8,42 +8,31 @@ import { getSubtitles } from 'youtube-captions-scraper';
 import { TOKEN_COSTS } from '../config/tokenCosts';
 
 async function getTranscript(videoId: string) {
-  try {
-    // 1. Try to fetch the default transcript (usually English or auto-generated)
-    const transcriptList = await YoutubeTranscript.fetchTranscript(videoId);
-    if (transcriptList && transcriptList.length > 0) {
-      return transcriptList;
-    }
-    
-    // If it returned empty array instead of throwing, force an error to reveal available languages
-    await YoutubeTranscript.fetchTranscript(videoId, { lang: 'zzz' });
-    throw new Error('Captions genuinely disabled'); // Will be caught below
-  } catch (err: any) {
-    // 2. Parse the error message to extract the actual available languages!
-    // Example: "No transcripts are available in en this video... Available languages: bn, hi"
-    if (err.message && err.message.includes('Available languages:')) {
-      const match = err.message.match(/Available languages:\s*(.+)/);
-      if (match) {
-        const langs = match[1].split(',').map((s: string) => s.trim().replace(/['"]/g, ''));
-        if (langs.length > 0) {
-          console.log(`Auto-detected fallback language '${langs[0]}' for video ${videoId}`);
-          try {
-            return await YoutubeTranscript.fetchTranscript(videoId, { lang: langs[0] });
-          } catch (innerErr) {
-            console.error(`Failed to fetch fallback language ${langs[0]} for ${videoId}`, innerErr);
-          }
-        }
+  const languagesToTry = ['en', 'bn', 'hi', 'ur', 'es'];
+  
+  for (const lang of languagesToTry) {
+    try {
+      const transcriptList = await YoutubeTranscript.fetchTranscript(videoId, { lang });
+      if (transcriptList && transcriptList.length > 0) {
+        console.log(`Successfully fetched transcript for ${videoId} in language: ${lang}`);
+        return transcriptList;
       }
+    } catch (err: any) {
+      console.log(`Failed to fetch transcript in ${lang} for ${videoId}. Trying next...`);
     }
-    
-    // 3. Absolute last resort fallback (e.g. if the inner API is down or video is English-only and we just want to ensure backward compatibility)
-    console.warn(`All YoutubeTranscript methods failed for ${videoId}, trying scraper...`);
+  }
+
+  // Absolute last resort fallback using the scraper
+  try {
+    console.warn(`All YoutubeTranscript native languages failed for ${videoId}, trying scraper...`);
     const captions = await getSubtitles({ videoID: videoId, lang: 'en' });
     return captions.map((cap: any) => ({
       text: cap.text,
       offset: parseFloat(cap.start) * 1000,
       duration: parseFloat(cap.dur) * 1000
     }));
+  } catch (scraperErr) {
+    throw new Error('Captions genuinely disabled or IP blocked by YouTube.');
   }
 }
 
