@@ -567,6 +567,7 @@ export default function LandingPage() {
             <Link href="/refund-policy" className="hover:text-white transition-colors font-bold text-sm">Refund Policy</Link>
             <Link href="/docs" className="hover:text-white transition-colors font-bold text-sm">Documentation</Link>
             <Link href="/pricing" className="hover:text-white transition-colors font-bold text-sm">Pricing</Link>
+            <Link href="/contact" className="hover:text-white transition-colors font-bold text-sm">Contact Us</Link>
           </div>
           <p className="text-sm font-medium">&copy; 2026 Prepia. All rights reserved.</p>
         </div>

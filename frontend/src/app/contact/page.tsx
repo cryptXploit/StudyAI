@@ -1,10 +1,62 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Mail, MessageSquare, Send } from 'lucide-react';
+import { ArrowLeft, Mail, MessageSquare, Send, Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function ContactUsPage() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !message.trim()) {
+      toast.error('Please fill out all required fields.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
+      const fetchUrl = apiUrlBase.endsWith('/api') 
+        ? `${apiUrlBase}/marketing/enquire` 
+        : `${apiUrlBase}/api/marketing/enquire`;
+
+      const finalQuery = name.trim() ? `Name: ${name}\n\nMessage: ${message}` : message;
+
+      const response = await fetch(fetchUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, query: finalQuery })
+      });
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        toast.success('Message sent successfully! We will get back to you soon.');
+        setName('');
+        setEmail('');
+        setMessage('');
+      } else {
+        toast.error(data.message || 'Failed to submit enquiry.');
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 font-sans text-slate-300 pb-24 selection:bg-emerald-500/30">
       {/* HEADER */}
@@ -60,13 +112,15 @@ export default function ContactUsPage() {
 
             {/* Contact Form */}
             <div className="md:col-span-3">
-              <form className="space-y-6 bg-slate-950 p-6 md:p-8 rounded-2xl border border-slate-800" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-6 bg-slate-950 p-6 md:p-8 rounded-2xl border border-slate-800" onSubmit={handleSubmit}>
                 
                 <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-bold text-slate-400">Your Name</label>
+                  <label htmlFor="name" className="text-sm font-bold text-slate-400">Your Name (Optional)</label>
                   <input 
                     type="text" 
                     id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="John Doe"
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
                   />
@@ -77,6 +131,8 @@ export default function ContactUsPage() {
                   <input 
                     type="email" 
                     id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="john@example.com"
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
                   />
@@ -87,16 +143,19 @@ export default function ContactUsPage() {
                   <textarea 
                     id="message"
                     rows={5}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     placeholder="How can we help you?"
                     className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all resize-none"
                   ></textarea>
                 </div>
 
                 <button 
-                  type="button"
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Send size={18} />
+                  {isSubmitting ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                   Send Message
                 </button>
 
@@ -109,3 +168,4 @@ export default function ContactUsPage() {
     </div>
   );
 }
+
