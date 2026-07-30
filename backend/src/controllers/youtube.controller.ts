@@ -2,8 +2,26 @@ import { Request, Response, Router } from 'express';
 import { ModelRouter } from '../ai/ModelRouter';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { createClient } from '@supabase/supabase-js';
-import { YoutubeTranscript } from 'youtube-transcript';
+import { Innertube, UniversalCache } from 'youtubei.js';
 import { TOKEN_COSTS } from '../config/tokenCosts';
+
+let yt: Innertube | null = null;
+async function getTranscript(videoId: string) {
+  if (!yt) yt = await Innertube.create({ cache: new UniversalCache(false) });
+  const info = await yt.getInfo(videoId);
+  const transcriptData = await info.getTranscript();
+  const content = transcriptData.transcript?.content as any;
+  if (!transcriptData || !transcriptData.transcript || !content || !content.body || !content.body.initial_segments) {
+    throw new Error("No transcript");
+  }
+  const segments = content.body.initial_segments;
+  return segments.map((seg: any) => ({
+    text: seg.snippet.text,
+    offset: parseInt(seg.start_ms, 10),
+    duration: parseInt(seg.end_ms, 10) - parseInt(seg.start_ms, 10)
+  }));
+}
+
 import { applyCreditMutation } from '../services/creditLedger.service';
 
 const supabase = createClient(
@@ -58,7 +76,7 @@ export async function fetchChaptersHandler(req: Request, res: Response): Promise
       return;
     }
 
-    const transcriptList = await YoutubeTranscript.fetchTranscript(videoId);
+    const transcriptList = await getTranscript(videoId);
     const chapters = generateChunks(transcriptList);
 
     res.json({ valid: true, videoId, chapters: chapters.map(c => ({ id: c.id, timeLabel: c.timeLabel })) }); 
@@ -91,7 +109,7 @@ export async function decodeYoutubeHandler(req: Request, res: Response): Promise
       
     }
 
-    const transcriptList = await YoutubeTranscript.fetchTranscript(videoId);
+    const transcriptList = await getTranscript(videoId);
     const allChapters = generateChunks(transcriptList);
     const targetChapters = allChapters.filter(ch => selectedChapterIds.includes(ch.id));
 
