@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   keywords: ['study', 'AI', 'learning', 'education', 'chat'],
 };
 
+import Script from 'next/script';
+
 export default function RootLayout({
   children,
 }: {
@@ -19,6 +21,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Google AdSense Script - Replaced 'ca-pub-YOUR_ADSENSE_ID' with my actual ID */}
+        <Script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7232534846173963" 
+          crossOrigin="anonymous" 
+          strategy="afterInteractive"
+        />
+      </head>
       <body>
         <AuthProvider>
           <I18nProvider>
