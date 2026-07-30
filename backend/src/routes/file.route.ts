@@ -9,8 +9,6 @@ const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-
 const router = Router();
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL || '',
