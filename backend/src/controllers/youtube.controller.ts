@@ -1,48 +1,183 @@
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { Request, Response, Router } from 'express';
 import { ModelRouter } from '../ai/ModelRouter';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { createClient } from '@supabase/supabase-js';
-import { YoutubeTranscript } from 'youtube-transcript';
-// @ts-ignore
-import { getSubtitles } from 'youtube-captions-scraper';
 import { TOKEN_COSTS } from '../config/tokenCosts';
-
-async function getTranscript(videoId: string) {
-  const languagesToTry = ['en', 'bn', 'hi', 'ur', 'es'];
-  
-  for (const lang of languagesToTry) {
-    try {
-      const transcriptList = await YoutubeTranscript.fetchTranscript(videoId, { lang });
-      if (transcriptList && transcriptList.length > 0) {
-        console.log(`Successfully fetched transcript for ${videoId} in language: ${lang}`);
-        return transcriptList;
-      }
-    } catch (err: any) {
-      console.log(`Failed to fetch transcript in ${lang} for ${videoId}. Trying next...`);
-    }
-  }
-
-  // Absolute last resort fallback using the scraper
-  try {
-    console.warn(`All YoutubeTranscript native languages failed for ${videoId}, trying scraper...`);
-    const captions = await getSubtitles({ videoID: videoId, lang: 'en' });
-    return captions.map((cap: any) => ({
-      text: cap.text,
-      offset: parseFloat(cap.start) * 1000,
-      duration: parseFloat(cap.dur) * 1000
-    }));
-  } catch (scraperErr) {
-    throw new Error('Captions genuinely disabled or IP blocked by YouTube.');
-  }
-}
-
-
 import { applyCreditMutation } from '../services/creditLedger.service';
+const execAsync = promisify(exec);
 
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
+
+// ─────────────────────────────────────────────
+// 🟢 HYBRID FALLBACK TRANSCRIPT ENGINE
+// Priority: yt-dlp  →  Piped API  →  Invidious API
+// ─────────────────────────────────────────────
+
+const PIPED_INSTANCES = [
+  'https://pipedapi.kavin.rocks',
+  'https://pipedapi.tokhmi.xyz',
+  'https://pipedapi.smnz.de',
+  'https://pipedapi.adminforge.de',
+  'https://api.piped.yt',
+  'https://piped-api.lunar.icu',
+  'https://piped.video/api',
+];
+
+const INVIDIOUS_INSTANCES = [
+  'https://invidious.jing.rocks',
+  'https://invidious.nerdvpn.de',
+  'https://inv.tux.pizza',
+  'https://invidious.flokinet.to',
+  'https://invidious.privacyredirect.com',
+  'https://y.com.sb',
+];
+
+// Method 1: yt-dlp subprocess
+async function transcriptViaYtDlp(videoId: string) {
+  console.log(`[YT-DLP] Attempting transcript for ${videoId}...`);
+  const cmd = `yt-dlp --skip-download --write-auto-sub --write-sub --sub-lang "en,bn,hi,ur,es" --sub-format vtt --print "%(subtitles)j %(automatic_captions)j" -- "${videoId}"`;
+  const { stdout } = await execAsync(cmd, { timeout: 30000 });
+  // Parse the JSON printed output to find a subtitle URL
+  const parts = stdout.trim().split('\n');
+  for (const part of parts) {
+    try {
+      const data = JSON.parse(part);
+      for (const langKey of ['en', 'bn', 'hi', 'ur', 'es']) {
+        if (data[langKey]) {
+          const entry = Array.isArray(data[langKey]) ? data[langKey] : data[langKey];
+          const vttEntry = Array.isArray(entry) ? entry.find((e: any) => e.ext === 'vtt' || e.ext === 'json3') : null;
+          if (vttEntry?.url) {
+            const res = await fetch(vttEntry.url);
+            const text = await res.text();
+            return parseVttToTranscript(text);
+          }
+        }
+      }
+    } catch {}
+  }
+  throw new Error('yt-dlp: No subtitle URL found in output');
+}
+
+function parseVttToTranscript(vtt: string) {
+  const lines = vtt.split('\n');
+  const result: { text: string; offset: number; duration: number }[] = [];
+  let i = 0;
+  const timeRe = /(\d{2}):(\d{2}):(\d{2})\.(\d{3}) --> (\d{2}):(\d{2}):(\d{2})\.(\d{3})/;
+  while (i < lines.length) {
+    const match = lines[i]?.match(timeRe);
+    if (match) {
+      const start = (+match[1]*3600 + +match[2]*60 + +match[3]) * 1000 + +match[4];
+      const end   = (+match[5]*3600 + +match[6]*60 + +match[7]) * 1000 + +match[8];
+      const textLines: string[] = [];
+      i++;
+      while (i < lines.length && lines[i].trim() !== '' && !lines[i].match(timeRe)) {
+        const clean = lines[i].replace(/<[^>]+>/g, '').trim();
+        if (clean) textLines.push(clean);
+        i++;
+      }
+      if (textLines.length > 0) {
+        result.push({ text: textLines.join(' '), offset: start, duration: end - start });
+      }
+    } else {
+      i++;
+    }
+  }
+  if (result.length === 0) throw new Error('yt-dlp: Parsed VTT is empty');
+  return result;
+}
+
+// Method 2: Piped API instances (with fallback across instances)
+async function transcriptViaPiped(videoId: string) {
+  for (const base of PIPED_INSTANCES) {
+    try {
+      console.log(`[PIPED] Trying ${base} for ${videoId}...`);
+      const res = await fetch(`${base}/streams/${videoId}`, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) continue;
+      const data: any = await res.json();
+      const subtitleTracks: any[] = data.subtitles || [];
+      if (subtitleTracks.length === 0) continue;
+      // Prefer en, then fallback to first
+      const preferred = subtitleTracks.find((t: any) => t.code?.startsWith('en')) || subtitleTracks[0];
+      const xmlRes = await fetch(preferred.url, { signal: AbortSignal.timeout(5000) });
+      const xml = await xmlRes.text();
+      return parseXmlTranscript(xml);
+    } catch (err: any) {
+      console.log(`[PIPED] ${base} failed: ${err.message}`);
+    }
+  }
+  throw new Error('All Piped instances failed');
+}
+
+// Method 3: Invidious API instances
+async function transcriptViaInvidious(videoId: string) {
+  for (const base of INVIDIOUS_INSTANCES) {
+    try {
+      console.log(`[INVIDIOUS] Trying ${base} for ${videoId}...`);
+      const res = await fetch(`${base}/api/v1/captions/${videoId}`, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) continue;
+      const data: any = await res.json();
+      const captions: any[] = data.captions || [];
+      if (captions.length === 0) continue;
+      const preferred = captions.find((c: any) => c.languageCode?.startsWith('en') && c.name?.includes('auto')) ||
+                        captions.find((c: any) => c.languageCode?.startsWith('en')) ||
+                        captions[0];
+      const captionRes = await fetch(`${base}/api/v1/captions/${videoId}?label=${encodeURIComponent(preferred.label)}`, { signal: AbortSignal.timeout(5000) });
+      const xml = await captionRes.text();
+      return parseXmlTranscript(xml);
+    } catch (err: any) {
+      console.log(`[INVIDIOUS] ${base} failed: ${err.message}`);
+    }
+  }
+  throw new Error('All Invidious instances failed');
+}
+
+function parseXmlTranscript(xml: string) {
+  const matches = [...xml.matchAll(/<text start="([^"]+)" dur="([^"]+)"[^>]*>([^<]*)<\/text>/g)];
+  if (matches.length === 0) throw new Error('XML transcript is empty');
+  return matches.map(m => ({
+    offset: parseFloat(m[1]) * 1000,
+    duration: parseFloat(m[2]) * 1000,
+    text: m[3].replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim()
+  })).filter(t => t.text.length > 0);
+}
+
+// 🟢 MASTER FUNCTION: Try all methods in sequence
+async function getTranscript(videoId: string) {
+  // Try yt-dlp first
+  try {
+    const result = await transcriptViaYtDlp(videoId);
+    console.log(`✅ [YT-DLP] Success for ${videoId}`);
+    return result;
+  } catch (e: any) {
+    console.warn(`⚠️ [YT-DLP] Failed: ${e.message}. Trying Piped...`);
+  }
+
+  // Try Piped
+  try {
+    const result = await transcriptViaPiped(videoId);
+    console.log(`✅ [PIPED] Success for ${videoId}`);
+    return result;
+  } catch (e: any) {
+    console.warn(`⚠️ [PIPED] Failed: ${e.message}. Trying Invidious...`);
+  }
+
+  // Try Invidious
+  try {
+    const result = await transcriptViaInvidious(videoId);
+    console.log(`✅ [INVIDIOUS] Success for ${videoId}`);
+    return result;
+  } catch (e: any) {
+    console.warn(`⚠️ [INVIDIOUS] Failed: ${e.message}.`);
+  }
+
+  throw new Error('All transcript methods exhausted. Video may have captions disabled.');
+}
+
 
 function extractVideoId(url: string): string | null {
   const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -84,17 +219,14 @@ function generateChunks(transcriptList: any[]) {
 
 export async function fetchChaptersHandler(req: Request, res: Response): Promise<void> {
   try {
-    const { videoUrl, transcriptList: clientTranscript } = req.body;
+    const { videoUrl } = req.body;
     const videoId = extractVideoId(videoUrl);
     if (!videoId) {
       res.status(400).json({ error: 'Invalid YouTube URL.' });
       return;
     }
 
-    let transcriptList = clientTranscript;
-    if (!transcriptList) {
-       transcriptList = await getTranscript(videoId);
-    }
+    const transcriptList = await getTranscript(videoId);
     const chapters = generateChunks(transcriptList);
 
     res.json({ valid: true, videoId, chapters: chapters.map(c => ({ id: c.id, timeLabel: c.timeLabel })) }); 
@@ -107,7 +239,7 @@ export async function decodeYoutubeHandler(req: Request, res: Response): Promise
   try {
     const userId = (req as any).user?.id;
     const tier = (req as any).user?.tier || 'Free';
-    const { videoUrl, videoId, selectedChapterIds, language = 'English', transcriptList: clientTranscript } = req.body;
+    const { videoUrl, videoId, selectedChapterIds, language = 'English' } = req.body;
 
     if (!userId || !selectedChapterIds || !Array.isArray(selectedChapterIds)) {
       res.status(400).json({ error: 'Missing chapter selection.' });
@@ -123,14 +255,9 @@ export async function decodeYoutubeHandler(req: Request, res: Response): Promise
         res.status(402).json({ error: 'INSUFFICIENT_TOKENS', required: cost });
         return;
       }
-      
-      
     }
 
-    let transcriptList = clientTranscript;
-    if (!transcriptList) {
-       transcriptList = await getTranscript(videoId);
-    }
+    const transcriptList = await getTranscript(videoId);
     const allChapters = generateChunks(transcriptList);
     const targetChapters = allChapters.filter(ch => selectedChapterIds.includes(ch.id));
 
