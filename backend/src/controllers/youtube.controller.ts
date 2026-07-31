@@ -15,8 +15,37 @@ const supabase = createClient(
 
 // ─────────────────────────────────────────────
 // 🟢 HYBRID FALLBACK TRANSCRIPT ENGINE
-// Priority: yt-dlp  →  Piped API  →  Invidious API
+// Priority: RapidAPI (YT-API)  →  yt-dlp  →  Piped API  →  Invidious API
 // ─────────────────────────────────────────────
+
+// Method 0: RapidAPI YT-API (PRIMARY - bypasses all IP blocks)
+async function transcriptViaRapidApi(videoId: string) {
+  const apiKey = process.env.RAPIDAPI_KEY;
+  if (!apiKey) throw new Error('RAPIDAPI_KEY not set');
+
+  console.log(`[RAPIDAPI] Attempting transcript for ${videoId}...`);
+  const res = await fetch(`https://yt-api.p.rapidapi.com/subtitles?id=${videoId}`, {
+    headers: {
+      'x-rapidapi-key': apiKey,
+      'x-rapidapi-host': 'yt-api.p.rapidapi.com'
+    },
+    signal: AbortSignal.timeout(10000)
+  });
+
+  if (!res.ok) throw new Error(`RapidAPI responded with ${res.status}`);
+  const data: any = await res.json();
+
+  const subtitles: any[] = data.subtitles || [];
+  if (subtitles.length === 0) throw new Error('RapidAPI: No subtitles available for this video');
+
+  // Prefer English, then any language
+  const preferred = subtitles.find((s: any) => s.languageCode?.startsWith('en')) || subtitles[0];
+  
+  // Fetch the actual XML transcript from the subtitle URL
+  const xmlRes = await fetch(preferred.url, { signal: AbortSignal.timeout(8000) });
+  const xml = await xmlRes.text();
+  return parseXmlTranscript(xml);
+}
 
 const PIPED_INSTANCES = [
   'https://pipedapi.kavin.rocks',
@@ -148,7 +177,16 @@ function parseXmlTranscript(xml: string) {
 
 // 🟢 MASTER FUNCTION: Try all methods in sequence
 async function getTranscript(videoId: string) {
-  // Try yt-dlp first
+  // 🥇 PRIMARY: RapidAPI (works from any IP, no YouTube restrictions)
+  try {
+    const result = await transcriptViaRapidApi(videoId);
+    console.log(`✅ [RAPIDAPI] Success for ${videoId}`);
+    return result;
+  } catch (e: any) {
+    console.warn(`⚠️ [RAPIDAPI] Failed: ${e.message}. Trying yt-dlp...`);
+  }
+
+  // 🥈 FALLBACK 1: yt-dlp
   try {
     const result = await transcriptViaYtDlp(videoId);
     console.log(`✅ [YT-DLP] Success for ${videoId}`);
@@ -157,7 +195,7 @@ async function getTranscript(videoId: string) {
     console.warn(`⚠️ [YT-DLP] Failed: ${e.message}. Trying Piped...`);
   }
 
-  // Try Piped
+  // 🥉 FALLBACK 2: Piped
   try {
     const result = await transcriptViaPiped(videoId);
     console.log(`✅ [PIPED] Success for ${videoId}`);
@@ -166,7 +204,7 @@ async function getTranscript(videoId: string) {
     console.warn(`⚠️ [PIPED] Failed: ${e.message}. Trying Invidious...`);
   }
 
-  // Try Invidious
+  // 🔴 FALLBACK 3: Invidious
   try {
     const result = await transcriptViaInvidious(videoId);
     console.log(`✅ [INVIDIOUS] Success for ${videoId}`);
