@@ -117,6 +117,7 @@ export default function YoutubeDecoderPage() {
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [courseData, setCourseData] = useState<any>(null);
   const [historyList, setHistoryList] = useState<any[]>([]);
+  const [videoStartTime, setVideoStartTime] = useState<number>(0);
   const [copied, setCopied] = useState(false);
 
   const { tokens, tier, refreshTokens } = useTokens();
@@ -347,12 +348,23 @@ export default function YoutubeDecoderPage() {
             </h3>
             <div className="space-y-2 overflow-y-auto custom-scrollbar pr-2 pb-4">
               {historyList.map((item) => (
-                <div key={item.id} onClick={() => { setActiveCourseId(item.id); setCourseData(item.course_data); setActiveVideoId(item.video_id); setUiError(null); }} className={`group p-3 rounded-xl cursor-pointer transition-all border flex justify-between items-center ${activeCourseId === item.id ? 'bg-red-500/10 border-red-500/50' : 'bg-slate-900 border-slate-800'}`}>
-                  <div className="flex items-center gap-2 truncate pr-2">
-                    <PlaySquare size={14} className="text-slate-500 shrink-0"/>
-                    <p className={`text-xs font-bold truncate ${activeCourseId === item.id ? 'text-red-300' : 'text-slate-300'}`}>{item.course_data.title}</p>
+                <div key={item.id} className={`group p-3 rounded-xl transition-all border flex flex-col ${activeCourseId === item.id ? 'bg-red-500/10 border-red-500/50' : 'bg-slate-900 border-slate-800'}`}>
+                  <div className="flex justify-between items-center cursor-pointer" onClick={() => { setActiveCourseId(item.id); setCourseData(item.course_data); setActiveVideoId(item.video_id); setUiError(null); setVideoStartTime(0); }}>
+                    <div className="flex items-center gap-2 truncate pr-2">
+                      <PlaySquare size={14} className="text-slate-500 shrink-0"/>
+                      <p className={`text-xs font-bold truncate ${activeCourseId === item.id ? 'text-red-300' : 'text-slate-300'}`}>{item.course_data.title}</p>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); deleteCourse(item.id, e); }} className="text-slate-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>
                   </div>
-                  <button onClick={(e) => deleteCourse(item.id, e)} className="text-slate-400 hover:text-red-500 shrink-0"><Trash2 size={14}/></button>
+                  {activeCourseId === item.id && item.course_data.timestamps && (
+                    <div className="mt-2 pl-6 flex flex-wrap gap-2">
+                      {item.course_data.timestamps.map((ts: any) => (
+                        <button key={ts.id} onClick={() => setVideoStartTime(ts.startSeconds)} className="text-[10px] text-slate-400 hover:text-red-400 flex items-center gap-1 bg-slate-800 px-2 py-0.5 rounded-md hover:bg-slate-700 transition-colors">
+                           <Clock size={10} /> {ts.timeLabel}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -404,7 +416,7 @@ export default function YoutubeDecoderPage() {
                        </button>
                     </div>
                     <div className="flex-1 w-full relative">
-                      <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${activeVideoId}`} allowFullScreen></iframe>
+                      <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${activeVideoId}?start=${videoStartTime}&autoplay=1`} allowFullScreen></iframe>
                     </div>
                  </div>
                )}
@@ -484,20 +496,31 @@ export default function YoutubeDecoderPage() {
                     historyList.map(item => (
                       <div 
                         key={item.id} 
-                        onClick={() => { 
+                        className={`group p-4 bg-slate-950 border rounded-xl transition-all flex flex-col ${activeCourseId === item.id ? 'border-red-500/50' : 'border-slate-800'}`}
+                      >
+                        <div className="flex justify-between items-center cursor-pointer" onClick={() => { 
                           setActiveCourseId(item.id); 
                           setCourseData(item.course_data); 
                           setActiveVideoId(item.video_id); 
                           setUiError(null); 
-                          setIsMobileDrawerOpen('none'); 
-                        }} 
-                        className="group p-4 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:shadow-md transition-all flex justify-between items-center"
-                      >
-                        <div className="flex items-center gap-2 truncate pr-2">
-                          <PlaySquare size={14} className="text-slate-500 shrink-0"/>
-                          <p className={`text-xs font-bold truncate ${activeCourseId === item.id ? 'text-red-300' : 'text-slate-300'}`}>{item.course_data.title}</p>
+                          setVideoStartTime(0);
+                          if (!item.course_data.timestamps) setIsMobileDrawerOpen('none'); 
+                        }}>
+                          <div className="flex items-center gap-2 truncate pr-2">
+                            <PlaySquare size={14} className="text-slate-500 shrink-0"/>
+                            <p className={`text-xs font-bold truncate ${activeCourseId === item.id ? 'text-red-300' : 'text-slate-300'}`}>{item.course_data.title}</p>
+                          </div>
+                          <button onClick={(e) => { e.stopPropagation(); deleteCourse(item.id, e); }} className="text-slate-500 hover:text-red-500 transition"><Trash2 size={14}/></button>
                         </div>
-                        <button onClick={(e) => deleteCourse(item.id, e)} className="text-slate-500 hover:text-red-500 transition"><Trash2 size={14}/></button>
+                        {activeCourseId === item.id && item.course_data.timestamps && (
+                          <div className="mt-3 pl-6 flex flex-wrap gap-2">
+                            {item.course_data.timestamps.map((ts: any) => (
+                              <button key={ts.id} onClick={() => { setVideoStartTime(ts.startSeconds); setIsMobileDrawerOpen('none'); }} className="text-[11px] text-slate-400 hover:text-red-400 flex items-center gap-1 bg-slate-800 px-2 py-1 rounded-md active:bg-slate-700 transition-colors">
+                                 <Clock size={12} /> {ts.timeLabel}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
