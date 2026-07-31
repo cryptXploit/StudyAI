@@ -2,6 +2,12 @@ FROM node:22-bookworm-slim AS build
 
 WORKDIR /app
 
+# Install yt-dlp as system binary (for hybrid transcript engine)
+RUN apt-get update && apt-get install -y python3 python3-pip curl --no-install-recommends \
+    && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
+    && chmod a+rx /usr/local/bin/yt-dlp \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
@@ -12,9 +18,14 @@ RUN npx tsc -p backend/tsconfig.production.json
 
 FROM node:22-bookworm-slim AS production
 
-
 WORKDIR /app
 ENV NODE_ENV=production
+
+# Install yt-dlp in production stage too
+RUN apt-get update && apt-get install -y curl --no-install-recommends \
+    && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
+    && chmod a+rx /usr/local/bin/yt-dlp \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
