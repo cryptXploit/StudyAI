@@ -362,11 +362,28 @@ Your detailed markdown notes here...
       cleanTranscript = ''; 
     }
 
+    // 🟢 Fetch Actual Video Title
+    let realVideoTitle = `Crash Course: Parts (${targetChapters.map(c => c.timeLabel).join(', ')})`;
+    try {
+      const noembedRes = await fetch(`https://noembed.com/embed?url=${videoUrl}`, { signal: AbortSignal.timeout(3000) });
+      const noembedData: any = await noembedRes.json();
+      if (noembedData && noembedData.title) {
+        realVideoTitle = noembedData.title;
+      }
+    } catch (e) {
+      console.warn('Failed to fetch video title from noembed');
+    }
+
     // 🟢 FRAGMENTED DATA JOINING
     const finalCourseData = {
-      title: `Crash Course: Parts (${targetChapters.map(c => c.timeLabel).join(', ')})`,
+      title: realVideoTitle,
       summary: `Compiled notes containing ${targetChapters.length} video segments.`,
-      markdownContent: processedChunks.map(chunk => `### ${chunk.title}\n\n${chunk.markdownContent}`).join('\n\n---\n\n')
+      markdownContent: processedChunks.map(chunk => `### ${chunk.title}\n\n${chunk.markdownContent}`).join('\n\n---\n\n'),
+      timestamps: targetChapters.map(c => ({ 
+        id: c.id, 
+        timeLabel: c.timeLabel, 
+        startSeconds: c.id * 5 * 60 
+      }))
     };
 
     let savedId = null;
