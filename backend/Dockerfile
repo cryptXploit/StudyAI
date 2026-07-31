@@ -3,7 +3,7 @@ FROM node:22-bookworm-slim AS build
 WORKDIR /app
 
 # Install yt-dlp as system binary (for hybrid transcript engine)
-RUN apt-get update && apt-get install -y python3 python3-pip curl --no-install-recommends \
+RUN apt-get update && apt-get install -y ca-certificates curl --no-install-recommends \
     && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -22,7 +22,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Install yt-dlp in production stage too
-RUN apt-get update && apt-get install -y curl --no-install-recommends \
+RUN apt-get update && apt-get install -y ca-certificates curl --no-install-recommends \
     && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
