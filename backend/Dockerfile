@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y ca-certificates curl --no-install-recom
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
-RUN npm ci
+RUN npm install -w backend --include-workspace-root --no-audit --no-fund
 
 COPY backend ./backend
 RUN npx tsc -p backend/tsconfig.production.json
