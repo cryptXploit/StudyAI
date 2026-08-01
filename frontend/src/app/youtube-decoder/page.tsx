@@ -408,7 +408,7 @@ export default function YoutubeDecoderPage() {
                
                {/* Embedded YouTube Player */}
                {activeVideoId && (
-                 <div className={`transition-all duration-300 bg-slate-950 border-slate-800 flex flex-col relative z-20 ${isVideoFullscreen ? 'fixed inset-0 z-[100]' : isNotesFullscreen ? 'hidden' : 'w-full lg:w-1/2 h-64 lg:h-full border-r'}`}>
+                 <div className={`transition-all duration-300 bg-slate-950 border-slate-800 flex flex-col z-30 shrink-0 shadow-md lg:shadow-none ${isVideoFullscreen ? 'fixed inset-0 z-[100]' : isNotesFullscreen ? 'hidden' : 'w-full lg:w-1/2 h-64 lg:h-full border-b lg:border-b-0 lg:border-r sticky top-0 lg:relative'}`}>
                     <div className="p-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
                        <span className="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-2"><PlaySquare size={12}/> Source Video</span>
                        <button onClick={() => setIsVideoFullscreen(!isVideoFullscreen)} className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors">
@@ -422,7 +422,7 @@ export default function YoutubeDecoderPage() {
                )}
 
                {/* Markdown Notes */}
-               <div className={`transition-all duration-300 bg-slate-900 flex flex-col relative ${isNotesFullscreen ? 'fixed inset-0 z-[100]' : isVideoFullscreen ? 'hidden' : 'w-full lg:w-1/2 h-full'}`}>
+               <div className={`transition-all duration-300 bg-slate-900 flex flex-col relative ${isNotesFullscreen ? 'fixed inset-0 z-[100]' : isVideoFullscreen ? 'hidden' : 'w-full lg:w-1/2 flex-1 lg:h-full'}`}>
                   <div className="p-4 border-b border-slate-700 bg-red-50/50 flex justify-between items-start z-10 shrink-0">
                      <div className="flex-1 pr-4">
                        <h2 className="text-lg font-black text-slate-200 mb-1 leading-tight">{courseData.title}</h2>
