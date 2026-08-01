@@ -63,7 +63,7 @@ export async function voiceProcessHandler(req: Request, res: Response): Promise<
       const text = await groqRes.text();
       throw new Error(`Groq STT failed: ${text}`);
     }
-    const groqData = await groqRes.json();
+    const groqData = await groqRes.json() as any;
     const userMessage = groqData.text;
 
     if (!userMessage || userMessage.trim().length === 0) {
