@@ -14,7 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/login',
     '/signup'
   ].map((route) => ({
-    url: \\\\,
+    url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: (route === '' ? 'daily' : 'weekly') as 'daily' | 'weekly',
     priority: route === '' ? 1.0 : (route === '/pricing' ? 0.9 : 0.7),
