@@ -1,5 +1,6 @@
 import { registerQuizRoutes } from './controllers/quiz.controller';
 import { registerLiveRoutes } from './controllers/live.controller';
+import { registerVoiceRoutes } from './controllers/voice.controller';
 import { registerNightRoutes } from './controllers/night.controller'; // উপরে ইমপোর্ট করুন
 import { registerMapRoutes } from './controllers/map.controller'; // 🟢 একদম উপরে ইমপোর্ট করুন
 import { registerFlashcardRoutes } from './controllers/flashcard.controller';
@@ -371,6 +372,7 @@ io.on('connection', (socket) => {
 
 registerChatRoutes(app);
 registerLiveRoutes(app);
+registerVoiceRoutes(app);
 registerQuizRoutes(app); // এখানে কল করে দিবেন
 registerNightRoutes(app); // 🟢 এখানে কল করুন
 registerMapRoutes(app); // 🟢 এখানে কল করুন

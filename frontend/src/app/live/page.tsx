@@ -25,222 +25,89 @@ export default function LivePodcastPage() {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'config'>('none');
 
-  // Audio Refs
-  const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
-  const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
-  const transcriptRef = useRef('');
-  const displayedTranscriptRef = useRef('');
-  const shouldSubmitVoiceRef = useRef(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
   const requestInFlightRef = useRef(false);
-  const liveStateRef = useRef(state);
-  const resumeListeningRef = useRef(false);
-  const silenceTimerRef = useRef<number | null>(null);
-  const voiceTurnSubmittedRef = useRef(false);
-  const recognitionActiveRef = useRef(false);
-
-  useEffect(() => { liveStateRef.current = state; }, [state]);
 
   useEffect(() => {
-    let refreshVoices = () => {};
-    if (typeof window !== 'undefined') {
-      synthRef.current = window.speechSynthesis;
-      refreshVoices = () => { voicesRef.current = window.speechSynthesis.getVoices(); };
-      refreshVoices();
-      window.speechSynthesis.addEventListener('voiceschanged', refreshVoices);
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        // A single browser recognition turn is substantially more reliable
-        // than continuous mode across Chrome/Edge. We reopen it after each AI
-        // reply, which still provides a continuous conversation experience.
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = true;
-      } else {
-        alert("Your browser does not support Speech Recognition. Please use Chrome.");
-      }
-    }
     return () => {
-      if (silenceTimerRef.current) window.clearTimeout(silenceTimerRef.current);
-      if (synthRef.current) synthRef.current.cancel();
-      if (recognitionRef.current) recognitionRef.current.abort();
-      window.speechSynthesis?.removeEventListener('voiceschanged', refreshVoices);
+      endLiveConversation();
     };
   }, []);
 
-  const getLangCode = () => {
-    if (language === 'Bengali') return 'bn-BD';
-    if (language === 'Hindi') return 'hi-IN';
-    return 'en-US';
-  };
-
-  const clearSilenceTimer = () => {
-    if (silenceTimerRef.current) {
-      window.clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-  };
-
-  const isMeaningfulSpeech = (value: string) => {
-    const normalized = value.trim().toLowerCase();
-    if (normalized.length < 2 || !/[\p{L}\p{N}]/u.test(normalized)) return false;
-    return !new Set(['um', 'uh', 'hmm', 'erm', 'ah', 'er', 'হুম', 'উম', 'আহ', 'हम्म', 'उम', 'अ']).has(normalized);
-  };
-
-  const submitVoiceTurn = (message: string) => {
-    if (voiceTurnSubmittedRef.current || requestInFlightRef.current || !isMeaningfulSpeech(message)) return;
-    voiceTurnSubmittedRef.current = true;
-    shouldSubmitVoiceRef.current = false;
-    clearSilenceTimer();
-    // Set the AI state before stopping recognition so its onend handler cannot
-    // restart the mic and submit the same turn twice.
-    void sendToAI(message.trim(), true);
-    try { recognitionRef.current?.stop(); } catch { /* already stopped */ }
-  };
-
-  const scheduleAutomaticReply = (message: string) => {
-    clearSilenceTimer();
-    if (!isMeaningfulSpeech(message) || voiceTurnSubmittedRef.current) return;
-    silenceTimerRef.current = window.setTimeout(() => {
-      if (liveStateRef.current === 'listening') submitVoiceTurn(displayedTranscriptRef.current || message);
-    }, 2000);
-  };
-
   const startListening = async () => {
-    if (!recognitionRef.current) return;
-    if (liveStateRef.current !== 'idle' || recognitionActiveRef.current) return;
-
-    if (synthRef.current) synthRef.current.cancel(); // stop ai speaking
-    setTranscript('');
-    transcriptRef.current = '';
-    displayedTranscriptRef.current = '';
-    shouldSubmitVoiceRef.current = false;
-    voiceTurnSubmittedRef.current = false;
-    clearSilenceTimer();
-    liveStateRef.current = 'listening';
-    setState('listening');
-
-    recognitionRef.current.lang = getLangCode();
-    recognitionRef.current.onresult = (event: any) => {
-      let finalTranscript = transcriptRef.current;
-      let interimTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        const phrase = event.results[i][0].transcript;
-        if (event.results[i].isFinal) finalTranscript += `${phrase} `;
-        else interimTranscript += phrase;
-      }
-      const currentTranscript = `${finalTranscript}${interimTranscript}`.trim();
-      if (currentTranscript) {
-        transcriptRef.current = finalTranscript.trim();
-        displayedTranscriptRef.current = currentTranscript;
-        setTranscript(currentTranscript);
-      }
-    };
-
-    recognitionRef.current.onerror = (event: any) => {
-      // aborted is emitted when the app intentionally stops/ends a turn.
-      if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        if (event.error === 'network') {
-          alert("Network Error: Your browser is failing to connect to the Voice API. Please ensure you are using Google Chrome and your internet is stable.");
-        } else if (event.error === 'audio-capture') {
-          alert("Microphone Error: No microphone was found, or it is being used by another application. Please check your microphone settings.");
-        } else if (event.error === 'not-allowed') {
-          alert("Permission Denied: Please allow microphone access in your browser settings to use the Live Podcast feature.");
-        } else {
-          console.error("Speech Recognition Error:", event.error);
-        }
-      }
-      // Don't immediately set idle here, let onend handle the cleanup and AI sending
-    };
-
-    recognitionRef.current.onend = () => {
-      recognitionActiveRef.current = false;
-      // Browser recognition may stop on a natural pause. A pause is not a turn
-      // boundary; only the explicit Send Voice action submits the message.
-      if (shouldSubmitVoiceRef.current) {
-        shouldSubmitVoiceRef.current = false;
-        voiceTurnSubmittedRef.current = true;
-        clearSilenceTimer();
-        const message = transcriptRef.current.trim() || displayedTranscriptRef.current.trim();
-        if (message) void sendToAI(message, true);
-        else { liveStateRef.current = 'idle'; setState('idle'); }
-        return;
-      }
-      const detectedSpeech = transcriptRef.current.trim() || displayedTranscriptRef.current.trim();
-      if (isMeaningfulSpeech(detectedSpeech)) {
-        // Recognition has ended after the user's natural pause. Give a small
-        // grace period before treating it as the completed turn.
-        scheduleAutomaticReply(detectedSpeech);
-      } else if (liveStateRef.current === 'listening') {
-        // Nothing meaningful was heard; end this turn cleanly. The next AI
-        // reply starts another turn automatically, and the user can start one
-        // again from idle without an overlapping recognizer.
-        liveStateRef.current = 'idle';
-        setState('idle');
-      }
-    };
-
-    // Attempt to force microphone permission prompt
-    try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        stream.getTracks().forEach(track => track.stop());
-      }
-    } catch (err: any) {
-      console.warn("getUserMedia failed:", err.name, err.message);
-      // We don't block here anymore. We just warn and let SpeechRecognition try its best.
+    if (state !== 'idle') return;
+    
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current = null;
     }
 
+    setTranscript('');
+    setAiText('');
+    setLiveError(null);
+    audioChunksRef.current = [];
+    
     try {
-      recognitionActiveRef.current = true;
-      recognitionRef.current.start();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        sendToAI(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      setState('listening');
     } catch (err: any) {
-      if (err?.name === 'InvalidStateError') {
-        recognitionActiveRef.current = true;
-        liveStateRef.current = 'listening';
-        setState('listening');
-        return;
+      console.error("Microphone access denied:", err);
+      if (err.name === 'NotAllowedError') {
+        alert("Permission Denied: Please allow microphone access in your browser settings to use the Live Podcast feature.");
+      } else {
+        alert("Microphone Error: No microphone was found, or it is being used by another application.");
       }
-      console.error("Failed to start SpeechRecognition:", err);
-      recognitionActiveRef.current = false;
-      liveStateRef.current = 'idle';
       setState('idle');
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current && state === 'listening') {
-      clearSilenceTimer();
-      shouldSubmitVoiceRef.current = true;
-      recognitionRef.current.stop();
+    if (mediaRecorderRef.current && state === 'listening') {
+      mediaRecorderRef.current.stop(); // This triggers onstop which calls sendToAI
     }
   };
 
   const endLiveConversation = () => {
-    clearSilenceTimer();
-    shouldSubmitVoiceRef.current = false;
-    voiceTurnSubmittedRef.current = false;
-    resumeListeningRef.current = false;
-    try { recognitionRef.current?.abort(); } catch { /* already stopped */ }
-    recognitionActiveRef.current = false;
-    if (synthRef.current) synthRef.current.cancel();
-    liveStateRef.current = 'idle';
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      // Temporarily override onstop so it doesn't send anything
+      mediaRecorderRef.current.onstop = () => {};
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
+    }
+    if (activeAudioRef.current) {
+      activeAudioRef.current.pause();
+      activeAudioRef.current = null;
+    }
     setState('idle');
   };
 
-  const sendToAI = async (message: string, resumeListeningAfterReply = false) => {
+  const sendToAI = async (audioBlob: Blob) => {
     if (requestInFlightRef.current) return;
     requestInFlightRef.current = true;
-    resumeListeningRef.current = resumeListeningAfterReply;
-    liveStateRef.current = 'thinking';
     setState('thinking');
-    setAiText('');
     setLiveError(null);
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       requestInFlightRef.current = false;
-      liveStateRef.current = 'idle';
       setState('idle');
       router.push('/login');
       return;
@@ -249,78 +116,85 @@ export default function LivePodcastPage() {
     if (tier !== 'PRO' && tokens < 2) {
       setShowTokenModal(true);
       requestInFlightRef.current = false;
-      liveStateRef.current = 'idle';
       setState('idle');
       return;
     }
 
     try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'audio.webm');
+      formData.append('language', language);
+      formData.append('tier', tier);
+      formData.append('history', JSON.stringify(history));
+
       const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
-      const response = await fetch(`${apiOrigin}/api/live`, {
+      const response = await fetch(`${apiOrigin}/api/voice/process`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ message, language, tier, history })
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: formData
       });
 
       if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(errorBody || `Live request failed (${response.status})`);
+        const errorBody = await response.json();
+        throw new Error(errorBody.error || `Voice request failed (${response.status})`);
       }
-      if (!response.body) throw new Error("No response body");
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let fullText = "";
-      let buffer = "";
-
-      let completed = false;
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const dataStr = line.slice(6).trim();
-            if (!dataStr) continue;
-            try {
-              const data = JSON.parse(dataStr);
-              if (data.error) {
-                if (data.error === 'INSUFFICIENT_TOKENS') setShowTokenModal(true);
-                setLiveError(getPublicErrorMessage(data));
-                if (data.error !== 'INSUFFICIENT_TOKENS') showPublicError(data);
-                liveStateRef.current = 'idle';
-                setState('idle');
-                return;
-              }
-              if (data.content) {
-                fullText += data.content;
-                setAiText(fullText);
-              }
-              if (data.status === 'complete') {
-                completed = true;
-                speakText(fullText);
-                setHistory(prev => [...prev.slice(-4), { role: 'user', content: message }, { role: 'assistant', content: fullText }]);
-                refreshTokens();
-              }
-            } catch (e) {}
-          }
-        }
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        if (data.error === 'INSUFFICIENT_TOKENS') setShowTokenModal(true);
+        else setLiveError(data.message || data.error);
+        setState('idle');
+        return;
       }
-      if (!completed) {
-        throw new Error(fullText ? 'Live response ended before completion.' : 'No response was received from the selected AI provider.');
+
+      setTranscript(data.userText);
+      setAiText(data.aiText);
+      
+      setHistory(prev => [...prev.slice(-4), { role: 'user', content: data.userText }, { role: 'assistant', content: data.aiText }]);
+      refreshTokens();
+      
+      // Play audio
+      if (data.audioBase64) {
+        playAudioBuffer(data.audioBase64);
+      } else {
+        setState('idle');
       }
-    } catch (error) {
+
+    } catch (error: any) {
       console.error(error);
-      const message = getPublicErrorMessage();
-      setLiveError(message);
-      showPublicError();
-      liveStateRef.current = 'idle';
+      setLiveError(error.message || getPublicErrorMessage());
       setState('idle');
     } finally {
       requestInFlightRef.current = false;
+    }
+  };
+
+  const playAudioBuffer = (base64Audio: string) => {
+    try {
+      setState('speaking');
+      const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
+      activeAudioRef.current = audio;
+      
+      audio.onended = () => {
+        setState('idle');
+        activeAudioRef.current = null;
+      };
+      
+      audio.onerror = (e) => {
+        console.error("Audio playback error:", e);
+        setState('idle');
+      };
+
+      audio.play().catch(e => {
+        console.error("Audio play blocked:", e);
+        // On iOS sometimes playing audio asynchronously is blocked.
+        // The user will still see the transcript.
+        setState('idle');
+      });
+    } catch (err) {
+      console.error("Failed to play audio:", err);
+      setState('idle');
     }
   };
 
@@ -330,49 +204,9 @@ export default function LivePodcastPage() {
     const msg = textInput.trim();
     setTextInput('');
     setTranscript(msg);
-    void sendToAI(msg, false);
-  };
-
-  const speakText = (text: string) => {
-    if (!synthRef.current) { liveStateRef.current = 'idle'; setState('idle'); return; }
-
-    liveStateRef.current = 'speaking';
-    setState('speaking');
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = getLangCode();
-
-    // Prefer an installed native voice in the selected language. If the OS has
-    // no Bangla/Hindi voice, use its available default voice instead of failing
-    // silently, while the full answer remains visible as subtitles.
-    const voices = voicesRef.current.length ? voicesRef.current : synthRef.current.getVoices();
-    const languagePrefix = utterance.lang.split('-')[0].toLowerCase();
-    const targetVoice = voices.find(v => v.lang.toLowerCase().startsWith(languagePrefix));
-    if (targetVoice) utterance.voice = targetVoice;
-    else if (voices[0]) {
-      // Some operating systems ship without Bangla/Hindi voices. Fall back to
-      // an installed voice so the answer is never silently dropped.
-      utterance.voice = voices[0];
-      utterance.lang = voices[0].lang;
-    }
-    utterance.rate = language === 'English' ? 0.98 : 0.9;
-    utterance.pitch = 1.04;
-
-    utterance.onend = () => {
-      liveStateRef.current = 'idle';
-      setState('idle');
-      if (resumeListeningRef.current) {
-        resumeListeningRef.current = false;
-        window.setTimeout(() => void startListening(), 350);
-      }
-    };
-
-    utterance.onerror = () => {
-      liveStateRef.current = 'idle';
-      setState('idle');
-      resumeListeningRef.current = false;
-    };
-
-    synthRef.current.speak(utterance);
+    // Since we are strictly voice for now with STT, let's just show an error if they try text, or disable the text input.
+    // Wait, let's keep text input disabled or hide it, since it's a "Voice AI". 
+    // If they want text, they can use chat.
   };
 
   const cancelSpeech = () => {
@@ -440,9 +274,9 @@ export default function LivePodcastPage() {
           {/* Subtitles / Text View */}
           <div className="h-32 w-full max-w-2xl text-center flex flex-col items-center justify-center">
             <AnimatePresence mode="wait">
-              {state === 'listening' && (
-                <motion.p key="listen" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-emerald-300 text-lg md:text-xl font-medium">
-                  "{transcript || '...'}"
+              {transcript && (state === 'thinking' || state === 'speaking') && (
+                <motion.p key="listen" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-emerald-300 text-lg md:text-xl font-medium mb-2">
+                  "{transcript}"
                 </motion.p>
               )}
               {(state === 'speaking' || state === 'thinking') && (
@@ -469,7 +303,7 @@ export default function LivePodcastPage() {
                     Send now
                   </button>
                   <button onClick={endLiveConversation} className="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-full font-bold transition-all flex items-center gap-2">
-                    <StopCircle className="w-5 h-5" /> End
+                    <StopCircle className="w-5 h-5" /> Cancel
                   </button>
                 </div>
               ) : (
@@ -479,40 +313,25 @@ export default function LivePodcastPage() {
                 </button>
               )}
             </div>
-
-            {/* Text Fallback Input */}
-            <form onSubmit={handleTextSubmit} className="w-full relative opacity-70 hover:opacity-100 transition-opacity focus-within:opacity-100">
-              <input
-                type="text"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                disabled={state !== 'idle'}
-                placeholder="Or type your message here..."
-                className="w-full bg-slate-900 border border-slate-700 text-white rounded-full py-3 px-6 pr-12 focus:outline-none focus:border-indigo-500 disabled:opacity-50"
-              />
-              <button type="submit" disabled={!textInput.trim() || state !== 'idle'} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-indigo-400 hover:text-indigo-300 disabled:opacity-50">
-                <Send className="w-5 h-5" />
-              </button>
-            </form>
           </div>
 
           {/* Mobile Floating Input Dock */}
           <div className="lg:hidden fixed bottom-0 left-0 w-full p-3 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent flex flex-col items-center pb-6">
             <div className="w-full max-w-md flex flex-col pointer-events-auto">
-              <div className="flex justify-between items-end mb-4 px-2">
+              <div className="flex justify-between items-center mb-4 px-4 w-full">
                 <button onClick={() => setIsMobileDrawerOpen('config')} className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/80 border-slate-700 text-slate-300">
                   <Settings2 size={14}/> {language}
                 </button>
 
                 {/* Mobile Voice Button */}
-                <div className="relative">
+                <div className="relative flex-1 flex justify-end">
                   {state === 'idle' ? (
                     <button onClick={startListening} className="w-16 h-16 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(79,70,229,0.4)] transition-all active:scale-95">
                       <Mic size={24} />
                     </button>
                   ) : state === 'listening' ? (
-                    <div className="flex items-center gap-2">
-                      <button onClick={endLiveConversation} aria-label="End live conversation" className="w-11 h-11 bg-slate-800 text-slate-200 rounded-full flex items-center justify-center"><StopCircle size={18}/></button>
+                    <div className="flex items-center gap-3">
+                      <button onClick={endLiveConversation} aria-label="Cancel" className="w-11 h-11 bg-slate-800 text-slate-200 rounded-full flex items-center justify-center"><StopCircle size={18}/></button>
                       <button onClick={stopListening} aria-label="Send voice message now" className="w-16 h-16 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all active:scale-95 animate-pulse">
                         <Send size={24} className="ml-1" />
                       </button>
@@ -524,24 +343,6 @@ export default function LivePodcastPage() {
                   )}
                 </div>
               </div>
-
-              {/* Mobile Text Input */}
-              <form onSubmit={handleTextSubmit} className="relative group mx-1 w-full flex-1">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/50 to-purple-500/50 rounded-[2rem] blur-md opacity-70 transition duration-500 group-focus-within:opacity-100"></div>
-                <div className="relative flex shadow-xl rounded-[2rem] border transition-all backdrop-blur-xl overflow-hidden p-1 bg-slate-900/90 border-slate-700/50 focus-within:border-indigo-500 focus-within:bg-slate-900">
-                  <input
-                    type="text"
-                    value={textInput}
-                    onChange={e => setTextInput(e.target.value)}
-                    disabled={state !== 'idle'}
-                    placeholder="Type message..."
-                    className="w-full pl-5 pr-12 py-3.5 bg-transparent border-none focus:ring-0 outline-none disabled:opacity-50 text-[15px] font-medium text-white placeholder:text-slate-500"
-                  />
-                  <button type="submit" disabled={!textInput.trim() || state !== 'idle'} className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-indigo-400 disabled:opacity-50 active:scale-95 transition-transform">
-                    <Send size={20} />
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
 

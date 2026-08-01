@@ -35,7 +35,7 @@ const allFeatures = [
   { name: 'Concept Battle', path: '/concept-battle', icon: <Swords size={18}/>, category: 'Gamified' },
   { name: 'Career Pathway', path: '/career-hacker', icon: <Briefcase size={18}/>, category: 'Tools' },
   { name: 'Book Jumper', path: '/book-jumper', icon: <FileText size={18}/>, category: 'Learning' },
-  // { name: 'Live Podcast', path: '/live', icon: <Mic size={18}/>, category: 'Fun' },
+  { name: 'Live Podcast', path: '/live', icon: <Mic size={18}/>, category: 'Fun' },
 ];
 
 export default function Omnibar() {
