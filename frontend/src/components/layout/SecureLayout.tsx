@@ -133,7 +133,7 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
     // { name: 'Analytics', path: '/analytics', icon: <BarChart3 size={20} />, color: 'text-indigo-500' },
     // { name: 'Settings', path: '/settings', icon: <Settings size={20} />, color: 'text-slate-700' },
     { name: 'Audio Summary', path: '/podcast', icon: <Headphones size={20}/>, color: 'text-rose-500' },
-    { name: 'Live Podcast', path: '/live', icon: <Mic size={20}/>, color: 'text-amber-500' },
+    // { name: 'Live Podcast', path: '/live', icon: <Mic size={20}/>, color: 'text-amber-500' },
     { name: '3D Chemistry Lab', path: '/molecule', icon: <Beaker size={20}/>, color: 'text-teal-500' },
     { name: 'Magic Study Planner', path: '/planner', icon: <CalendarDays size={20}/>, color: 'text-indigo-600' }, 
     {name: 'AI Presentation Creator', path: '/presentation', icon: <Projector size={20}/>, color: 'text-indigo-600'},
