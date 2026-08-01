@@ -131,6 +131,7 @@ function FlashcardsPageContent() {
 
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [activeDef, setActiveDef] = useState<string | null>(null);
 
   const [historyList, setHistoryList] = useState<any[]>([]);
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
@@ -559,16 +560,25 @@ function FlashcardsPageContent() {
                                     const defKey = Object.keys(glossary).find(k => k.toLowerCase() === term.toLowerCase());
 
                                     if (defKey) {
+                                      const isActive = activeDef === defKey;
                                       return (
-                                        <span className="relative group inline-block font-bold text-indigo-200 border-b border-dashed border-indigo-300 cursor-help transition-colors hover:text-white hover:border-white">
+                                        <span 
+                                          className="relative inline-block font-bold text-indigo-200 border-b border-dashed border-indigo-300 cursor-pointer transition-colors hover:text-white hover:border-white"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveDef(isActive ? null : defKey);
+                                          }}
+                                        >
                                           {children}
-                                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-4 bg-slate-900 border border-slate-700 text-slate-200 text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none shadow-2xl z-50 scale-95 group-hover:scale-100 text-left">
-                                            <span className="flex items-center gap-2 text-xs font-black text-indigo-500 uppercase tracking-widest mb-1 border-b border-slate-800 pb-1">
-                                              <Info size={12}/> {t.definition}
+                                          {isActive && (
+                                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-4 bg-slate-900 border border-slate-700 text-slate-200 text-sm font-medium rounded-xl shadow-2xl z-50 text-left animate-in fade-in slide-in-from-bottom-2 cursor-auto" onClick={e => e.stopPropagation()}>
+                                              <span className="flex items-center gap-2 text-xs font-black text-indigo-500 uppercase tracking-widest mb-1 border-b border-slate-800 pb-1">
+                                                <Info size={12}/> {t.definition}
+                                              </span>
+                                              {glossary[defKey]}
+                                              <svg className="absolute text-white h-2 w-full left-0 top-full drop-shadow-sm" x="0px" y="0px" viewBox="0 0 255 255" xmlSpace="preserve"><polygon className="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                                             </span>
-                                            {glossary[defKey]}
-                                            <svg className="absolute text-white h-2 w-full left-0 top-full drop-shadow-sm" x="0px" y="0px" viewBox="0 0 255 255" xmlSpace="preserve"><polygon className="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
-                                          </span>
+                                          )}
                                         </span>
                                       );
                                     }
