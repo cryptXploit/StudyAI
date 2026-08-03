@@ -11,17 +11,28 @@ let cachedMappings: any[] | null = null;
 let lastFetch = 0;
 
 export const featureGuardGlobal = async (req: Request, res: Response, next: NextFunction) => {
-  // Only intercept /api routes
-  if (!req.originalUrl.startsWith('/api/')) return next();
+  // Only intercept /api routes and POST requests (AI generation is usually POST)
+  if (!req.originalUrl.startsWith('/api/') || req.method !== 'POST') return next();
   
   // Exclude admin, webhook, upload, auth routes
   if (req.originalUrl.includes('/admin') || req.originalUrl.includes('/payments') || req.originalUrl.includes('/upload')) {
     return next();
   }
 
+  const KNOWN_AI_FEATURES = new Set([
+    'chat', 'quiz', 'live', 'voice', 'night-before', 'mind-map', 'mind-map-chat', 'flashcard', 
+    'story', 'solver', 'podcast', 'molecule', 'curve', 'planner', 'presentation', 
+    'flowchart', 'wallpaper', 'logicflow', 'universe', 'timeline', 'bionic', 
+    'purifier', 'calendar', 'labgraph', 'battle', 'youtube', 'focus', 'battle2', 
+    'reward', 'syllabus', 'geomapper', 'career', 'notes', 'bookjumper', 'oracle'
+  ]);
+
   try {
     const match = req.originalUrl.match(/\/api\/([a-zA-Z0-9_-]+)/);
     const featureName = match ? match[1].toLowerCase() : 'unknown';
+
+    // If it's not a known AI feature, skip the feature guard!
+    if (!KNOWN_AI_FEATURES.has(featureName)) return next();
 
     const userTier = (req as any).user?.tier || 'Free';
     const userId = (req as any).user?.id;
