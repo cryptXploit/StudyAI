@@ -15,6 +15,7 @@ const SAFE_PUBLIC_ERROR_CODES = new Set([
   'FORBIDDEN',
   'NOT_FOUND',
   'VALIDATION_ERROR',
+  'PRO_FEATURE_CONSENT_REQUIRED'
 ]);
 
 function isSafePublicError(payload: Record<string, unknown>): boolean {
