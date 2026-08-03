@@ -24,13 +24,41 @@ const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').r
 export default function AdminSettingsPage() {
   const supabase = createClient();
   const [configs, setConfigs] = useState<ApiConfig[]>([]);
+  const [featureMappings, setFeatureMappings] = useState<{tier: string, features: string[]}[]>([
+    { tier: 'embedding', features: [] },
+    { tier: 'general', features: [] },
+    { tier: 'complex', features: [] }
+  ]);
   const [activeTab, setActiveTab] = useState<'embedding' | 'general' | 'complex'>('embedding');
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
+  const ALL_FEATURES = [
+    'chat', 'quiz', 'live', 'voice', 'night-before', 'mind-map', 'flashcard', 
+    'story', 'solver', 'podcast', 'molecule', 'curve', 'planner', 'presentation', 
+    'flowchart', 'wallpaper', 'logicflow', 'universe', 'timeline', 'bionic', 
+    'purifier', 'calendar', 'labgraph', 'battle', 'youtube', 'focus', 'battle2', 
+    'reward', 'syllabus', 'geomapper', 'career', 'notes', 'bookjumper', 'oracle'
+  ];
+
   useEffect(() => {
     fetchConfigs();
+    fetchMappings();
   }, []);
+
+  const fetchMappings = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const response = await fetch(`${apiOrigin}/api/admin/feature-mappings`, {
+      headers: session ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (response.ok && payload.data) {
+      setFeatureMappings(prev => prev.map(p => {
+         const found = payload.data.find((d: any) => d.tier === p.tier);
+         return found ? { tier: p.tier, features: found.features || [] } : p;
+      }));
+    }
+  };
 
   const fetchConfigs = async () => {
     setIsLoading(true);
@@ -133,6 +161,17 @@ export default function AdminSettingsPage() {
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(payload.error || 'Save failed');
       
+      // Save feature mappings
+      const mapResponse = await fetch(`${apiOrigin}/api/admin/feature-mappings`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ mappings: featureMappings }),
+      });
+      if (!mapResponse.ok) throw new Error('Failed to save mappings');
+
       await fetchConfigs(); 
       setSaveStatus('Saved Successfully!');
       setTimeout(() => setSaveStatus(null), 3000);
@@ -167,6 +206,41 @@ export default function AdminSettingsPage() {
           <button onClick={() => setActiveTab('embedding')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'embedding' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>1. Embedding AI</button>
           <button onClick={() => setActiveTab('general')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'general' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>2. Free Users (General)</button>
           <button onClick={() => setActiveTab('complex')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'complex' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>3. Pro Users (Complex)</button>
+        </div>
+
+        {/* FEATURE MAPPING UI */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+           <h2 className="text-lg font-bold text-slate-800 mb-2">Features assigned to {activeTab === 'general' ? 'Free Users' : activeTab === 'complex' ? 'Pro Users' : 'Embedding'}</h2>
+           <p className="text-sm text-slate-500 mb-4">Unassigned features will automatically fall back to the Pro (Complex) tier for security.</p>
+           <div className="flex flex-wrap gap-2">
+             {ALL_FEATURES.map(feat => {
+               const currentMapping = featureMappings.find(m => m.tier === activeTab);
+               const isSelected = currentMapping?.features.includes(feat);
+               const isAssignedElsewhere = featureMappings.find(m => m.tier !== activeTab && m.features.includes(feat));
+               
+               return (
+                 <label key={feat} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm cursor-pointer transition ${isSelected ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium' : isAssignedElsewhere ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
+                   <input 
+                     type="checkbox" 
+                     className="hidden" 
+                     checked={isSelected}
+                     onChange={(e) => {
+                       setFeatureMappings(prev => prev.map(m => {
+                         if (m.tier === activeTab) {
+                           return { ...m, features: e.target.checked ? [...m.features, feat] : m.features.filter(f => f !== feat) };
+                         }
+                         if (e.target.checked && m.features.includes(feat)) {
+                           return { ...m, features: m.features.filter(f => f !== feat) }; // Remove from other tiers
+                         }
+                         return m;
+                       }));
+                     }}
+                   />
+                   {feat}
+                 </label>
+               )
+             })}
+           </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">

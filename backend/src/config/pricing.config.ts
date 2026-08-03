@@ -1,6 +1,6 @@
 // backend/src/config/pricing.config.ts
 
-export const FREE_TIER_TOKENS = 500;
+export const FREE_TIER_TOKENS = 300;
 
 export type PricingPlanKind = 'solo' | 'family';
 

@@ -39,6 +39,7 @@ import logger from './core/logger';
 import multer from 'multer';
 import { registerChatRoutes } from './controllers/chat.controller';
 import { requireAuth } from './middlewares/auth.middleware';
+import { featureGuardGlobal } from './middlewares/featureGuardGlobal';
 import { documentQueue } from './queue/connection';
 import './queue/oracleWorker'; // 🟢 Start the Oracle background worker
 import './workers/subscriptionWorker'; // 🟢 Start the Subscription Expiration Checker
@@ -206,6 +207,8 @@ app.use('/api', limiter);
 // ==========================================
 // API ROUTES
 // ==========================================
+// Apply the feature mapping guard globally to /api/* routes
+app.use('/api', featureGuardGlobal);
 const upload = multer({ 
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 } 

@@ -3,6 +3,7 @@ import { AuthProvider } from '@/components/providers/AuthContext';
 import { I18nProvider } from '@/components/providers/I18nContext';
 import { ToastProvider } from '@/components/providers/ToastProvider';
 import { PublicErrorProvider } from '@/components/providers/PublicErrorProvider';
+import FetchInterceptor from '@/components/FetchInterceptor';
 // @ts-ignore: Allow side-effect CSS import when global CSS types are not declared in this project
 import './globals.css';
 
@@ -92,6 +93,7 @@ export default function RootLayout({
         <AuthProvider>
           <I18nProvider>
             <PublicErrorProvider />
+            <FetchInterceptor />
             {children}
             <ToastProvider />
           </I18nProvider>

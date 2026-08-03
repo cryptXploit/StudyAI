@@ -47,7 +47,7 @@ export const TOKEN_COSTS = {
   FREE_USER_WEEKLY_FILE_LIMIT: 3,
   
   // 🎟️ User Tier Limits
-  FREE_USER_INITIAL_TOKENS: 500,
+  FREE_USER_INITIAL_TOKENS: 300,
   PRO_USER_TOKENS: 10000,
 };
 
@@ -61,8 +61,8 @@ export const REWARDS = {
   
   // 🎯 Bounties & Loops
   PROFILE_COMPLETED: 100,
-  REFERRAL_SENDER: 200,
-  REFERRAL_RECEIVER: 100,
+  REFERRAL_SENDER: 50,
+  REFERRAL_RECEIVER: 30,
 };
 
 // Safety utility to dynamically fetch cost

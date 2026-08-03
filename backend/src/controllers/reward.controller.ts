@@ -20,7 +20,7 @@ const getReferralConfig = () => {
     return JSON.parse(rawConfig).referral;
   } catch (error) {
     console.warn("Missing referralConfig.json, falling back to defaults.");
-    return { senderReward: 200, receiverReward: 100 }; // Default Fallback
+    return { senderReward: 100, receiverReward: 50 }; // Default Fallback
   }
 };
 

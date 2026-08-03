@@ -7,6 +7,7 @@ import { AtomesusAdapter } from './adapters/AtomesusAdapter'; // 🟢 NEW: Impor
 import { HealthMonitor, CircuitState } from './HealthMonitor';
 import { CostTracker } from './CostTracker';
 import { createClient } from '@supabase/supabase-js';
+import { requestContext } from '../core/requestContext';
 
 export type Tier = 'Free' | 'Student' | 'Pro';
 
@@ -146,8 +147,15 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
   }
 
   private async getAllRoutes(tier: Tier): Promise<RouteConfig[]> {
-    const taskType = tier === 'Pro' ? 'complex' : 'general';
-    const configs = await this.getActiveConfigs(taskType);
+    const ctx = requestContext.getStore();
+    const resolvedTier = ctx?.resolvedTier || (tier === 'Pro' ? 'complex' : 'general');
+    
+    // Explicitly handle mapping 'embedding' or 'complex' tasks correctly.
+    let taskType = 'general';
+    if (resolvedTier === 'complex' || resolvedTier === 'Pro') taskType = 'complex';
+    if (resolvedTier === 'embedding') taskType = 'embedding';
+
+    const configs = await this.getActiveConfigs(taskType as 'general' | 'complex');
     
     return configs.map(config => {
       const adapter = this.adapterMap[config.provider_name.toLowerCase()] || this.fallbackAdapter;
@@ -209,24 +217,27 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
 
     if (routes.length === 0) throw new Error("No API routes available.");
 
+    let loopCount = 0;
+    const maxLoops = Math.min(routes.length * 2, 6); // Max 2 full cycles or 6 total tries
+    let currentRouteIndex = 0;
+
     if (tier === 'Pro' && routes.length >= 2) {
       try {
         finalResult = await this.executeWithHedging(routes[0], routes[1], securedMessages, options);
       } catch (hedgingError) {
-        for (let i = 2; i < routes.length; i++) {
-          try {
-            finalResult = await this.executeWithHealthCheck(routes[i], securedMessages, options);
-            break;
-          } catch(err) {}
-        }
+        currentRouteIndex = 2; // start fallback loop from 3rd config if hedging fails
       }
-    } else {
-      for (const route of routes) {
-        try {
-          finalResult = await this.executeWithHealthCheck(route, securedMessages, options);
-          break; 
-        } catch (primaryError) {}
-      }
+    }
+
+    while (!finalResult && loopCount < maxLoops) {
+       if (currentRouteIndex >= routes.length) currentRouteIndex = 0; // Circular wrap around
+       const route = routes[currentRouteIndex];
+       try {
+         finalResult = await this.executeWithHealthCheck(route, securedMessages, options);
+       } catch (primaryError) {
+         currentRouteIndex++;
+         loopCount++;
+       }
     }
 
     if (!finalResult) {
@@ -247,13 +258,20 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
 
     let fullResponse = '';
     let success = false;
+    let loopCount = 0;
+    const maxLoops = Math.min(routes.length * 2, 6);
+    let currentRouteIndex = 0;
 
-    for (const route of routes) {
+    while (!success && loopCount < maxLoops) {
+      if (currentRouteIndex >= routes.length) currentRouteIndex = 0;
+      const route = routes[currentRouteIndex];
       const startTime = Date.now();
       try {
         const state = await HealthMonitor.getState(route.adapter.providerName);
         if (state === CircuitState.OPEN) {
           console.warn(`[Router] Skipping open circuit for ${route.adapter.providerName}`);
+          currentRouteIndex++;
+          loopCount++;
           continue;
         }
 
@@ -261,14 +279,12 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
           const stream = route.adapter.generateStream(securedMessages, route.model, options);
           const iterator = stream[Symbol.asyncIterator]();
           
-          // Try to get the first chunk to catch immediate API errors (like quota exceeded)
           const firstResult = await iterator.next();
           
           if (!firstResult.done) {
              yield firstResult.value;
              fullResponse += firstResult.value;
              
-             // Stream the rest
              while (true) {
                 const result = await iterator.next();
                 if (result.done) break;
@@ -283,14 +299,17 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
             userId, tier, route.adapter.providerName, route.model,
             Math.ceil(fullResponse.length / 4), Math.ceil(fullResponse.length / 4)
           );
-          break; // Successfully streamed from this provider
+          break; 
+        } else {
+          currentRouteIndex++;
+          loopCount++;
         }
       } catch (error) {
         await HealthMonitor.recordFailure(route.adapter.providerName, error instanceof Error && error.message === 'LatencyBudgetExceeded');
         console.warn(`[Router] Stream failed for ${route.adapter.providerName}; trying the next configured route.`, error);
-        // Reset state for the next provider
         fullResponse = '';
-        continue;
+        currentRouteIndex++;
+        loopCount++;
       }
     }
 
