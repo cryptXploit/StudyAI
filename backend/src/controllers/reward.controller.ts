@@ -216,20 +216,99 @@ export async function checkDailyDripHandler(req: Request, res: Response): Promis
   }
 }
 
-// 🟢 NEW: AdSense Rewarded Ad Handler
-export async function adsenseRewardHandler(req: Request, res: Response): Promise<void> {
+// 🟢 NEW: Adsterra Rewarded Ad Handlers
+import { REWARD_CONFIG } from '../config/rewardConfig';
+
+export async function getAdStatusHandler(req: Request, res: Response): Promise<void> {
   const userId = (req as any).user?.id;
   try {
-    // Generate a reasonably unique idempotency key for this reward instance.
-    // In a production system with fraud prevention, we'd verify an AdSense callback token.
-    const uniqueId = Math.random().toString(36).substring(2, 15);
+    const { data: user, error } = await supabaseAdmin
+      .from('profiles')
+      .select('daily_ad_claims, last_ad_claim_date, tokens')
+      .eq('id', userId)
+      .single();
+
+    if (error || !user) throw new Error('User not found');
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const lastClaimStr = user.last_ad_claim_date ? new Date(user.last_ad_claim_date).toISOString().split('T')[0] : null;
+
+    let currentClaims = user.daily_ad_claims || 0;
+    
+    // Reset if it's a new day
+    if (lastClaimStr !== todayStr) {
+      currentClaims = 0;
+    }
+
+    res.json({
+      success: true,
+      maxAds: REWARD_CONFIG.MAX_DAILY_ADS,
+      claimsToday: currentClaims,
+      tokensPerAd: REWARD_CONFIG.TOKENS_PER_AD,
+      timerSeconds: REWARD_CONFIG.AD_TIMER_SECONDS,
+      smartlinkUrl: REWARD_CONFIG.SMARTLINK_URL,
+      currentTokens: user.tokens
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function claimAdRewardHandler(req: Request, res: Response): Promise<void> {
+  const userId = (req as any).user?.id;
+  try {
+    // 1. Fetch user status
+    const { data: user, error: fetchError } = await supabaseAdmin
+      .from('profiles')
+      .select('daily_ad_claims, last_ad_claim_date')
+      .eq('id', userId)
+      .single();
+
+    if (fetchError || !user) throw new Error('User not found');
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const lastClaimStr = user.last_ad_claim_date ? new Date(user.last_ad_claim_date).toISOString().split('T')[0] : null;
+
+    let currentClaims = user.daily_ad_claims || 0;
+    
+    // Reset if it's a new day
+    if (lastClaimStr !== todayStr) {
+      currentClaims = 0;
+    }
+
+    // 2. Enforce limits
+    if (currentClaims >= REWARD_CONFIG.MAX_DAILY_ADS) {
+      res.status(400).json({ error: 'Daily ad limit reached' });
+      return;
+    }
+
+    // 3. ATOMIC UPDATE limit in profiles
+    const { error: updateError } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        daily_ad_claims: currentClaims + 1,
+        last_ad_claim_date: today.toISOString()
+      })
+      .eq('id', userId);
+
+    if (updateError) throw updateError;
+
+    // 4. Award Tokens
+    const uniqueId = crypto.randomBytes(4).toString('hex');
     await applyCreditMutation({
       userId,
-      amount: 3,
-      reason: 'AdSense Rewarded Ad',
-      idempotencyKey: `adsense-reward:${userId}:${Date.now()}:${uniqueId}`,
+      amount: REWARD_CONFIG.TOKENS_PER_AD,
+      reason: 'Watched Adsterra Rewarded Ad',
+      idempotencyKey: `adsterra-reward:${userId}:${todayStr}:${currentClaims + 1}:${uniqueId}`,
     });
-    res.json({ success: true, tokens: 3, message: 'Reward claimed successfully!' });
+
+    res.json({ 
+      success: true, 
+      tokens: REWARD_CONFIG.TOKENS_PER_AD, 
+      claimsToday: currentClaims + 1,
+      message: `Reward claimed! +${REWARD_CONFIG.TOKENS_PER_AD} Tokens` 
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -242,6 +321,10 @@ export function registerRewardRoutes(app: any): void {
   router.get('/referral', requireAuth, async (req: Request, res: Response) => { await getReferralDataHandler(req, res); });
   router.post('/referral/apply', requireAuth, async (req: Request, res: Response) => { await applyReferralHandler(req, res); });
   router.post('/daily-drip', requireAuth, async (req: Request, res: Response) => { await checkDailyDripHandler(req, res); });
-  router.post('/adsense-reward', requireAuth, async (req: Request, res: Response) => { await adsenseRewardHandler(req, res); });
+  
+  // Rewarded Ads Endpoints
+  router.get('/ad-status', requireAuth, async (req: Request, res: Response) => { await getAdStatusHandler(req, res); });
+  router.post('/claim-ad', requireAuth, async (req: Request, res: Response) => { await claimAdRewardHandler(req, res); });
+  
   app.use('/api/rewards', router);
 }

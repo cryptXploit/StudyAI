@@ -14,6 +14,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DreamVarsityWidget from '@/components/dashboard/DreamVarsityWidget';
+import RewardedAdCard from '@/components/rewards/RewardedAdCard';
 
 const translations = {
   English: { welcome: "Welcome back!", signedInAs: "Signed in as", welcomeSubtitle: "Manage your documents and start learning.", totalDocs: "Total Documents", indexed: "Indexed", storage: "Storage Used", available: "Available on Free Tier", materials: "Study Materials", learning: "Learning contexts created", uploadTitle: "Knowledge Builder", uploadDesc: "Upload PDFs or Forge your Syllabus manually.", recentFiles: "Knowledge Base (Sources)", syllabusFiles: "Syllabus Vault", packsTitle: "Context Packs", packsDesc: "Your generated study materials and notes.", uploadType: "Select Input Type", typeSource: "Upload Source (PDF)", typeSyllabus: "Forge Syllabus (Text)", courseName: "Course/Subject Name", chapters: "Chapters (One per line)", createSyllabus: "Forge Syllabus", noSyllabus: "No syllabuses forged yet." },
@@ -250,6 +251,7 @@ export default function DashboardPage() {
             </div>
 
             <DreamVarsityWidget />
+            <RewardedAdCard />
 
             {/* 🟢 CONTEXT-AWARE: Continue Learning */}
             <section>
