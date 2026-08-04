@@ -100,7 +100,11 @@ export default function QuestsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
-      const fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/quests/${endpoint}` : `${apiUrlBase}/api/quests/${endpoint}`;
+      
+      let fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/quests/${endpoint}` : `${apiUrlBase}/api/quests/${endpoint}`;
+      if (endpoint === 'daily-drip') {
+         fetchUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/rewards/daily-drip` : `${apiUrlBase}/api/rewards/daily-drip`;
+      }
 
       const response = await fetch(fetchUrl, {
         method: 'POST',
@@ -112,8 +116,12 @@ export default function QuestsPage() {
       if (!response.ok || !data.success) {
          throw new Error(data.error || "Failed to claim reward.");
       }
-
-      alert(`Success! You earned ${data.tokensAdded} ✨ tokens.`);
+      
+      const tokensAwarded = data.data?.tokensAdded || data.tokensAdded || 0;
+      if (tokensAwarded > 0) {
+         alert(`Success! You earned ${tokensAwarded} ✨ tokens.`);
+         window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: tokensAwarded } }));
+      }
 
       if (endpoint === 'daily-drip') {
         const today = new Date().toISOString().split('T')[0];

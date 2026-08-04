@@ -124,9 +124,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (data.success && data.tokensAdded) {
-         setDailyDripReward({ tokens: data.tokensAdded, streak: data.newStreak || 1 });
-         window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: data.tokensAdded } }));
+      if (data.success && (data.data?.tokensAdded || data.tokensAdded)) {
+         const tokens = data.data?.tokensAdded || data.tokensAdded;
+         const streak = data.data?.newStreak || data.newStreak || 1;
+         setDailyDripReward({ tokens, streak });
+         window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens } }));
       }
     } catch (error) {
       console.error("Daily Drip check failed:", error);
