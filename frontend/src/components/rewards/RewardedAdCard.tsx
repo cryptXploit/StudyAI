@@ -21,6 +21,9 @@ export default function RewardedAdCard() {
   const [isWatching, setIsWatching] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
 
+  const [adStartTime, setAdStartTime] = useState<number | null>(null);
+  const [canClaim, setCanClaim] = useState(false);
+
   const supabase = createClient();
   const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
 
@@ -52,8 +55,7 @@ export default function RewardedAdCard() {
         setTimeLeft(prev => prev - 1);
       }, 1000);
     } else if (isWatching && timeLeft === 0) {
-      setIsWatching(false);
-      claimReward();
+      setCanClaim(true);
     }
     return () => clearInterval(timer);
   }, [isWatching, timeLeft]);
@@ -91,11 +93,19 @@ export default function RewardedAdCard() {
     window.open(status.smartlinkUrl, '_blank');
     
     // Start verification countdown
+    setAdStartTime(Date.now());
     setIsWatching(true);
+    setCanClaim(false);
     setTimeLeft(status.timerSeconds);
   };
 
   const claimReward = async () => {
+    if (!status) return;
+    if (!adStartTime || Date.now() - adStartTime < (status.timerSeconds * 1000)) {
+      toast.error('Please watch the ad completely!');
+      return;
+    }
+
     const loadingToast = toast.loading('Claiming reward...');
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -109,6 +119,9 @@ export default function RewardedAdCard() {
         toast.success(data.message, { id: loadingToast, icon: '🎉' });
         triggerDopamine();
         setStatus(prev => prev ? { ...prev, claimsToday: data.claimsToday, currentTokens: prev.currentTokens + data.tokens } : prev);
+        setIsWatching(false);
+        setCanClaim(false);
+        setAdStartTime(null);
         
         // Dispatch a custom event to update tokens globally if needed
         window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: data.tokens } }));
@@ -122,11 +135,12 @@ export default function RewardedAdCard() {
 
   if (loading || !status) return null;
 
-  // Render logic based on user token levels and max ads watched.
-  // We only show this if they have <= 10 tokens (running low) and they haven't maxed out their daily ads.
-  if (status.currentTokens > 10 || status.claimsToday >= status.maxAds) {
-    return null;
-  }
+  // VISIBILITY LOGIC:
+  // - If max ads reached -> Hide
+  // - If started watching today (claims > 0) -> Show until max ads reached
+  // - If tokens < 100 -> Show warning/ad prompt
+  if (status.claimsToday >= status.maxAds) return null;
+  if (status.claimsToday === 0 && status.currentTokens >= 100) return null;
 
   const progressPercentage = (status.claimsToday / status.maxAds) * 100;
 
@@ -164,23 +178,29 @@ export default function RewardedAdCard() {
 
         <div className="w-full md:w-auto shrink-0 flex flex-col items-center">
           <button
-            onClick={handleWatchAd}
-            disabled={isWatching}
+            onClick={canClaim ? claimReward : handleWatchAd}
+            disabled={isWatching && !canClaim}
             className={`
               w-full md:w-auto relative group px-8 py-4 rounded-xl font-bold text-lg shadow-lg
               transition-all duration-300 transform active:scale-95
-              ${isWatching 
+              ${(isWatching && !canClaim)
                 ? 'bg-slate-700 text-slate-300 cursor-not-allowed border border-slate-600' 
-                : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-amber-500/25 hover:from-amber-400 hover:to-orange-400 border border-amber-400/50'}
+                : canClaim
+                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:shadow-emerald-500/25 hover:from-emerald-400 hover:to-green-400 border border-emerald-400/50 animate-pulse'
+                  : 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-amber-500/25 hover:from-amber-400 hover:to-orange-400 border border-amber-400/50'}
             `}
           >
-            {isWatching ? (
+            {isWatching && !canClaim ? (
               <span className="flex items-center gap-2">
                 <svg className="animate-spin h-5 w-5 text-slate-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Verifying... {timeLeft}s
+              </span>
+            ) : canClaim ? (
+              <span className="flex items-center gap-2">
+                🎉 Claim {status.tokensPerAd} Tokens
               </span>
             ) : (
               <span className="flex items-center gap-2">
@@ -189,11 +209,11 @@ export default function RewardedAdCard() {
             )}
             
             {/* Hover glow effect */}
-            {!isWatching && (
+            {(!isWatching || canClaim) && (
               <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             )}
           </button>
-          {isWatching && <p className="text-xs text-indigo-200 mt-3 animate-pulse">Please stay on this page while verifying...</p>}
+          {isWatching && !canClaim && <p className="text-xs text-indigo-200 mt-3 animate-pulse">Please stay on this page while verifying...</p>}
         </div>
       </div>
     </div>
