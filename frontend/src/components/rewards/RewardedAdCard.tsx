@@ -51,13 +51,21 @@ export default function RewardedAdCard() {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isWatching && timeLeft > 0) {
+      document.title = `⏳ ${timeLeft}s - Verifying Ad...`;
       timer = setInterval(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
     } else if (isWatching && timeLeft === 0) {
+      document.title = `✅ Claim Your Tokens! - StudyAI`;
       setCanClaim(true);
+    } else {
+      document.title = 'StudyAI - Dashboard';
     }
-    return () => clearInterval(timer);
+    
+    return () => {
+      clearInterval(timer);
+      if (!isWatching) document.title = 'StudyAI - Dashboard';
+    };
   }, [isWatching, timeLeft]);
 
   const triggerDopamine = () => {
