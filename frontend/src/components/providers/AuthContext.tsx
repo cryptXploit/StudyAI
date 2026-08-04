@@ -128,7 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
          const tokens = data.data?.tokensAdded || data.tokensAdded;
          const streak = data.data?.newStreak || data.newStreak || 1;
          setDailyDripReward({ tokens, streak });
-         window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens } }));
+         // We do NOT dispatch tokenUpdate here anymore, to avoid a race condition 
+         // with SecureLayout fetching profiles. We let RewardClaimer dispatch it when it closes!
       }
     } catch (error) {
       console.error("Daily Drip check failed:", error);

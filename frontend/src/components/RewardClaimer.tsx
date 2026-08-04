@@ -75,6 +75,7 @@ export default function RewardClaimer() {
       
       // Auto vanish after 8 seconds
       const timer = setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: dailyDripReward.tokens } }));
         clearDailyDripReward();
       }, 8000);
       return () => clearTimeout(timer);
@@ -110,12 +111,18 @@ export default function RewardClaimer() {
               </div>
             </div>
             
-            <Link href="/quests" onClick={clearDailyDripReward} className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white font-black rounded-2xl shadow-[0_0_20px_rgba(52,211,153,0.4)] hover:shadow-[0_0_30px_rgba(52,211,153,0.6)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
+            <Link href="/quests" onClick={(e) => {
+              window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: dailyDripReward.tokens } }));
+              clearDailyDripReward();
+            }} className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white font-black rounded-2xl shadow-[0_0_20px_rgba(52,211,153,0.4)] hover:shadow-[0_0_30px_rgba(52,211,153,0.6)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
               <span className="text-lg tracking-wide">Continue to Quests</span>
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
             
-            <button onClick={clearDailyDripReward} className="mt-4 text-xs font-bold text-indigo-300/50 hover:text-indigo-300 uppercase tracking-widest transition-colors">
+            <button onClick={() => {
+              window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: dailyDripReward.tokens } }));
+              clearDailyDripReward();
+            }} className="mt-4 text-xs font-bold text-indigo-300/50 hover:text-indigo-300 uppercase tracking-widest transition-colors">
               Tap to close
             </button>
           </div>
