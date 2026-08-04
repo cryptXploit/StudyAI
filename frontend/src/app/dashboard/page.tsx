@@ -7,7 +7,7 @@ import FileUploadDragDrop from '@/components/dashboard/FileUploadDragDrop';
 import FileList from '@/components/dashboard/FileList';
 import { useAuth } from '@/components/providers/AuthContext';
 import { uploadFile, fetchUserFiles, fetchUserContextPacks, deleteFile, getFileStats, File as DBFile, ContextPack } from '@/services/dashboard.service';
-import RewardClaimer from '@/components/RewardClaimer';
+
 import { BookOpen, Map, Swords, Plus, Loader2, ListTree, Trash2, CheckCircle2, Edit2, Zap, Play, Heart, Bookmark, Share2, BrainCircuit, Lock, Sparkles, ChevronUp, X, Radar, AlertTriangle, ArrowRight, Layers, MessageSquare, FileText } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
@@ -445,7 +445,7 @@ export default function DashboardPage() {
 
           </motion.div>
 
-          <RewardClaimer />
+
         </div>
       </SecureLayout>
 

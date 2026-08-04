@@ -12,6 +12,7 @@ import {
   MessageSquare, BrainCircuit, BarChart3, Settings, Calculator, Zap, FileSignature, 
   MapPin, ShieldAlert, Sparkles, Layers, Book, Radar, Headphones, Mic, Beaker, CalendarDays, Projector, Network, Cpu, Smartphone, Orbit, Hourglass, Eye, CalendarCheck, Swords, LineChart as ChartIcon, MonitorPlay, Map, Briefcase, GraduationCap, Pickaxe, Flame, ChevronRight, Castle, Medal, Gift } from 'lucide-react';
 import Omnibar from '@/components/layout/Omnibar';
+import RewardClaimer from '@/components/RewardClaimer';
 
 
 export default function SecureLayout({ children }: { children: React.ReactNode }) {
@@ -349,6 +350,7 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
       <ReferralWelcomeModal />
       <ProUpgradeModal isOpen={isProModalOpen} onClose={() => setIsProModalOpen(false)} />
       <FeedbackWidget />
+      <RewardClaimer />
     </div>
   );
 }

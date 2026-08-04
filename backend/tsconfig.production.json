@@ -1,5 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "files": ["src/index.ts"],
-  "include": []
+  "include": [],
+  "compilerOptions": {
+    "noEmitOnError": false,
+    "skipLibCheck": true
+  }
 }
