@@ -25,6 +25,8 @@ export default function RewardedAdCard() {
   const [canClaim, setCanClaim] = useState(false);
   const [adTicket, setAdTicket] = useState<string | null>(null);
 
+  const [targetTime, setTargetTime] = useState<number | null>(null);
+
   const supabase = createClient();
   const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
 
@@ -51,15 +53,19 @@ export default function RewardedAdCard() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isWatching && timeLeft > 0) {
-      document.title = `⏳ ${timeLeft}s - Verifying Ad...`;
+    if (isWatching && targetTime) {
       timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
-      }, 1000);
-    } else if (isWatching && timeLeft === 0) {
-      document.title = `✅ Claim Your Tokens! - StudyAI`;
-      setCanClaim(true);
-    } else {
+        const remaining = Math.max(0, Math.ceil((targetTime - Date.now()) / 1000));
+        setTimeLeft(remaining);
+        document.title = `⏳ ${remaining}s - Verifying Ad...`;
+        
+        if (remaining === 0) {
+          document.title = `✅ Claim Your Tokens! - StudyAI`;
+          setCanClaim(true);
+          clearInterval(timer);
+        }
+      }, 500); // Check twice a second to feel highly responsive
+    } else if (!isWatching) {
       document.title = 'StudyAI - Dashboard';
     }
     
@@ -67,7 +73,7 @@ export default function RewardedAdCard() {
       clearInterval(timer);
       if (!isWatching) document.title = 'StudyAI - Dashboard';
     };
-  }, [isWatching, timeLeft]);
+  }, [isWatching, targetTime]);
 
   const triggerDopamine = () => {
     const end = Date.now() + 2 * 1000;
@@ -122,10 +128,12 @@ export default function RewardedAdCard() {
       if (newWindow) newWindow.location.href = status.smartlinkUrl;
       
       // Start verification countdown
+      const timerSecs = status.timerSeconds;
+      setTargetTime(Date.now() + timerSecs * 1000);
       setAdStartTime(Date.now());
       setIsWatching(true);
       setCanClaim(false);
-      setTimeLeft(status.timerSeconds);
+      setTimeLeft(timerSecs);
     } catch (e) {
       if (newWindow) newWindow.close();
       toast.error('Network error. Try again.');

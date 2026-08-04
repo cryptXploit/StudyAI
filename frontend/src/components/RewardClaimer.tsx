@@ -1,12 +1,16 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Gift, X, Loader2, ShieldCheck } from 'lucide-react';
+import { Gift, X, Loader2, ShieldCheck, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/components/providers/AuthContext';
+import Link from 'next/link';
+import confetti from 'canvas-confetti';
 
 // 🟢 FIXED: Module-level global lock to survive React 18 Strict Mode unmount/remount cycles
 let isClaimingGlobal = false;
 
 export default function RewardClaimer() {
+  const { dailyDripReward, clearDailyDripReward } = useAuth();
   const [loading, setLoading] = useState(false);
   const [rewardData, setRewardData] = useState<any>(null);
   const supabase = createClient();
@@ -62,7 +66,51 @@ export default function RewardClaimer() {
     claimPendingRewards();
   }, []);
 
+  useEffect(() => {
+    if (dailyDripReward) {
+      // Trigger confetti!
+      const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899'];
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors });
+      
+      // Auto vanish after 4 seconds
+      const timer = setTimeout(() => {
+        clearDailyDripReward();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [dailyDripReward]);
+
   if (loading) return null; 
+  
+  if (dailyDripReward) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-500">
+        <div className="bg-gradient-to-br from-indigo-900 to-purple-900 p-8 md:p-12 rounded-[2rem] shadow-2xl max-w-sm w-full text-center relative border border-indigo-500/30 animate-in zoom-in-90 slide-in-from-bottom-10 duration-700 overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-fuchsia-500 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-pulse"></div>
+          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-pulse"></div>
+          
+          <div className="relative z-10">
+            <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-full flex flex-col items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(245,158,11,0.5)] transform hover:scale-110 transition-transform">
+              <span className="text-3xl font-black">🔥</span>
+              <span className="text-xs font-black uppercase tracking-wider">Day {dailyDripReward.streak}</span>
+            </div>
+            <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Daily Streak!</h2>
+            <p className="text-indigo-200 font-medium mb-6">You've logged in for {dailyDripReward.streak} days in a row.</p>
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 mb-8 transform hover:scale-105 transition-transform">
+              <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-1">Tokens Rewarded</p>
+              <p className="text-5xl font-black text-amber-400 drop-shadow-md">+{dailyDripReward.tokens}</p>
+            </div>
+            
+            <Link href="/quests" onClick={clearDailyDripReward} className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white font-black rounded-xl shadow-lg shadow-emerald-500/25 transition-all active:scale-95 flex items-center justify-center gap-2">
+              <span>View Quests</span>
+              <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!rewardData) return null;
 
   // UI For Security (Duplicate Claim Attempt)

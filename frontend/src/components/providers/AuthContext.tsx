@@ -11,6 +11,8 @@ interface AuthContextType {
   error: string | null;
   referralReward: { message: string } | null;
   clearReferralReward: () => void;
+  dailyDripReward: { tokens: number, streak: number } | null;
+  clearDailyDripReward: () => void;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -27,6 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const [referralReward, setReferralReward] = useState<{ message: string } | null>(null);
   const clearReferralReward = () => setReferralReward(null);
+  
+  const [dailyDripReward, setDailyDripReward] = useState<{ tokens: number, streak: number } | null>(null);
+  const clearDailyDripReward = () => setDailyDripReward(null);
   
   const supabase = createClient();
 
@@ -120,7 +125,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.success && data.tokensAdded) {
-         console.log("Daily Drip Claimed!");
+         setDailyDripReward({ tokens: data.tokensAdded, streak: data.newStreak || 1 });
+         window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: data.tokensAdded } }));
       }
     } catch (error) {
       console.error("Daily Drip check failed:", error);
@@ -247,6 +253,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error,
         referralReward,
         clearReferralReward,
+        dailyDripReward,
+        clearDailyDripReward,
         signIn,
         signUp,
         signOut,
