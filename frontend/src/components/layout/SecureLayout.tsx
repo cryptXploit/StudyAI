@@ -64,6 +64,14 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
       setIsCheckingAuth(false);
     };
     checkAuthAndFetchTokens();
+
+    const handleTokenUpdate = (e: any) => {
+      if (e.detail?.tokens) {
+        setTokens(prev => (prev || 0) + e.detail.tokens);
+      }
+    };
+    window.addEventListener('tokenUpdate', handleTokenUpdate);
+    return () => window.removeEventListener('tokenUpdate', handleTokenUpdate);
   }, [pathname, router]);
 
 

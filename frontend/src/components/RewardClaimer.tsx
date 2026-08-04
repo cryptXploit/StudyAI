@@ -70,12 +70,13 @@ export default function RewardClaimer() {
     if (dailyDripReward) {
       // Trigger confetti!
       const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899'];
-      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, colors });
+      confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 }, colors });
+      setTimeout(() => confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, colors }), 1000);
       
-      // Auto vanish after 4 seconds
+      // Auto vanish after 8 seconds
       const timer = setTimeout(() => {
         clearDailyDripReward();
-      }, 4000);
+      }, 8000);
       return () => clearTimeout(timer);
     }
   }, [dailyDripReward]);
@@ -84,27 +85,39 @@ export default function RewardClaimer() {
   
   if (dailyDripReward) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-500">
-        <div className="bg-gradient-to-br from-indigo-900 to-purple-900 p-8 md:p-12 rounded-[2rem] shadow-2xl max-w-sm w-full text-center relative border border-indigo-500/30 animate-in zoom-in-90 slide-in-from-bottom-10 duration-700 overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-fuchsia-500 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-pulse"></div>
-          <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500 rounded-full mix-blend-screen filter blur-3xl opacity-50 animate-pulse"></div>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-lg p-4 animate-in fade-in duration-500">
+        <div className="bg-gradient-to-br from-indigo-950 via-purple-900 to-indigo-900 p-8 md:p-12 rounded-[2.5rem] shadow-[0_0_80px_rgba(79,70,229,0.3)] max-w-sm w-full text-center relative border border-indigo-400/30 animate-in zoom-in-75 slide-in-from-bottom-12 duration-700 overflow-hidden transform hover:scale-[1.02] transition-transform">
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-fuchsia-500 rounded-full mix-blend-screen filter blur-[80px] opacity-60 animate-pulse"></div>
+          <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-emerald-500 rounded-full mix-blend-screen filter blur-[80px] opacity-40 animate-pulse animation-delay-2000"></div>
           
-          <div className="relative z-10">
-            <div className="w-24 h-24 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-full flex flex-col items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(245,158,11,0.5)] transform hover:scale-110 transition-transform">
-              <span className="text-3xl font-black">🔥</span>
-              <span className="text-xs font-black uppercase tracking-wider">Day {dailyDripReward.streak}</span>
-            </div>
-            <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Daily Streak!</h2>
-            <p className="text-indigo-200 font-medium mb-6">You've logged in for {dailyDripReward.streak} days in a row.</p>
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 mb-8 transform hover:scale-105 transition-transform">
-              <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest mb-1">Tokens Rewarded</p>
-              <p className="text-5xl font-black text-amber-400 drop-shadow-md">+{dailyDripReward.tokens}</p>
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-28 h-28 bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 text-white rounded-full flex flex-col items-center justify-center mb-6 shadow-[0_0_40px_rgba(245,158,11,0.6)] transform hover:scale-110 hover:rotate-3 transition-all duration-300">
+              <span className="text-4xl font-black mb-1">🔥</span>
+              <span className="text-sm font-black uppercase tracking-widest text-orange-50">Day {dailyDripReward.streak}</span>
             </div>
             
-            <Link href="/quests" onClick={clearDailyDripReward} className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white font-black rounded-xl shadow-lg shadow-emerald-500/25 transition-all active:scale-95 flex items-center justify-center gap-2">
-              <span>View Quests</span>
-              <ArrowRight size={18} />
+            <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-orange-400 mb-2 tracking-tight">Streak Bonus!</h2>
+            <p className="text-indigo-200 font-medium mb-8 text-lg">You've logged in for <strong className="text-white font-black">{dailyDripReward.streak}</strong> consecutive days.</p>
+            
+            <div className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 mb-8 transform hover:scale-105 hover:bg-white/10 transition-all duration-300 shadow-inner group">
+              <p className="text-xs font-black text-indigo-300 uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
+                <Gift size={14} className="group-hover:animate-bounce" /> 
+                Tokens Unlocked
+              </p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-5xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]">+{dailyDripReward.tokens}</span>
+                <span className="text-2xl font-black text-emerald-500/50">✨</span>
+              </div>
+            </div>
+            
+            <Link href="/quests" onClick={clearDailyDripReward} className="w-full py-4 bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-400 hover:to-emerald-300 text-white font-black rounded-2xl shadow-[0_0_20px_rgba(52,211,153,0.4)] hover:shadow-[0_0_30px_rgba(52,211,153,0.6)] transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 group">
+              <span className="text-lg tracking-wide">Continue to Quests</span>
+              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </Link>
+            
+            <button onClick={clearDailyDripReward} className="mt-4 text-xs font-bold text-indigo-300/50 hover:text-indigo-300 uppercase tracking-widest transition-colors">
+              Tap to close
+            </button>
           </div>
         </div>
       </div>
