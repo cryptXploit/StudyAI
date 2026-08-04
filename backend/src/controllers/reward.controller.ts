@@ -218,6 +218,9 @@ export async function checkDailyDripHandler(req: Request, res: Response): Promis
 
 // 🟢 NEW: Adsterra Rewarded Ad Handlers
 import { REWARD_CONFIG } from '../config/rewardConfig';
+import jwt from 'jsonwebtoken';
+
+const AD_SECRET = process.env.SUPABASE_JWT_SECRET || process.env.JWT_SECRET || 'fallback_secret_for_ads_123';
 
 export async function getAdStatusHandler(req: Request, res: Response): Promise<void> {
   const userId = (req as any).user?.id;
@@ -254,10 +257,51 @@ export async function getAdStatusHandler(req: Request, res: Response): Promise<v
   }
 }
 
-export async function claimAdRewardHandler(req: Request, res: Response): Promise<void> {
+export async function startAdRewardHandler(req: Request, res: Response): Promise<void> {
   const userId = (req as any).user?.id;
   try {
-    // 1. Fetch user status
+    // Generate a cryptographic ticket that the user started the ad NOW
+    const ticket = jwt.sign(
+      { userId, startTime: Date.now() }, 
+      AD_SECRET, 
+      { expiresIn: '5m' } // Ticket expires in 5 minutes
+    );
+
+    res.json({ success: true, ticket });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function claimAdRewardHandler(req: Request, res: Response): Promise<void> {
+  const userId = (req as any).user?.id;
+  const { ticket } = req.body;
+
+  try {
+    if (!ticket) {
+      res.status(400).json({ error: 'Missing ad verification ticket' }); return;
+    }
+
+    // 1. Verify the cryptographic ticket and Timer
+    let decoded: any;
+    try {
+      decoded = jwt.verify(ticket, AD_SECRET);
+    } catch (err) {
+      res.status(400).json({ error: 'Invalid or expired ad ticket. Please watch the ad again.' }); return;
+    }
+
+    if (decoded.userId !== userId) {
+      res.status(403).json({ error: 'Ticket user mismatch' }); return;
+    }
+
+    const elapsedSeconds = (Date.now() - decoded.startTime) / 1000;
+    
+    // Add a strict backend enforcement! (If they claim before the config timer finishes)
+    if (elapsedSeconds < REWARD_CONFIG.AD_TIMER_SECONDS) {
+      res.status(400).json({ error: `You claimed too early! You must wait at least ${REWARD_CONFIG.AD_TIMER_SECONDS} seconds.` }); return;
+    }
+
+    // 2. Fetch user status
     const { data: user, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('daily_ad_claims, last_ad_claim_date')
@@ -277,13 +321,12 @@ export async function claimAdRewardHandler(req: Request, res: Response): Promise
       currentClaims = 0;
     }
 
-    // 2. Enforce limits
+    // 3. Enforce limits
     if (currentClaims >= REWARD_CONFIG.MAX_DAILY_ADS) {
-      res.status(400).json({ error: 'Daily ad limit reached' });
-      return;
+      res.status(400).json({ error: 'Daily ad limit reached' }); return;
     }
 
-    // 3. ATOMIC UPDATE limit in profiles
+    // 4. ATOMIC UPDATE limit in profiles
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -294,13 +337,14 @@ export async function claimAdRewardHandler(req: Request, res: Response): Promise
 
     if (updateError) throw updateError;
 
-    // 4. Award Tokens
+    // 5. Award Tokens
+    // We use the ticket's signature as part of the idempotency key to prevent replay attacks!
     const uniqueId = crypto.randomBytes(4).toString('hex');
     await applyCreditMutation({
       userId,
       amount: REWARD_CONFIG.TOKENS_PER_AD,
       reason: 'Watched Adsterra Rewarded Ad',
-      idempotencyKey: `adsterra-reward:${userId}:${todayStr}:${currentClaims + 1}:${uniqueId}`,
+      idempotencyKey: `adsterra-reward:${userId}:${todayStr}:${currentClaims + 1}:${ticket.substring(ticket.length - 10)}`,
     });
 
     res.json({ 
@@ -324,6 +368,7 @@ export function registerRewardRoutes(app: any): void {
   
   // Rewarded Ads Endpoints
   router.get('/ad-status', requireAuth, async (req: Request, res: Response) => { await getAdStatusHandler(req, res); });
+  router.post('/start-ad', requireAuth, async (req: Request, res: Response) => { await startAdRewardHandler(req, res); });
   router.post('/claim-ad', requireAuth, async (req: Request, res: Response) => { await claimAdRewardHandler(req, res); });
   
   app.use('/api/rewards', router);

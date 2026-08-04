@@ -23,6 +23,7 @@ export default function RewardedAdCard() {
 
   const [adStartTime, setAdStartTime] = useState<number | null>(null);
   const [canClaim, setCanClaim] = useState(false);
+  const [adTicket, setAdTicket] = useState<string | null>(null);
 
   const supabase = createClient();
   const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
@@ -94,32 +95,60 @@ export default function RewardedAdCard() {
     }());
   };
 
-  const handleWatchAd = () => {
+  const handleWatchAd = async () => {
     if (!status || status.claimsToday >= status.maxAds) return;
     
-    // Open ad in new tab
-    window.open(status.smartlinkUrl, '_blank');
+    // Open a blank tab synchronously to avoid popup blockers!
+    const newWindow = window.open('about:blank', '_blank');
     
-    // Start verification countdown
-    setAdStartTime(Date.now());
-    setIsWatching(true);
-    setCanClaim(false);
-    setTimeLeft(status.timerSeconds);
+    try {
+      // Fetch a secure cryptographic ticket from the backend
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${apiOrigin}/api/rewards/start-ad`, {
+        method: 'POST',
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : {}
+      });
+      const data = await res.json();
+      
+      if (!data.success) {
+        if (newWindow) newWindow.close();
+        toast.error('Failed to start ad securely.');
+        return;
+      }
+      
+      setAdTicket(data.ticket);
+      
+      // Navigate the new tab to the Adsterra link
+      if (newWindow) newWindow.location.href = status.smartlinkUrl;
+      
+      // Start verification countdown
+      setAdStartTime(Date.now());
+      setIsWatching(true);
+      setCanClaim(false);
+      setTimeLeft(status.timerSeconds);
+    } catch (e) {
+      if (newWindow) newWindow.close();
+      toast.error('Network error. Try again.');
+    }
   };
 
   const claimReward = async () => {
-    if (!status) return;
+    if (!status || !adTicket) return;
     if (!adStartTime || Date.now() - adStartTime < (status.timerSeconds * 1000)) {
       toast.error('Please watch the ad completely!');
       return;
     }
 
-    const loadingToast = toast.loading('Claiming reward...');
+    const loadingToast = toast.loading('Claiming reward securely...');
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch(`${apiOrigin}/api/rewards/claim-ad`, {
         method: 'POST',
-        headers: session ? { Authorization: `Bearer ${session.access_token}` } : {}
+        headers: session ? { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}` 
+        } : { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticket: adTicket })
       });
       const data = await response.json();
       
@@ -130,6 +159,7 @@ export default function RewardedAdCard() {
         setIsWatching(false);
         setCanClaim(false);
         setAdStartTime(null);
+        setAdTicket(null);
         
         // Dispatch a custom event to update tokens globally if needed
         window.dispatchEvent(new CustomEvent('tokenUpdate', { detail: { tokens: data.tokens } }));
