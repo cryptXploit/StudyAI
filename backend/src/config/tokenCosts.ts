@@ -81,17 +81,3 @@ export const getFeatureCost = (featureName: keyof typeof TOKEN_COSTS): number =>
 
 
 
-// export const TOKEN_COSTS = {
-//   CAREER_HACKER: 20,
-//   CONCEPT_BATTLE: 10,
-//   FLOWCHART_GEN: 15,
-//   BIONIC_READER: 5,
-//   FOCUS_ISLAND: 0, // Free
-// };
-
-// export const REWARDS = {
-//   DAILY_LOGIN: 30,
-//   PROFILE_COMPLETED: 100,
-//   REFERRAL_BONUS_SENDER: 200,
-//   REFERRAL_BONUS_RECEIVER: 100,
-// };

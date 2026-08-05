@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import logger from './logger'; // Assuming logger exists, fallback to console if needed
+import logger from '../core/logger'; // Assuming logger exists, fallback to console if needed
 
 // We assume Google Cloud Service Account credentials are provided as a JSON string in ENV
 // Or through GOOGLE_APPLICATION_CREDENTIALS file path
@@ -7,13 +7,11 @@ const getJwtClient = () => {
   try {
     if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
       const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-      return new google.auth.JWT(
-        credentials.client_email,
-        undefined,
-        credentials.private_key,
-        ['https://www.googleapis.com/auth/indexing'],
-        undefined
-      );
+      return new google.auth.JWT({
+        email: credentials.client_email,
+        key: credentials.private_key,
+        scopes: ['https://www.googleapis.com/auth/indexing'],
+      });
     } else {
       // Fallback to default application credentials if GOOGLE_APPLICATION_CREDENTIALS is set
       return new google.auth.GoogleAuth({
