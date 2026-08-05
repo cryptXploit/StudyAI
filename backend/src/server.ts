@@ -58,6 +58,7 @@ import paddleRoutes from './routes/paddle.routes';
 import feedbackRoutes from './routes/feedback.routes';
 import marketingRoutes from './routes/marketing.routes';
 import familyRoutes from './routes/family.routes';
+import { registerSeoRoutes } from './controllers/seo.controller';
 
 import fileRoutes from './routes/file.route';
 import uploadRoutes from './routes/upload.route';
@@ -419,6 +420,7 @@ app.use('/api/upload', uploadRoutes);
 registerGamificationRoutes(app);
 registerProfileRoutes(app);
 registerAdminRoutes(app);
+registerSeoRoutes(app);
 // registerPanicRoutes(app);
 
 // Keep the error handler last so errors from every registered route reach it.

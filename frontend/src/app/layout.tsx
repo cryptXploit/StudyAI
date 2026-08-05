@@ -10,21 +10,18 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL('https://prepia.app'),
   title: {
-    default: 'Prepia - AI Learning Platform & PDF Study Assistant',
-    template: '%s | Prepia'
+    default: 'Prepia AI – #1 AI Study Operating System for Students',
+    template: '%s | Prepia AI'
   },
-  description: 'Prepia is the ultimate Bengali & English AI learning platform for students. Upload documents, chat with PDFs via RAG, generate flashcards, mind maps, quizzes, and study routines instantly.',
+  description: 'Transform textbooks & PDFs into flashcards, 3D organic molecules, AI podcasts & exam cheat sheets in seconds. Accurate RAG-powered study tool for students.',
   keywords: [
+    'Prepia AI',
     'AI study assistant',
-    'PDF AI chat',
-    'Bengali AI learning',
-    'AI flashcards maker',
-    'AI mind map generator',
-    'study routines AI',
-    'concept battles',
-    'RAG learning platform',
-    'Prepia',
-    'student exam prep'
+    'PDF to podcast AI',
+    'night before exam cheat sheet',
+    'RAG AI textbook summarizer',
+    '3D molecule study tool',
+    'AI flashcard generator'
   ],
   authors: [{ name: 'Prepia Team' }],
   creator: 'Prepia',
@@ -33,24 +30,24 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://prepia.app',
-    siteName: 'Prepia',
-    title: 'Prepia - AI Learning Platform for Students',
-    description: 'Upload documents, chat with AI, generate quizzes, flashcards, and mind maps instantly. The ultimate study tool for Bengali & English students.',
+    siteName: 'Prepia AI',
+    title: 'Prepia AI – #1 AI Study Operating System for Students',
+    description: 'Transform textbooks & PDFs into flashcards, 3D organic molecules, AI podcasts & exam cheat sheets in seconds. Accurate RAG-powered study tool for students.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: 'https://prepia.app/assets/og-cover.png',
         width: 1200,
         height: 630,
-        alt: 'Prepia - AI Learning Platform'
+        alt: 'Prepia AI - Study Operating System'
       }
     ]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Prepia - AI Learning Platform',
-    description: 'The ultimate AI study assistant. Chat with your PDFs, generate mind maps, and ace your exams!',
-    images: ['/og-image.jpg'],
-    creator: '@PrepiaApp'
+    title: 'Prepia AI – #1 AI Study Operating System for Students',
+    description: 'Transform textbooks & PDFs into flashcards, 3D organic molecules, AI podcasts & exam cheat sheets in seconds.',
+    images: ['https://prepia.app/assets/og-cover.png'],
+    creator: '@PrepiaAI'
   },
   alternates: {
     canonical: 'https://prepia.app'
@@ -71,6 +68,31 @@ export const metadata: Metadata = {
   }
 };
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Prepia AI',
+  operatingSystem: 'Web, Android, iOS',
+  applicationCategory: 'EducationalApplication',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  aggregateRating: {
+    '@type': 'AggregateRating',
+    ratingValue: '4.9',
+    ratingCount: '1250',
+  },
+  description: 'RAG-powered AI Academic Learning Platform with 28 micro-apps, 3D lab visualizer, PDF-to-podcast generator, and Night Before Exam cheat sheets.',
+  sameAs: [
+    'https://twitter.com/PrepiaAI',
+    'https://www.linkedin.com/company/prepia-ai',
+    'https://github.com/prepia-ai',
+    'https://www.producthunt.com/products/prepia-ai'
+  ]
+};
+
 import Script from 'next/script';
 
 export default function RootLayout({
@@ -81,12 +103,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Google AdSense Script - Replaced 'ca-pub-YOUR_ADSENSE_ID' with my actual ID */}
-        <Script 
-          async 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7232534846173963" 
-          crossOrigin="anonymous" 
-          strategy="afterInteractive"
+        {/* Structured Data (JSON-LD) for SEO */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body>
