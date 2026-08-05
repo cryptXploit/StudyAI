@@ -196,8 +196,8 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
             onMouseEnter={() => setIsSidebarOpen(true)}
             onMouseDown={() => setIsSidebarOpen(false)}
           >
-            <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-               <span className="text-white font-black text-lg leading-none">AI</span>
+            <div className="w-9 h-9 sm:w-10 sm:h-10 shrink-0 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+               <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex min-w-0 items-center gap-1">
                <span className="text-lg sm:text-xl font-black text-white tracking-tight">Prepia</span>

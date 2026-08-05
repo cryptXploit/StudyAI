@@ -81,8 +81,8 @@ export default async function PublicStudyPage({ params }: Props) {
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans">
       <nav className="w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50 flex items-center justify-between px-6 h-20">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-black text-xl">AI</span>
+          <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
+             <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-contain" />
           </div>
           <span className="text-xl font-black tracking-tight text-white hidden sm:block">Prepia AI</span>
         </Link>
