@@ -7,7 +7,7 @@ import { blogPosts } from '../blogData';
 import Markdown from 'react-markdown';
 
 type Props = {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
