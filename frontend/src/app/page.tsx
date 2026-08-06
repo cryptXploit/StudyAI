@@ -125,8 +125,8 @@ export default function LandingPage() {
       <nav className="fixed top-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50 transition-all">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
-            <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
-               <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-contain" />
+            <div className="w-9 h-9 flex items-center justify-center overflow-hidden rounded-xl shadow-lg">
+               <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-cover scale-110" />
             </div>
             <span className="text-2xl font-black tracking-tight text-white">Prepia</span>
           </div>

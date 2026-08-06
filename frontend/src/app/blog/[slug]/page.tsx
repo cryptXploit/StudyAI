@@ -43,8 +43,8 @@ export default async function BlogPostPage({ params }: Props) {
     <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-emerald-500/30 pb-24">
       <nav className="w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50 transition-all flex items-center justify-between px-6 h-20 sticky top-0">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-10 h-10 flex items-center justify-center overflow-hidden">
-             <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-contain" />
+          <div className="w-8 h-8 flex items-center justify-center overflow-hidden rounded-xl shadow-md">
+             <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-cover scale-125" />
           </div>
           <span className="text-2xl font-black tracking-tight text-white hidden sm:block">Prepia</span>
         </Link>
