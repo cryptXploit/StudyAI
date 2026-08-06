@@ -125,8 +125,8 @@ function LoginPageContent() {
         >
           {/* Header Section */}
           <motion.div variants={itemVariants} className="text-center mb-4 space-y-2">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 shadow-xl shadow-indigo-500/20 mb-1">
-              <span className="text-2xl font-bold text-white">P</span>
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl shadow-xl shadow-indigo-500/20 mb-1 overflow-hidden">
+               <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-cover scale-125" />
             </div>
             <h1 className="text-3xl font-bold text-white tracking-tight">
               Welcome back
