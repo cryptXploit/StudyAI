@@ -86,7 +86,7 @@ export default function TimelinePage() {
     setIsPlaying(false);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       let apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
@@ -110,7 +110,13 @@ export default function TimelinePage() {
       refreshTokens();
       fetchHistory();
     } catch (error: any) {
-      showPublicError();
+      if (error.name === 'AbortError') {
+        alert(`🚨 Timeout: Server took too long. Please try again.`);
+      } else if (error.message && error.message !== "Failed to fetch" && !error.message.includes("Unexpected token")) {
+        import('react-hot-toast').then((toast) => toast.default.error(error.message));
+      } else {
+        showPublicError();
+      }
     } finally {
       setIsLoading(false);
     }

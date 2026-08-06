@@ -172,7 +172,7 @@ function ConceptBattleContent() {
 
     // 🟢 CONNECTION KEEPALIVE PROTECTOR: Long-polling support
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 1 Minute Timeout
+    const timeoutId = setTimeout(() => controller.abort(), 90000); // 1.5 Minute Timeout
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -216,7 +216,9 @@ function ConceptBattleContent() {
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        showPublicError();
+        alert(`🚨 Timeout: Server took too long. Please try again.`);
+      } else if (error.message && error.message !== "Failed to fetch" && !error.message.includes("Unexpected token")) {
+        import('react-hot-toast').then((toast) => toast.default.error(error.message));
       } else {
         showPublicError();
       }

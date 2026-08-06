@@ -186,7 +186,7 @@ export default function LogicFlowPage() {
 
     // 🟢 CONNECTION KEEPALIVE PROTECTOR: Long-polling support
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -233,6 +233,9 @@ export default function LogicFlowPage() {
     } catch (error: any) {
       if (error.name === 'AbortError') {
         alert(`🚨 Timeout: Server took too long to build the architecture. Please try a simpler prompt.`);
+      } else if (error.message && error.message !== "Failed to fetch" && !error.message.includes("Unexpected token")) {
+        // Show the actual AI error instead of generic "Server busy"
+        import('react-hot-toast').then((toast) => toast.default.error(error.message));
       } else {
         showPublicError();
       }
