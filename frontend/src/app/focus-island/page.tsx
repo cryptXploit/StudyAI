@@ -44,16 +44,16 @@ const translations = {
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 const LOFI_STREAMS = [
-  { name: "Lofi Radio (24/7)", url: "https://play.streamafrica.net/lofi" },
-  { name: "Nightwave Plaza (Synthwave)", url: "https://radio.plaza.one/mp3" },
-  { name: "Lofi Hip Hop (Chilled)", url: "https://stream.zeno.fm/0r0xa792kwzuv" },
-  { name: "Chillhop Music", url: "https://stream.zeno.fm/f3wvbbqmdg8uv" },
-  { name: "Anime Lofi", url: "https://stream.zeno.fm/81jvwg7x08quv" },
-  { name: "Jazz Lofi", url: "https://stream.zeno.fm/f77435gpx8quv" },
-  { name: "Study Lofi", url: "https://stream.zeno.fm/7wtqkx40x8quv" },
-  { name: "Chill Lofi", url: "https://stream.zeno.fm/v3v0z5v2x8quv" },
-  { name: "Sleep Lofi", url: "https://stream.zeno.fm/6k37g1w2x8quv" },
-  { name: "Aesthetic Lofi", url: "https://stream.zeno.fm/9r97g1w2x8quv" }
+  { name: "Sunset Lofi", url: "https://archive.org/download/jamendo-628803/01-2308540-Nikolay%20Lvovich-Sunset.mp3" },
+  { name: "Lofi Memories", url: "https://archive.org/download/jamendo-628971/01-2307035-AbsoluteSound-Lofi%20Memories%20Children.mp3" },
+  { name: "Gift2 (Vaporwave)", url: "https://archive.org/download/gift2-ep-plj99x/%E3%83%AD%E3%83%95%E3%83%88%20tapes%20-%20Gift2%20EP%20-%2001%202Bcome1.gif.mp3" },
+  { name: "Infinite Skies", url: "https://archive.org/download/infinite-skies-pljnnj/%E3%83%9E%E3%83%89%E3%83%AD%E3%82%B9MERCURY%20-%20Infinite%20Skies%20-%2001%20Now%20and%20Forever.mp3" },
+  { name: "Chill Motivational", url: "https://archive.org/download/jamendo-520252/01-2029907-Dmytro%20Demchenko-Chill%20Motivational%20LoFI%20short%20A.mp3" },
+  { name: "Pumpupthemind", url: "https://archive.org/download/jamendo-487180/01-1954172-Pumpupthemind-For%20Lofi.mp3" },
+  { name: "Eintagsfliege", url: "https://archive.org/download/jamendo-630059/01-2311250-Eintagsfliege82-Ja%2CWir.mp3" },
+  { name: "On Chilling", url: "https://archive.org/download/jamendo-465349/01-1898664-Pumpupthemind-on%20Chilling.mp3" },
+  { name: "Lofi Hip Hop Mix", url: "https://archive.org/download/yzd91kadtdzqm9nicph00v8vpsufgsju08ajmlwl/uoetwthc0e9x6xi-listen.mp3" },
+  { name: "Rainy Night Lofi", url: "https://archive.org/download/jamendo-628803/01-2308540-Nikolay%20Lvovich-Sunset.mp3" }
 ];
 const AMBIENT_SOUNDS = [
   { name: "Heavy Rain", url: "https://assets.mixkit.co/active_storage/sfx/1230/1230-preview.mp3" },
@@ -263,8 +263,8 @@ function FocusIslandContent() {
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
          {/* Background Audio Engine - 100% HTML5 Audio to bypass all YouTube/Browser restrictions */}
-         <audio ref={ambientAudioRef} loop className="hidden" />
-         <audio ref={lofiAudioRef} className="hidden" />
+         <audio ref={ambientAudioRef} loop className="hidden" crossOrigin="anonymous" />
+         <audio ref={lofiAudioRef} loop className="hidden" crossOrigin="anonymous" />
 
          {/* 🟢 Mobile Smart Header */}
          <div className={`lg:hidden fixed left-3 right-3 rounded-2xl flex items-center justify-between px-4 z-40 backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] h-[60px]`}>
