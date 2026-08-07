@@ -259,15 +259,15 @@ function FocusIslandContent() {
 
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
-         {/* Background Audio Engine */}
-         <div className="absolute w-[1px] h-[1px] overflow-hidden opacity-100 pointer-events-none">
+         {/* Background Audio Engine - Rendered full size to bypass YouTube tiny-iframe blocking */}
+         <div className="absolute inset-0 z-0 pointer-events-none">
            <ReactPlayer 
              ref={lofiPlayerRef}
              url={selectedLofi} 
              playing={isRunning && lofiVolume > 0} 
              volume={lofiVolume / 100} 
-             width="10px" 
-             height="10px"
+             width="100%" 
+             height="100%"
              config={{
                youtube: {
                  playerVars: {
@@ -286,8 +286,10 @@ function FocusIslandContent() {
                 }
              }}
            />
-           <audio ref={ambientAudioRef} loop />
          </div>
+         {/* Solid cover to completely hide the YouTube video visually */}
+         <div className="absolute inset-0 z-[1] bg-slate-950 pointer-events-none"></div>
+         <audio ref={ambientAudioRef} loop className="hidden" />
 
          {/* 🟢 Mobile Smart Header */}
          <div className={`lg:hidden fixed left-3 right-3 rounded-2xl flex items-center justify-between px-4 z-40 backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] h-[60px]`}>
