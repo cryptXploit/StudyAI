@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { useSearchParams, useRouter } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Volume2, Pin, CheckCircle2, History, ShieldCheck, Music, CloudRain, Users, Share2, AlertTriangle } from 'lucide-react';
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 import io from 'socket.io-client';
@@ -47,11 +48,27 @@ type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 const LOFI_STREAMS = [
   { name: "Lofi Girl (Chill Beats)", url: "https://www.youtube.com/watch?v=jfKfPfyJRdk" },
-  { name: "Chillhop Radio", url: "https://www.youtube.com/watch?v=5yx6BWlEVcY" }
+  { name: "Chillhop Radio", url: "https://www.youtube.com/watch?v=5yx6BWlEVcY" },
+  { name: "Synthwave Radio", url: "https://www.youtube.com/watch?v=4xDzrMQvE0s" },
+  { name: "Space Lofi", url: "https://www.youtube.com/watch?v=1fueZCTYkpA" },
+  { name: "Coffee Shop Lofi", url: "https://www.youtube.com/watch?v=e3L1PIY1lN8" },
+  { name: "Japanese Lofi", url: "https://www.youtube.com/watch?v=-9gEgshJUuY" },
+  { name: "Dark Academia Lofi", url: "https://www.youtube.com/watch?v=B11X7kR8E4Y" },
+  { name: "Jazz Hop", url: "https://www.youtube.com/watch?v=kgx4WGK0oNU" },
+  { name: "Gaming Lofi", url: "https://www.youtube.com/watch?v=GVC5dzZKqM8" },
+  { name: "Rainy Night Lofi", url: "https://www.youtube.com/watch?v=7NOSDKb0HlU" }
 ];
 const AMBIENT_SOUNDS = [
   { name: "Heavy Rain", url: "https://assets.mixkit.co/active_storage/sfx/1230/1230-preview.mp3" },
-  { name: "Ocean Waves", url: "https://assets.mixkit.co/active_storage/sfx/1228/1228-preview.mp3" }
+  { name: "Ocean Waves", url: "https://assets.mixkit.co/active_storage/sfx/1228/1228-preview.mp3" },
+  { name: "Forest Birds", url: "https://assets.mixkit.co/active_storage/sfx/2569/2569-preview.mp3" },
+  { name: "Thunderstorm", url: "https://assets.mixkit.co/active_storage/sfx/1297/1297-preview.mp3" },
+  { name: "Crackling Fireplace", url: "https://assets.mixkit.co/active_storage/sfx/1310/1310-preview.mp3" },
+  { name: "Windy Night", url: "https://assets.mixkit.co/active_storage/sfx/2579/2579-preview.mp3" },
+  { name: "Coffee Shop Ambience", url: "https://assets.mixkit.co/active_storage/sfx/2042/2042-preview.mp3" },
+  { name: "White Noise", url: "https://assets.mixkit.co/active_storage/sfx/2564/2564-preview.mp3" },
+  { name: "Deep Space Drone", url: "https://assets.mixkit.co/active_storage/sfx/2583/2583-preview.mp3" },
+  { name: "River Stream", url: "https://assets.mixkit.co/active_storage/sfx/2513/2513-preview.mp3" }
 ];
 
 let socket: any;
@@ -252,69 +269,101 @@ function FocusIslandContent() {
          </div>
 
          {/* 🟢 Main Island (Left/Center) */}
-         <div ref={scrollRef} onScroll={handleScroll} className={`w-full ${roomCode ? 'lg:w-3/5' : 'lg:w-2/3'} flex-1 lg:flex-none p-6 md:p-8 pt-24 lg:pt-8 pb-28 lg:pb-8 flex flex-col items-center justify-between relative bg-gradient-to-b from-slate-900 to-indigo-950 overflow-y-auto lg:overflow-hidden transition-all duration-300 custom-scrollbar min-h-screen lg:min-h-0`}>
-            <div className="absolute inset-0 bg-cover bg-center mix-blend-overlay opacity-40 animate-pulse" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80')" }}></div>
+         <div ref={scrollRef} onScroll={handleScroll} className={`w-full ${roomCode ? 'lg:w-3/5' : 'lg:w-2/3'} flex-1 lg:flex-none p-6 md:p-8 pt-24 lg:pt-8 pb-28 lg:pb-8 flex flex-col items-center justify-between relative bg-slate-950 overflow-y-auto lg:overflow-hidden transition-all duration-300 custom-scrollbar min-h-screen lg:min-h-0`}>
+            {/* Dopamine-releasing Animated Background */}
+            <motion.div 
+               animate={{ scale: [1, 1.05, 1], rotate: [0, 1, 0] }} 
+               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+               className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-screen" 
+               style={{ backgroundImage: "url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&q=80')" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-indigo-950/40 to-slate-950/80"></div>
+            
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+               <div className="absolute top-[20%] left-[20%] w-[40vw] h-[40vw] bg-indigo-600/20 rounded-full blur-[100px] animate-pulse"></div>
+               <div className="absolute bottom-[20%] right-[20%] w-[40vw] h-[40vw] bg-violet-600/20 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+            </div>
 
-            <div className="w-full hidden lg:flex justify-between items-center z-10 mb-8">
-               <div>
-                  <h2 className="text-3xl font-black text-white tracking-tight">{t.title}</h2>
-                  <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest">{t.subtitle}</p>
-               </div>
+            <div className="w-full hidden lg:flex justify-between items-center z-10 mb-8 relative">
+               <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
+                  <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-md">{t.title}</h2>
+                  <p className="text-xs font-bold text-indigo-300 uppercase tracking-widest drop-shadow-md">{t.subtitle}</p>
+               </motion.div>
 
                {!roomCode ? (
-                 <button onClick={createRoom} className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl font-black text-xs text-white flex items-center gap-2 shadow-lg transition-all active:scale-95">
+                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={createRoom} className="bg-indigo-600/80 backdrop-blur-md hover:bg-indigo-500 border border-indigo-400/30 px-5 py-2.5 rounded-2xl font-black text-xs text-white flex items-center gap-2 shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all">
                     <Users size={16}/> Create Group Room
-                 </button>
+                 </motion.button>
                ) : (
-                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-indigo-300 bg-indigo-900/50 px-3 py-2 rounded-xl border border-indigo-500/30">
+                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
+                    <span className="text-xs font-black text-indigo-300 bg-indigo-900/50 px-4 py-2.5 rounded-2xl border border-indigo-500/30 backdrop-blur-md">
                        ROOM: {roomCode}
                     </span>
-                    <button onClick={inviteFriends} className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl font-black text-xs text-white flex items-center gap-2 shadow-lg transition-all active:scale-95">
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={inviteFriends} className="bg-emerald-600/80 backdrop-blur-md hover:bg-emerald-500 border border-emerald-400/30 px-5 py-2.5 rounded-2xl font-black text-xs text-white flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all">
                        {copied ? <CheckCircle2 size={16}/> : <Share2 size={16}/>} {copied ? t.copied : t.invite}
-                    </button>
-                 </div>
+                    </motion.button>
+                 </motion.div>
                )}
             </div>
 
             {/* Giant Clock */}
-            <div className="my-auto flex flex-col items-center z-10">
-               <div className="text-8xl md:text-9xl font-black font-mono text-white tracking-tighter bg-white/10 backdrop-blur-md px-12 py-8 rounded-[40px] border border-white/20 shadow-2xl shadow-indigo-500/20">
+            <div className="my-auto flex flex-col items-center z-10 relative">
+               <motion.div 
+                 initial={{ scale: 0.9, opacity: 0 }} 
+                 animate={{ scale: 1, opacity: 1 }} 
+                 className={`text-8xl md:text-[140px] leading-none font-black font-mono tracking-tighter px-12 py-8 rounded-[3rem] border border-white/10 shadow-[0_0_50px_rgba(79,70,229,0.15)] backdrop-blur-xl transition-all duration-500 ${isRunning ? 'text-white bg-white/5' : 'text-slate-400 bg-slate-900/50'}`}
+               >
                   {formatTime(timeLeft)}
-               </div>
+               </motion.div>
 
-               <div className="flex gap-4 mt-8">
-                  <button onClick={() => setIsRunning(!isRunning)} className="px-10 py-4 bg-indigo-500 hover:bg-indigo-400 text-white font-black rounded-2xl flex items-center gap-2 shadow-lg transition-all active:scale-95">
-                     {isRunning ? <Pause size={18}/> : <Play size={18}/>} {isRunning ? t.pause : t.start}
-                  </button>
-                  <button onClick={() => { setIsRunning(false); setTimeLeft(25 * 60); }} className="p-4 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-2xl transition-all backdrop-blur-md">
-                     <RotateCcw size={18}/>
-                  </button>
+               <div className="flex gap-4 mt-12">
+                  <motion.button 
+                    whileHover={{ scale: 1.05, boxShadow: "0px 0px 30px rgba(79,70,229,0.5)" }} 
+                    whileTap={{ scale: 0.95 }} 
+                    onClick={() => setIsRunning(!isRunning)} 
+                    className="px-12 py-5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black rounded-3xl flex items-center gap-3 shadow-[0_10px_40px_rgba(79,70,229,0.4)] border border-indigo-400/50 uppercase tracking-widest text-sm"
+                  >
+                     {isRunning ? <Pause size={20}/> : <Play size={20}/>} {isRunning ? t.pause : t.start}
+                  </motion.button>
+                  <motion.button 
+                    whileHover={{ scale: 1.05, rotate: 180 }} 
+                    whileTap={{ scale: 0.95 }} 
+                    onClick={() => { setIsRunning(false); setTimeLeft(25 * 60); }} 
+                    className="p-5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-3xl backdrop-blur-md shadow-lg"
+                  >
+                     <RotateCcw size={20}/>
+                  </motion.button>
                </div>
             </div>
 
             {/* Audio Mixer */}
-            <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl p-5 rounded-2xl border border-white/10 shadow-2xl z-10 grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mt-8 lg:mt-0">
-               <div className="space-y-3">
+            <motion.div 
+              initial={{ y: 20, opacity: 0 }} 
+              animate={{ y: 0, opacity: 1 }} 
+              transition={{ delay: 0.2 }}
+              className="w-full max-w-2xl bg-slate-900/60 backdrop-blur-2xl p-6 md:p-8 rounded-[2rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-10 grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-10 mt-12 lg:mt-0 relative overflow-hidden"
+            >
+               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 opacity-50"></div>
+               <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                     <label className="text-[10px] font-black tracking-widest text-indigo-200 uppercase flex items-center gap-1"><Music size={12}/> {t.lofiTrack}</label>
-                     <select value={selectedLofi} onChange={(e) => setSelectedLofi(e.target.value)} className="bg-slate-900/50 text-white text-[10px] font-bold outline-none rounded-md px-2 py-1 border border-white/10 max-w-[120px] truncate">
+                     <label className="text-[10px] md:text-xs font-black tracking-widest text-indigo-300 uppercase flex items-center gap-2"><Music size={14} className="text-indigo-400"/> {t.lofiTrack}</label>
+                     <select value={selectedLofi} onChange={(e) => setSelectedLofi(e.target.value)} className="bg-slate-950/80 text-white text-[10px] font-bold outline-none rounded-xl px-3 py-1.5 border border-white/10 max-w-[140px] truncate shadow-inner focus:border-indigo-500 transition-all cursor-pointer">
                         {LOFI_STREAMS.map(stream => <option key={stream.url} value={stream.url}>{stream.name}</option>)}
                      </select>
                   </div>
-                  <input type="range" min="0" max="100" value={lofiVolume} onChange={e => setLofiVolume(Number(e.target.value))} className="w-full h-1.5 bg-slate-700/50 rounded-lg appearance-none cursor-pointer accent-indigo-400" />
+                  <input type="range" min="0" max="100" value={lofiVolume} onChange={e => setLofiVolume(Number(e.target.value))} className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all" />
                </div>
 
-               <div className="space-y-3">
+               <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                     <label className="text-[10px] font-black tracking-widest text-indigo-200 uppercase flex items-center gap-1"><CloudRain size={12}/> {t.ambientSound}</label>
-                     <select value={selectedAmbient} onChange={(e) => setSelectedAmbient(e.target.value)} className="bg-slate-900/50 text-white text-[10px] font-bold outline-none rounded-md px-2 py-1 border border-white/10 max-w-[120px] truncate">
+                     <label className="text-[10px] md:text-xs font-black tracking-widest text-violet-300 uppercase flex items-center gap-2"><CloudRain size={14} className="text-violet-400"/> {t.ambientSound}</label>
+                     <select value={selectedAmbient} onChange={(e) => setSelectedAmbient(e.target.value)} className="bg-slate-950/80 text-white text-[10px] font-bold outline-none rounded-xl px-3 py-1.5 border border-white/10 max-w-[140px] truncate shadow-inner focus:border-violet-500 transition-all cursor-pointer">
                         {AMBIENT_SOUNDS.map(sound => <option key={sound.url} value={sound.url}>{sound.name}</option>)}
                      </select>
                   </div>
-                  <input type="range" min="0" max="100" value={ambientVolume} onChange={e => setAmbientVolume(Number(e.target.value))} className="w-full h-1.5 bg-slate-700/50 rounded-lg appearance-none cursor-pointer accent-indigo-400" />
+                  <input type="range" min="0" max="100" value={ambientVolume} onChange={e => setAmbientVolume(Number(e.target.value))} className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-violet-500 hover:accent-violet-400 transition-all" />
                </div>
-            </div>
+            </motion.div>
          </div>
 
          {/* Mobile Floating Input Dock */}
