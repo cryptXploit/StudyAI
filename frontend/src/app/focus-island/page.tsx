@@ -97,15 +97,13 @@ function FocusIslandContent() {
   const [selectedAmbient, setSelectedAmbient] = useState(AMBIENT_SOUNDS[0].url);
 
   const ambientAudioRef = useRef<HTMLAudioElement | null>(null);
-  const playPromiseRef = useRef<Promise<void> | any>(null); // 🟢 AbortError Tracker
-
   // Multiplayer States
   const [roomCode, setRoomCode] = useState<string | null>(searchParams.get('room'));
   const [roomUsers, setRoomUsers] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
-
+  const lofiPlayerRef = useRef<any>(null);
   // 🟢 MOBILE UI STATES
-  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'history'|'config'>('none');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = React.useRef(0);
@@ -262,21 +260,30 @@ function FocusIslandContent() {
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
          {/* Background Audio Engine */}
-         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.01]">
+         <div className="absolute w-[1px] h-[1px] overflow-hidden opacity-100 pointer-events-none">
            <ReactPlayer 
+             ref={lofiPlayerRef}
              url={selectedLofi} 
              playing={isRunning && lofiVolume > 0} 
              volume={lofiVolume / 100} 
-             width="100%" 
-             height="100%"
+             width="10px" 
+             height="10px"
              config={{
                youtube: {
                  playerVars: {
                    controls: 0,
                    rel: 0,
+                   playsinline: 1,
                    origin: typeof window !== 'undefined' ? window.location.origin : 'https://www.prepia.app'
                  }
                }
+             }}
+             onReady={() => {
+                // If it mounts while running, ensure it plays
+                if (isRunning && lofiVolume > 0 && lofiPlayerRef.current) {
+                   const player = lofiPlayerRef.current.getInternalPlayer();
+                   if (player && player.playVideo) player.playVideo();
+                }
              }}
            />
            <audio ref={ambientAudioRef} loop />
@@ -343,7 +350,23 @@ function FocusIslandContent() {
                   <motion.button 
                     whileHover={{ scale: 1.05, boxShadow: "0px 0px 30px rgba(79,70,229,0.5)" }} 
                     whileTap={{ scale: 0.95 }} 
-                    onClick={() => setIsRunning(!isRunning)} 
+                    onClick={() => {
+                       const willRun = !isRunning;
+                       setIsRunning(willRun);
+                       
+                       // Synchronous play to bypass strict browser autoplay policies
+                       if (willRun) {
+                          if (lofiPlayerRef.current) {
+                             const player = lofiPlayerRef.current.getInternalPlayer();
+                             if (player && player.playVideo) player.playVideo();
+                          }
+                       } else {
+                          if (lofiPlayerRef.current) {
+                             const player = lofiPlayerRef.current.getInternalPlayer();
+                             if (player && player.pauseVideo) player.pauseVideo();
+                          }
+                       }
+                    }} 
                     className="px-12 py-5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black rounded-3xl flex items-center gap-3 shadow-[0_10px_40px_rgba(79,70,229,0.4)] border border-indigo-400/50 uppercase tracking-widest text-sm"
                   >
                      {isRunning ? <Pause size={20}/> : <Play size={20}/>} {isRunning ? t.pause : t.start}
