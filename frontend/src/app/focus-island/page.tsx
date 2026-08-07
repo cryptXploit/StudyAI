@@ -134,8 +134,11 @@ function FocusIslandContent() {
     }
 
     // Connect Socket
-    socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
-    return () => { if (socket) socket.disconnect(); };
+    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000', {
+       transports: ['websocket', 'polling']
+    });
+    socket = newSocket;
+    return () => { newSocket.disconnect(); };
   }, []);
 
   const fetchData = async () => {
@@ -176,21 +179,21 @@ function FocusIslandContent() {
     if (!audio) return;
 
     audio.volume = ambientVolume / 100;
+    
+    // Manage src imperatively to prevent uncatchable AbortErrors during React render
+    if (!audio.src || !audio.src.includes(selectedAmbient)) {
+      audio.src = selectedAmbient;
+    }
 
     if (isRunning && ambientVolume > 0) {
       const playPromise = audio.play();
       if (playPromise !== undefined) {
-        playPromise.then(() => {
-           // Playback started successfully
-        }).catch((error: any) => {
-          // Ignore AbortError caused by rapid play/pause toggling
+        playPromise.catch((error: any) => {
+          // Safely catch any AbortErrors
         });
       }
     } else {
-      // Small timeout to prevent immediate pause interrupting a pending play request
-      setTimeout(() => {
-         if (ambientAudioRef.current) ambientAudioRef.current.pause();
-      }, 50);
+      audio.pause();
     }
   }, [isRunning, ambientVolume, selectedAmbient]);
 
@@ -277,7 +280,7 @@ function FocusIslandContent() {
                }
              }}
            />
-           <audio ref={ambientAudioRef} src={selectedAmbient} loop />
+           <audio ref={ambientAudioRef} loop />
          </div>
 
          {/* 🟢 Mobile Smart Header */}
