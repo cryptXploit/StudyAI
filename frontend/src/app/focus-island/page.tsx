@@ -254,8 +254,25 @@ function FocusIslandContent() {
 
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
-         <div className="absolute opacity-0 pointer-events-none w-0 h-0 overflow-hidden">
-           <ReactPlayer {...({ url: selectedLofi, playing: isRunning && lofiVolume > 0, volume: lofiVolume / 100, loop: true, width: "10px", height: "10px" } as any)} />
+         {/* Hidden players */}
+         <div className="fixed top-[-2000px] left-[-2000px] w-[50px] h-[50px] pointer-events-none opacity-0">
+           <ReactPlayer 
+             url={selectedLofi} 
+             playing={isRunning && lofiVolume > 0} 
+             volume={lofiVolume / 100} 
+             width="100%" 
+             height="100%"
+             config={{
+               youtube: {
+                 playerVars: {
+                   autoplay: 1,
+                   controls: 0,
+                   rel: 0,
+                   origin: typeof window !== 'undefined' ? window.location.origin : 'https://www.prepia.app'
+                 }
+               }
+             }}
+           />
            <audio ref={ambientAudioRef} src={selectedAmbient} loop />
          </div>
 
