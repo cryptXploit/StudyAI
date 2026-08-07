@@ -9,6 +9,92 @@ import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import * as ics from 'ics';
 
+const translations = {
+  English: {
+    smartSync: "Smart Sync",
+    plannerSub: "1-Click Calendar Planner",
+    proFeature: "PRO TIER FEATURE",
+    targetSubject: "Target Subject",
+    examDate: "Exam Date",
+    subjectPlaceholder: "e.g., Final Physics Exam...",
+    generateRoadmap: "Generate Roadmap",
+    craftingStrategy: "Crafting Strategy...",
+    savedRoutines: "Saved Routines",
+    noRoutines: "No routines created yet.",
+    deadline: "Deadline:",
+    chat: "Chat",
+    roadmapAwaits: "Roadmap Awaits",
+    roadmapDesc: "Set your exam date and subject on the left to generate a strict, master study schedule.",
+    buildingStrategy: "Building Strategy...",
+    masteryPlan: "Mastery Plan",
+    daysFocused: "Days of focused study",
+    syncMobile: "Sync to Mobile",
+    day: "DAY",
+    reminder: "Reminder will trigger 15m before",
+    saved: "Saved",
+    newStrategy: "New Strategy",
+    timeoutError: "🚨 Timeout: Server took too long. Please try again.",
+    massiveRoutineError: "Please select an exam date within 90 days for optimal AI performance.",
+    failedCompile: "Failed to compile calendar file."
+  },
+  Bangla: {
+    smartSync: "স্মার্ট সিঙ্ক",
+    plannerSub: "১-ক্লিক ক্যালেন্ডার প্ল্যানার",
+    proFeature: "প্রো টায়ার ফিচার",
+    targetSubject: "নির্ধারিত বিষয়",
+    examDate: "পরীক্ষার তারিখ",
+    subjectPlaceholder: "যেমন: পদার্থবিজ্ঞান ফাইনাল পরীক্ষা...",
+    generateRoadmap: "রুটিন তৈরি করুন",
+    craftingStrategy: "কৌশল তৈরি হচ্ছে...",
+    savedRoutines: "সংরক্ষিত রুটিন",
+    noRoutines: "এখনো কোনো রুটিন তৈরি করা হয়নি।",
+    deadline: "শেষ তারিখ:",
+    chat: "চ্যাট",
+    roadmapAwaits: "রুটিন অপেক্ষা করছে",
+    roadmapDesc: "একটি কঠোর স্টাডি রুটিন তৈরি করতে বাম দিকে আপনার পরীক্ষার তারিখ এবং বিষয় সেট করুন।",
+    buildingStrategy: "কৌশল তৈরি হচ্ছে...",
+    masteryPlan: "মাস্টারি প্ল্যান",
+    daysFocused: "দিনের ফোকাসড স্টাডি",
+    syncMobile: "মোবাইলে সিঙ্ক করুন",
+    day: "দিন",
+    reminder: "১৫ মিনিট আগে রিমাইন্ডার ট্রিগার করবে",
+    saved: "সংরক্ষিত",
+    newStrategy: "নতুন কৌশল",
+    timeoutError: "🚨 টাইমআউট: সার্ভার বেশি সময় নিচ্ছে। আবার চেষ্টা করুন।",
+    massiveRoutineError: "সেরা পারফরম্যান্সের জন্য অনুগ্রহ করে ৯০ দিনের মধ্যে একটি পরীক্ষার তারিখ নির্বাচন করুন।",
+    failedCompile: "ক্যালেন্ডার ফাইল তৈরি করতে ব্যর্থ হয়েছে।"
+  },
+  Hindi: {
+    smartSync: "स्मार्ट सिंक",
+    plannerSub: "१-क्लिक कैलेंडर प्लानर",
+    proFeature: "प्रो टियर फीचर",
+    targetSubject: "निर्धारित विषय",
+    examDate: "परीक्षा की तिथि",
+    subjectPlaceholder: "जैसे: अंतिम भौतिकी परीक्षा...",
+    generateRoadmap: "रूटीन बनाएं",
+    craftingStrategy: "रणनीति बनाई जा रही है...",
+    savedRoutines: "सहेजे गए रूटीन",
+    noRoutines: "अभी तक कोई रूटीन नहीं बनाया गया है।",
+    deadline: "अंतिम तिथि:",
+    chat: "चैट",
+    roadmapAwaits: "रूटीन इंतजार कर रहा है",
+    roadmapDesc: "एक सख्त स्टडी रूटीन बनाने के लिए बाईं ओर अपनी परीक्षा की तिथि और विषय सेट करें।",
+    buildingStrategy: "रणनीति बनाई जा रही है...",
+    masteryPlan: "मास्टरी प्लान",
+    daysFocused: "दिनों का केंद्रित अध्ययन",
+    syncMobile: "मोबाइल से सिंक करें",
+    day: "दिन",
+    reminder: "रिमाइंडर 15 मिनट पहले ट्रिगर होगा",
+    saved: "सहेजा गया",
+    newStrategy: "नई रणनीति",
+    timeoutError: "🚨 टाइमआउट: सर्वर बहुत समय ले रहा है। कृपया पुनः प्रयास करें।",
+    massiveRoutineError: "सर्वोत्तम प्रदर्शन के लिए कृपया 90 दिनों के भीतर परीक्षा की तिथि चुनें।",
+    failedCompile: "कैलेंडर फ़ाइल बनाने में विफल।"
+  }
+};
+
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
+
 export default function CalendarSyncPage() {
   const supabase = createClient();
   const [topic, setTopic] = useState('');
@@ -16,6 +102,7 @@ export default function CalendarSyncPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [schedule, setSchedule] = useState<any>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [language, setLanguage] = useState<LanguageType>('English');
 
   const { tokens, tier, refreshTokens } = useTokens();
   const [showTokenModal, setShowTokenModal] = useState(false);
@@ -37,7 +124,14 @@ export default function CalendarSyncPage() {
     lastScrollY.current = currentScrollY;
   };
 
-  useEffect(() => { fetchHistory(); }, []);
+  useEffect(() => {
+    fetchHistory();
+    const loadSettings = () => {
+      const savedLang = localStorage.getItem('Prepia_language');
+      if (savedLang) setLanguage(savedLang as LanguageType);
+    };
+    loadSettings();
+  }, []);
 
   // 🟢 AGGRESSIVE CLIENT CACHING (API Spamming Fix)
   const fetchHistory = async () => {
@@ -75,7 +169,7 @@ export default function CalendarSyncPage() {
     // 🟢 LIMIT PROTECTOR: Prevent requesting massive routines (> 90 days)
     const daysLeft = Math.ceil((new Date(examDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
     if (daysLeft > 90) {
-      alert("Please select an exam date within 90 days for optimal AI performance.");
+      alert(translations[language].massiveRoutineError);
       return;
     }
 
@@ -99,7 +193,7 @@ export default function CalendarSyncPage() {
       const res = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ topic, examDate, language: 'English' }),
+        body: JSON.stringify({ topic, examDate, language }),
         signal: controller.signal // 🟢 Added Safety Signal
       });
 
@@ -128,7 +222,7 @@ export default function CalendarSyncPage() {
       }
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        alert(`🚨 Timeout: Server took too long. Please try again.`);
+        alert(translations[language].timeoutError);
       } else if (err.message && err.message !== "Failed to fetch" && !err.message.includes("Unexpected token")) {
         import('react-hot-toast').then((toast) => toast.default.error(err.message));
       } else {
@@ -168,7 +262,7 @@ export default function CalendarSyncPage() {
 
     ics.createEvents(events as any, (error, value) => {
       if (error) {
-        alert("Failed to compile calendar file.");
+        alert(translations[language].failedCompile);
         return;
       }
       const blob = new Blob([value], { type: 'text/calendar' });
@@ -180,6 +274,8 @@ export default function CalendarSyncPage() {
       URL.revokeObjectURL(url);
     });
   };
+
+  const t = translations[language];
 
   return (
     <SecureLayout>
@@ -194,7 +290,7 @@ export default function CalendarSyncPage() {
         {/* Left Panel: Premium Inputs & History (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative z-10">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-indigo-500 to-purple-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
-             <ShieldCheck size={12}/> PRO TIER FEATURE
+             <ShieldCheck size={12}/> {t.proFeature}
           </div>
 
           <div className="flex items-center gap-3 mb-8 mt-2">
@@ -202,14 +298,14 @@ export default function CalendarSyncPage() {
               <CalendarCheck size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-100 tracking-tight">Smart Sync</h2>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">1-Click Calendar Planner</p>
+              <h2 className="text-2xl font-black text-slate-100 tracking-tight">{t.smartSync}</h2>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t.plannerSub}</p>
             </div>
           </div>
 
           <form onSubmit={handleGenerate} className="space-y-5 mb-8">
             <div className="group">
-              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Target size={12}/> Target Subject</label>
+              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Target size={12}/> {t.targetSubject}</label>
               <div className="relative">
                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <BookOpen size={16} className="text-slate-500 group-focus-within:text-indigo-500 transition-colors"/>
@@ -218,7 +314,7 @@ export default function CalendarSyncPage() {
                    type="text"
                    value={topic}
                    onChange={e => setTopic(e.target.value)}
-                   placeholder="e.g., Final Physics Exam..."
+                   placeholder={t.subjectPlaceholder}
                    className="w-full pl-11 pr-4 py-4 bg-slate-900 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-200 placeholder:text-slate-300 shadow-inner transition-all"
                    required
                  />
@@ -226,7 +322,7 @@ export default function CalendarSyncPage() {
             </div>
 
             <div className="group">
-              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Clock size={12}/> Exam Date</label>
+              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Clock size={12}/> {t.examDate}</label>
               <input
                 type="date"
                 value={examDate}
@@ -239,18 +335,18 @@ export default function CalendarSyncPage() {
 
             <button type="submit" disabled={isLoading || !topic.trim() || !examDate} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-400 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-              {isLoading ? "Crafting Strategy..." : "Generate Roadmap"}
+              {isLoading ? t.craftingStrategy : t.generateRoadmap}
             </button>
           </form>
 
           {/* History Library */}
           <div className="mt-auto pt-6 border-t border-slate-800/50">
             <h3 className="text-xs font-black tracking-widest text-slate-500 uppercase mb-3 flex items-center gap-2">
-              <History size={14} className="text-indigo-400" /> Saved Routines
+              <History size={14} className="text-indigo-400" /> {t.savedRoutines}
             </h3>
             <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2 pb-4">
               {history.length === 0 ? (
-                <p className="text-xs text-slate-400 text-center py-4 bg-slate-900 rounded-xl">No routines created yet.</p>
+                <p className="text-xs text-slate-400 text-center py-4 bg-slate-900 rounded-xl">{t.noRoutines}</p>
               ) : (
                 history.map((item) => (
                   <div
@@ -260,7 +356,7 @@ export default function CalendarSyncPage() {
                   >
                     <div>
                        <p className="text-sm font-bold text-slate-300 truncate max-w-[180px]">{item.topic}</p>
-                       <p className="text-[10px] text-slate-500 font-mono mt-0.5">Deadline: {item.exam_date}</p>
+                       <p className="text-[10px] text-slate-500 font-mono mt-0.5">{t.deadline} {item.exam_date}</p>
                     </div>
                     <button onClick={(e) => deleteRoutine(item.id, e)} className="text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
                   </div>
@@ -276,10 +372,10 @@ export default function CalendarSyncPage() {
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-indigo-900/90 border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]`}>
             <div className="flex flex-col">
-              <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-indigo-400"><CalendarCheck size={16}/> Smart Sync</h2>
-              <p className="text-[9px] font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-widest">1-Click Calendar Planner</p>
+              <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-indigo-400"><CalendarCheck size={16}/> {t.smartSync}</h2>
+              <p className="text-[9px] font-bold text-slate-300 flex items-center gap-1.5 uppercase tracking-widest">{t.plannerSub}</p>
             </div>
-            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chat}</button>
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col p-0 relative bg-slate-950">
@@ -287,13 +383,13 @@ export default function CalendarSyncPage() {
           {!schedule && !isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60 p-10">
               <CalendarRange size={80} className="text-slate-300 mb-6" />
-              <h3 className="text-3xl font-black text-slate-400">Roadmap Awaits</h3>
-              <p className="text-slate-500 mt-2 max-w-sm">Set your exam date and subject on the left to generate a strict, master study schedule.</p>
+              <h3 className="text-3xl font-black text-slate-400">{t.roadmapAwaits}</h3>
+              <p className="text-slate-500 mt-2 max-w-sm">{t.roadmapDesc}</p>
             </div>
           ) : isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-10">
               <Loader2 size={48} className="text-indigo-500 animate-spin mb-4" />
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Building Strategy...</p>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">{t.buildingStrategy}</p>
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in duration-700 bg-slate-950">
@@ -302,11 +398,11 @@ export default function CalendarSyncPage() {
                <div className="p-8 border-b border-slate-700 bg-slate-900 flex justify-between items-center z-10 shadow-sm relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -z-10"></div>
                   <div>
-                    <h2 className="text-3xl font-black text-slate-200 mb-1">{topic} Mastery Plan</h2>
-                    <p className="text-indigo-600 text-xs font-bold uppercase tracking-widest flex items-center gap-1"><Target size={12}/> {schedule.routine.length} Days of focused study</p>
+                    <h2 className="text-3xl font-black text-slate-200 mb-1">{topic} {t.masteryPlan}</h2>
+                    <p className="text-indigo-600 text-xs font-bold uppercase tracking-widest flex items-center gap-1"><Target size={12}/> {schedule.routine.length} {t.daysFocused}</p>
                   </div>
                   <button onClick={downloadICS} className="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl flex items-center gap-2 shadow-lg transition-all active:scale-95">
-                    <Download size={18} className="text-indigo-400"/> Sync to Mobile
+                    <Download size={18} className="text-indigo-400"/> {t.syncMobile}
                   </button>
                </div>
 
@@ -325,7 +421,7 @@ export default function CalendarSyncPage() {
                                   <div className="w-3 h-3 rounded-full bg-slate-300 group-hover:bg-indigo-500 transition-colors"></div>
                                </div>
                                <div className="mt-2 text-center">
-                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">DAY {i+1}</p>
+                                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.day} {i+1}</p>
                                   <p className="text-xs font-bold text-slate-400">{day.date.split('-').slice(1).join('/')}</p>
                                </div>
                             </div>
@@ -342,7 +438,7 @@ export default function CalendarSyncPage() {
                                </div>
                                <p className="text-sm font-medium text-slate-500 leading-relaxed">{day.description}</p>
                                <div className="mt-4 flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                  <BellRing size={12}/> Reminder will trigger 15m before
+                                  <BellRing size={12}/> {t.reminder}
                                </div>
                             </div>
                           </div>
@@ -362,14 +458,14 @@ export default function CalendarSyncPage() {
                 onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
-                <History size={16}/> Saved
+                <History size={16}/> {t.saved}
               </button>
 
               <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(99,102,241,0.3)] transition-all active:scale-95 border border-indigo-400/50"
               >
-                <Sparkles size={18} /> New Strategy
+                <Sparkles size={18} /> {t.newStrategy}
               </button>
             </div>
           </div>
@@ -384,7 +480,7 @@ export default function CalendarSyncPage() {
 
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-indigo-400"/> Saved Routines</> : <><Sparkles size={18} className="text-indigo-400"/> New Strategy</>}
+                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-indigo-400"/> {t.savedRoutines}</> : <><Sparkles size={18} className="text-indigo-400"/> {t.newStrategy}</>}
               </h3>
             </div>
 
@@ -392,7 +488,7 @@ export default function CalendarSyncPage() {
               {isMobileDrawerOpen === 'history' ? (
                 <div className="space-y-3">
                   {history.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">No routines created yet.</p>
+                    <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">{t.noRoutines}</p>
                   ) : (
                     history.map(item => (
                       <div
@@ -406,7 +502,7 @@ export default function CalendarSyncPage() {
                       >
                         <div>
                            <p className="text-sm font-bold text-slate-200 truncate max-w-[180px] group-hover:text-indigo-300 transition-colors">{item.topic}</p>
-                           <p className="text-[10px] text-slate-500 font-mono mt-0.5">Deadline: {item.exam_date}</p>
+                           <p className="text-[10px] text-slate-500 font-mono mt-0.5">{t.deadline} {item.exam_date}</p>
                         </div>
                         <button onClick={(e) => deleteRoutine(item.id, e)} className="text-slate-500 hover:text-red-500 transition"><Trash2 size={14}/></button>
                       </div>
@@ -416,7 +512,7 @@ export default function CalendarSyncPage() {
               ) : (
                 <form onSubmit={(e) => { handleGenerate(e); if(topic.trim() && examDate) setIsMobileDrawerOpen('none'); }} className="space-y-5">
                   <div className="group">
-                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Target size={12}/> Target Subject</label>
+                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Target size={12}/> {t.targetSubject}</label>
                     <div className="relative">
                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           <BookOpen size={16} className="text-slate-500 group-focus-within:text-indigo-500 transition-colors"/>
@@ -425,7 +521,7 @@ export default function CalendarSyncPage() {
                          type="text"
                          value={topic}
                          onChange={e => setTopic(e.target.value)}
-                         placeholder="e.g., Final Physics Exam..."
+                         placeholder={t.subjectPlaceholder}
                          className="w-full pl-11 pr-4 py-4 bg-slate-950 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-200 placeholder:text-slate-300 shadow-inner transition-all"
                          required
                        />
@@ -433,7 +529,7 @@ export default function CalendarSyncPage() {
                   </div>
 
                   <div className="group">
-                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Clock size={12}/> Exam Date</label>
+                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-1"><Clock size={12}/> {t.examDate}</label>
                     <input
                       type="date"
                       value={examDate}
@@ -446,7 +542,7 @@ export default function CalendarSyncPage() {
 
                   <button type="submit" disabled={isLoading || !topic.trim() || !examDate} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-400 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 mt-4">
                     {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-                    {isLoading ? "Crafting Strategy..." : "Generate Roadmap"}
+                    {isLoading ? t.craftingStrategy : t.generateRoadmap}
                   </button>
                 </form>
               )}

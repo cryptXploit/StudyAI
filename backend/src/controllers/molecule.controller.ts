@@ -35,7 +35,6 @@ export async function moleculeInsightHandler(req: Request, res: Response): Promi
         .eq('compound_name', cacheKey)
         .eq('language', language)
         .maybeSingle();
-      
       cachedData = result.data;
     } catch (dbErr) {
       console.warn("🛡️ Database Cache Table missed or not ready. Flowing directly to LLM.");
@@ -50,17 +49,14 @@ export async function moleculeInsightHandler(req: Request, res: Response): Promi
     const cost = TOKEN_COSTS.MOLECULE_INSIGHT;
     if (tier.toLowerCase() !== 'pro') {
       const { data: userProfile, error: profileErr } = await supabase.from('profiles').select('tokens').eq('id', userId).single();
-      
       if (profileErr || !userProfile || userProfile.tokens < cost) {
         res.status(402).json({ error: 'INSUFFICIENT_TOKENS', required: cost });
         return;
       }
-      
-      
     }
 
     // 🟢 2. GENERATE NEW INSIGHT
-    const systemPrompt = `You are a brilliant Chemistry Lab Assistant.
+    let systemPrompt = `You are a brilliant Chemistry Lab Assistant.
 Provide a fascinating, easy-to-understand summary about the chemical compound "${safeCompoundName}".
 Include:
 1. Common medical, industrial, or daily uses.
@@ -69,10 +65,18 @@ Include:
 Keep it under 100 words, use bullet points with emojis.
 MANDATORY LANGUAGE: You MUST generate the ENTIRE response fluently in ${language.toUpperCase()}.`;
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    systemPrompt += strictLangInstruction;
+
     const router = new ModelRouter();
     const responseText = await router.generate([{ role: 'system', content: systemPrompt }], userId, tier, { temperature: 0.4 });
-    
-    // 🟢 3. SAVE TO CACHE (FIXED: Non-blocking pure async DB call without IIFE overhead)
+
+    // 🟢 3. SAVE TO CACHE (Non-blocking)
     void (async () => {
       try {
         const { error } = await supabase.from('molecule_insights').insert([{
@@ -87,15 +91,13 @@ MANDATORY LANGUAGE: You MUST generate the ENTIRE response fluently in ${language
       }
     })();
 
-    // Return the response immediately to the user
-    
-      // 🟢 DEDUCT TOKENS ONLY ON SUCCESS
-      if (tier.toLowerCase() !== 'pro') {
-        await applyCreditMutation({ userId, amount: -cost, reason: 'Molecule Insight Generator', idempotencyKey: `molecule:${userId}:${Date.now()}`, tier });
-      }
-      
-      res.json({ insight: responseText });
-    
+    // 🟢 DEDUCT TOKENS ONLY ON SUCCESS
+    if (tier.toLowerCase() !== 'pro') {
+      await applyCreditMutation({ userId, amount: -cost, reason: 'Molecule Insight Generator', idempotencyKey: `molecule:${userId}:${Date.now()}`, tier });
+    }
+
+    res.json({ insight: responseText });
+
   } catch (error: any) {
     console.error("🔥 Critical Molecule Handler Failure:", error.message);
     res.status(500).json({ error: error.message });

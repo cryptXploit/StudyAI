@@ -23,7 +23,13 @@ const translations = {
     comingSoon: "Exchange Store (Coming Soon)",
     comingSoonDesc: "Redeem or exchange your Aura and Karma for exclusive avatars, AI models, and career perks!",
     noHistory: "No Aura earned yet. Invite friends to a battle to start earning!",
-    earned: "Earned"
+    earned: "Earned",
+    premiumPerks: "Premium Perks",
+    chat: "Chat",
+    studyPower: "Study Power",
+    careerReputation: "Career Reputation",
+    noAuraYet: "No Aura Yet",
+    viewTransactionHistory: "View Transaction History"
   },
   Bangla: {
     title: "রিওয়ার্ড সেন্টার",
@@ -42,7 +48,13 @@ const translations = {
     comingSoon: "এক্সচেঞ্জ স্টোর (শীঘ্রই আসছে)",
     comingSoonDesc: "আপনার অরা এবং কার্মা এক্সচেঞ্জ করে স্পেশাল সুবিধা এবং ক্যারিয়ার পার্কস আনলক করুন!",
     noHistory: "এখনো কোনো অরা আয় হয়নি। বন্ধুদের ইনভাইট করে আয় শুরু করুন!",
-    earned: "অর্জিত"
+    earned: "অর্জিত",
+    premiumPerks: "প্রিমিয়াম সুবিধা",
+    chat: "চ্যাট",
+    studyPower: "স্টাডি পাওয়ার",
+    careerReputation: "ক্যারিয়ার রেপুটেশন",
+    noAuraYet: "এখনো কোনো অরা নেই",
+    viewTransactionHistory: "লেনদেনের ইতিহাস দেখুন"
   },
   Hindi: {
     title: "इनाम केंद्र",
@@ -61,7 +73,13 @@ const translations = {
     comingSoon: "एक्सचेंज स्टोर (जल्द आ रहा है)",
     comingSoonDesc: "प्रीमियम भत्तों और करियर लाभों के लिए अपने ऑरा और कर्मा का आदान-प्रदान करें!",
     noHistory: "अभी तक कोई ऑरा अर्जित नहीं किया। कमाने के लिए दोस्तों को आमंत्रित करें!",
-    earned: "अर्जित"
+    earned: "अर्जित",
+    premiumPerks: "प्रीमियम भत्ते",
+    chat: "चैट",
+    studyPower: "स्टडी पावर",
+    careerReputation: "करियर प्रतिष्ठा",
+    noAuraYet: "अभी तक कोई ऑरा नहीं",
+    viewTransactionHistory: "लेन-देन का इतिहास देखें"
   }
 };
 
@@ -174,9 +192,9 @@ export default function RewardsPage() {
       <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)]`}>
         <div className="flex flex-col">
           <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><Gift size={16} className="text-indigo-400"/> {t.title}</h2>
-          <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">Premium Perks</p>
+          <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.premiumPerks}</p>
         </div>
-        <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+        <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chat}</button>
       </div>
 
       <div ref={scrollRef} onScroll={handleScroll} className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 mt-4 font-sans h-[calc(100vh-140px)] lg:h-auto overflow-y-auto lg:overflow-visible custom-scrollbar">
@@ -208,7 +226,7 @@ export default function RewardsPage() {
                   <span className="text-2xl font-bold text-indigo-400">✨</span>
                 </div>
                 <div className="mt-6 inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/10">
-                  <TrendingUp size={14} className="text-emerald-400" /> Study Power
+                  <TrendingUp size={14} className="text-emerald-400" /> {t.studyPower}
                 </div>
               </div>
             </div>
@@ -227,7 +245,7 @@ export default function RewardsPage() {
                   <span className="text-2xl font-bold text-amber-500">🏆</span>
                 </div>
                 <div className="mt-6 inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/10">
-                  <Briefcase size={14} className="text-amber-400" /> Career Reputation
+                  <Briefcase size={14} className="text-amber-400" /> {t.careerReputation}
                 </div>
               </div>
             </div>
@@ -274,7 +292,7 @@ export default function RewardsPage() {
                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                   <Sparkles className="text-slate-300" size={32} />
                 </div>
-                <h4 className="text-lg font-bold text-slate-600 mb-2">No Aura Yet</h4>
+                <h4 className="text-lg font-bold text-slate-600 mb-2">{t.noAuraYet}</h4>
                 <p className="text-slate-400 text-sm max-w-sm">{t.noHistory}</p>
               </div>
             ) : (
@@ -314,7 +332,7 @@ export default function RewardsPage() {
             onClick={() => setIsMobileDrawerOpen('history')} 
             className="flex-1 flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400/50"
           >
-            <History size={18} /> View Transaction History
+            <History size={18} /> {t.viewTransactionHistory}
           </button>
         </div>
       </div>

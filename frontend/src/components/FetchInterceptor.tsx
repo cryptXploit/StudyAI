@@ -10,7 +10,14 @@ export default function FetchInterceptor() {
     const originalFetch = window.fetch;
 
     window.fetch = async (...args) => {
+      const [url, config] = args;
+      
+      // Skip interceptor for GET requests or any request without a POST method
+      const isPost = config?.method && config.method.toUpperCase() === 'POST';
+      
       const response = await originalFetch(...args);
+      
+      if (!isPost) return response;
       
       // Clone response to read body without consuming the original
       const clonedResponse = response.clone();

@@ -16,7 +16,8 @@ const translations = {
     cvText: "Paste CV / Experience (Optional if RAG selected)", cvPlaceholder: "Paste your raw resume text or key skills here...",
     generateBtn: "Hack My Career Strategy", generating: "Analyzing Profile & Target...",
     emailDraft: "Cold Email Draft", copyEmail: "Copy Email", copied: "Copied!",
-    cvTips: "CV Tailoring Suggestions", history: "Strategy History", noHistory: "No history found."
+    cvTips: "CV Tailoring Suggestions", history: "Strategy History", noHistory: "No history found.",
+    chat: "Chat", alertTarget: "Please enter the target description!", alertCv: "Please paste your CV text or select an indexed CV from RAG sources."
   },
   Bangla: {
     title: "ক্যারিয়ার হ্যাকার", subtitle: "কোল্ড ইমেইল ও ইন্টার্নশিপ টেইলর",
@@ -25,7 +26,8 @@ const translations = {
     cvText: "সিভি / অভিজ্ঞতা পেস্ট করুন (RAG সিলেক্ট করলে ঐচ্ছিক)", cvPlaceholder: "আপনার সিভির টেক্সট বা মূল স্কিলগুলো এখানে পেস্ট করুন...",
     generateBtn: "ক্যারিয়ার স্ট্র্যাটেজি তৈরি করুন", generating: "প্রোফাইল এবং টার্গেট বিশ্লেষণ করা হচ্ছে...",
     emailDraft: "কোল্ড ইমেইল ড্রাফট", copyEmail: "ইমেইল কপি করুন", copied: "কপি হয়েছে!",
-    cvTips: "সিভি পরিবর্তনের পরামর্শ", history: "স্ট্র্যাটেজি হিস্ট্রি", noHistory: "কোনো হিস্ট্রি পাওয়া যায়নি।"
+    cvTips: "সিভি পরিবর্তনের পরামর্শ", history: "স্ট্র্যাটেজি হিস্ট্রি", noHistory: "কোনো হিস্ট্রি পাওয়া যায়নি।",
+    chat: "চ্যাট", alertTarget: "অনুগ্রহ করে টার্গেট বিবরণ লিখুন!", alertCv: "অনুগ্রহ করে আপনার সিভির টেক্সট পেস্ট করুন অথবা RAG সোর্স থেকে একটি সিভি নির্বাচন করুন।"
   },
   Hindi: {
     title: "करियर हैकर", subtitle: "कोल्ड ईमेल और इंटर्नशिप टेलर",
@@ -34,7 +36,8 @@ const translations = {
     cvText: "सीवी / अनुभव पेस्ट करें (यदि RAG चुना गया है तो वैकल्पिक)", cvPlaceholder: "अपना सीवी टेक्स्ट या मुख्य कौशल यहां पेस्ट करें...",
     generateBtn: "करियर रणनीति बनाएं", generating: "प्रोफ़ाइल और लक्ष्य का विश्लेषण हो रहा है...",
     emailDraft: "कोल्ड ईमेल ड्राफ्ट", copyEmail: "ईमेल कॉपी करें", copied: "कॉपी हो गया!",
-    cvTips: "सीवी बदलने के सुझाव", history: "रणनीति इतिहास", noHistory: "कोई इतिहास नहीं मिला।"
+    cvTips: "सीवी बदलने के सुझाव", history: "रणनीति इतिहास", noHistory: "कोई इतिहास नहीं मिला।",
+    chat: "चैट", alertTarget: "कृपया लक्षित विवरण दर्ज करें!", alertCv: "कृपया अपना सीवी टेक्स्ट पेस्ट करें या RAG स्रोतों से एक सीवी चुनें।"
   }
 };
 
@@ -112,8 +115,8 @@ export default function CareerHackerPage() {
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!targetDesc.trim()) return alert("Please enter the target description!");
-    if (!cvText.trim() && selectedFileIds.length === 0) return alert("Please paste your CV text or select an indexed CV from RAG sources.");
+    if (!targetDesc.trim()) return alert(t.alertTarget);
+    if (!cvText.trim() && selectedFileIds.length === 0) return alert(t.alertCv);
 
     setIsLoading(true); setResult(null);
 
@@ -221,10 +224,10 @@ export default function CareerHackerPage() {
         {/* Mobile Smart Header */}
         <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0`}>
           <div className="flex flex-col">
-            <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><Briefcase size={16} className="text-indigo-400"/> Hacker</h2>
-            <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">Career Hacker</p>
+            <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><Briefcase size={16} className="text-indigo-400"/> {t.title}</h2>
+            <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.title}</p>
           </div>
-          <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-slate-100 shadow-md hover:bg-indigo-500">Chat</button>
+          <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-slate-100 shadow-md hover:bg-indigo-500">{t.chat}</button>
         </div>
 
         {/* Desktop Sidebar: Controls & RAG */}

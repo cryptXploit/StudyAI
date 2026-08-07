@@ -51,8 +51,15 @@ CRITICAL TONE & STYLE RULES:
 
     const userPrompt = buildStoryPrompt(topic, style, contextChunks);
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const messages = [
-      { role: 'system' as const, content: systemPrompt },
+      { role: 'system' as const, content: systemPrompt + strictLangInstruction },
       { role: 'user' as const, content: userPrompt }
     ];
 

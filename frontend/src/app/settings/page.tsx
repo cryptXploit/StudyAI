@@ -16,7 +16,13 @@ const translations = {
     preferencesSaved: "Preferences Saved!",
     saveChanges: "Save Changes",
     colorMode: "Color Mode (Theme)",
-    themeDesc: "Choose between light and dark modes for a comfortable viewing experience."
+    themeDesc: "Choose between light and dark modes for a comfortable viewing experience.",
+    lightMode: "Light Mode",
+    darkMode: "Dark Mode",
+    unlockMatrix: "Unlock the Matrix",
+    upgradePro: "Upgrade to Prepia PRO",
+    premiumDesc: "Get access to all premium AI micro-apps, high compute models (GPT-4 / Claude 3 Opus), and massive token limits.",
+    viewPricing: "View Pricing Plans"
   },
   Bangla: {
     globalSettings: "গ্লোবাল সেটিংস",
@@ -26,7 +32,13 @@ const translations = {
     preferencesSaved: "প্রেফারেন্স সেভ হয়েছে!",
     saveChanges: "পরিবর্তন সেভ করুন",
     colorMode: "কালার মোড (থিম)",
-    themeDesc: "আরামদায়ক ভিউইং এক্সপেরিয়েন্সের জন্য লাইট এবং ডার্ক মোডের মধ্যে বেছে নিন।"
+    themeDesc: "আরামদায়ক ভিউইং এক্সপেরিয়েন্সের জন্য লাইট এবং ডার্ক মোডের মধ্যে বেছে নিন।",
+    lightMode: "লাইট মোড",
+    darkMode: "ডার্ক মোড",
+    unlockMatrix: "ম্যাট্রিক্স আনলক করুন",
+    upgradePro: "Prepia PRO তে আপগ্রেড করুন",
+    premiumDesc: "সমস্ত প্রিমিয়াম AI মাইক্রো-অ্যাপ, উচ্চ কম্পিউট মডেল (GPT-4 / Claude 3 Opus) এবং বিশাল টোকেন লিমিটগুলির অ্যাক্সেস পান।",
+    viewPricing: "প্রাইসিং প্ল্যান দেখুন"
   },
   Hindi: {
     globalSettings: "ग्लोबल सेटिंग्स",
@@ -36,7 +48,13 @@ const translations = {
     preferencesSaved: "प्राथमिकताएं सहेजी गईं!",
     saveChanges: "परिवर्तन सहेजें",
     colorMode: "रंग मोड (थीम)",
-    themeDesc: "आरामदायक देखने के अनुभव के लिए लाइट और डार्क मोड के बीच चुनें।"
+    themeDesc: "आरामदायक देखने के अनुभव के लिए लाइट और डार्क मोड के बीच चुनें।",
+    lightMode: "लाइट मोड",
+    darkMode: "डार्क मोड",
+    unlockMatrix: "मैट्रिक्स अनलॉक करें",
+    upgradePro: "Prepia PRO में अपग्रेड करें",
+    premiumDesc: "सभी प्रीमियम AI माइक्रो-ऐप्स, उच्च कंप्यूट मॉडल (GPT-4 / Claude 3 Opus), और बड़े टोकन लिमिट्स तक पहुंच प्राप्त करें।",
+    viewPricing: "मूल्य निर्धारण योजनाएं देखें"
   }
 };
 
@@ -137,10 +155,10 @@ export default function SettingsPage() {
             {/* Theme Preference Section */}
             <div className="flex items-center gap-2 mb-4 mt-8 pt-8 border-t border-slate-700">
               <Palette size={18} className="text-pink-500" />
-              <h3 className="text-lg font-bold text-slate-200">{(t as any).colorMode || "Color Mode"}</h3>
+              <h3 className="text-lg font-bold text-slate-200">{t.colorMode}</h3>
             </div>
             <p className="text-sm text-slate-500 mb-6">
-              {(t as any).themeDesc || "Choose between light and dark modes."}
+              {t.themeDesc}
             </p>
             
             <div className="grid grid-cols-2 gap-4 mb-8">
@@ -149,14 +167,14 @@ export default function SettingsPage() {
                 className={`p-4 rounded-xl cursor-pointer border-2 text-center transition-all flex flex-col items-center gap-2 ${uiTheme === 'light' ? 'bg-indigo-50 border-indigo-500 shadow-sm' : 'bg-slate-900 border-slate-700 hover:border-indigo-300'}`}
               >
                 <Sun size={24} className={uiTheme === 'light' ? 'text-indigo-600' : 'text-slate-400'} />
-                <p className={`font-bold ${uiTheme === 'light' ? 'text-indigo-700' : 'text-slate-400'}`}>Light Mode</p>
+                <p className={`font-bold ${uiTheme === 'light' ? 'text-indigo-700' : 'text-slate-400'}`}>{t.lightMode}</p>
               </div>
               <div 
                 onClick={() => setUiTheme('dark')}
                 className={`p-4 rounded-xl cursor-pointer border-2 text-center transition-all flex flex-col items-center gap-2 ${uiTheme === 'dark' ? 'bg-slate-900 border-indigo-500 shadow-sm' : 'bg-slate-950 border-slate-700 hover:border-slate-800'}`}
               >
                 <Moon size={24} className={uiTheme === 'dark' ? 'text-indigo-400' : 'text-slate-400'} />
-                <p className={`font-bold ${uiTheme === 'dark' ? 'text-indigo-300' : 'text-slate-400'}`}>Dark Mode</p>
+                <p className={`font-bold ${uiTheme === 'dark' ? 'text-indigo-300' : 'text-slate-400'}`}>{t.darkMode}</p>
               </div>
             </div>
 
@@ -177,20 +195,20 @@ export default function SettingsPage() {
                 <Crown size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-black text-white">Unlock the Matrix</h3>
-                <p className="text-sm text-slate-400 font-medium">Upgrade to Prepia PRO</p>
+                <h3 className="text-lg font-black text-white">{t.unlockMatrix}</h3>
+                <p className="text-sm text-slate-400 font-medium">{t.upgradePro}</p>
               </div>
             </div>
             
             <p className="text-sm text-slate-500 mb-6 relative z-10">
-              Get access to all premium AI micro-apps, high compute models (GPT-4 / Claude 3 Opus), and massive token limits.
+              {t.premiumDesc}
             </p>
             
             <button 
               onClick={() => router.push('/pricing')}
               className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-xs rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all flex justify-center items-center gap-2 relative z-10"
             >
-              View Pricing Plans <ChevronRight size={16} />
+              {t.viewPricing} <ChevronRight size={16} />
             </button>
           </div>
         </div>

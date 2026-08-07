@@ -22,7 +22,30 @@ const translations = {
     deckAwaits: "Your Deck Awaits",
     awaitsDesc: "Provide a topic and select context files. AI will build a complete 16:9 presentation with speaker notes.",
     proBadge: "PRO TIER FEATURE",
-    copied: "Copied!"
+    copied: "Copied!",
+    deckTemplate: "Deck Template",
+    bgMotion: "Background motion",
+    contextFiles: "Context Files",
+    deckDesign: "Deck design",
+    saveChangesNote: "Use Save changes in Edit Slide to persist this deck design.",
+    mobileTemplateNote: "Template and motion changes are ready. Use Save changes in Edit Slide to keep them with this deck.",
+    saveToDevice: "Save to device",
+    liveShare: "Live Share",
+    livePresent: "Live Present",
+    chat: "Chat",
+    useArrowKeys: "Use Arrow Keys to Navigate",
+    editSlide: "Edit Slide",
+    closeEditor: "Close Editor",
+    script: "Script",
+    copySlide: "Copy Slide",
+    editSlideTitle: "Edit slide",
+    saveChanges: "Save changes",
+    editTitleLabel: "Title",
+    editPointsLabel: "Points (one per line)",
+    editNotesLabel: "Speaker notes",
+    newDeck: "New Deck",
+    done: "Done",
+    createDeck: "Create Deck"
   },
   Bangla: {
     title: "এআই স্লাইড ডেক মেকার",
@@ -37,7 +60,30 @@ const translations = {
     deckAwaits: "আপনার স্লাইডের অপেক্ষায়",
     awaitsDesc: "বামে টপিক এবং ফাইল সিলেক্ট করুন। এআই স্পিকার নোটস সহ একটি সম্পূর্ণ প্রেজেন্টেশন বানিয়ে দেবে।",
     proBadge: "প্রো-টিয়ার ফিচার",
-    copied: "কপি হয়েছে!"
+    copied: "কপি হয়েছে!",
+    deckTemplate: "ডেক টেমপ্লেট",
+    bgMotion: "ব্যাকগ্রাউন্ড মোশন",
+    contextFiles: "কনটেক্সট ফাইল",
+    deckDesign: "ডেক ডিজাইন",
+    saveChangesNote: "এই ডেক ডিজাইন সেভ করতে Edit Slide থেকে Save changes ব্যবহার করুন।",
+    mobileTemplateNote: "টেম্পলেট এবং মোশন চেঞ্জ রেডি। এই ডেকের সাথে সেভ রাখতে Edit Slide থেকে Save changes ব্যবহার করুন।",
+    saveToDevice: "ডিভাইসে সেভ করুন",
+    liveShare: "লাইভ শেয়ার",
+    livePresent: "লাইভ প্রেজেন্ট",
+    chat: "চ্যাট",
+    useArrowKeys: "নেভিগেট করতে Arrow Keys ব্যবহার করুন",
+    editSlide: "স্লাইড এডিট করুন",
+    closeEditor: "এডিটর বন্ধ করুন",
+    script: "স্ক্রিপ্ট",
+    copySlide: "স্লাইড কপি করুন",
+    editSlideTitle: "স্লাইড এডিট করুন",
+    saveChanges: "পরিবর্তন সেভ করুন",
+    editTitleLabel: "শিরোনাম",
+    editPointsLabel: "পয়েন্টস (প্রতি লাইনে একটি)",
+    editNotesLabel: "স্পিকার নোটস",
+    newDeck: "নতুন ডেক",
+    done: "সম্পন্ন",
+    createDeck: "ডেক তৈরি করুন"
   },
   Hindi: {
     title: "AI स्लाइड डेक मेकर",
@@ -52,7 +98,30 @@ const translations = {
     deckAwaits: "आपके डेक की प्रतीक्षा में",
     awaitsDesc: "बाईं ओर अपना विषय और फ़ाइलें चुनें। AI स्पीकर नोट्स के साथ एक संपूर्ण प्रस्तुति तैयार करेगा।",
     proBadge: "प्रो टियर फ़ीचर",
-    copied: "कॉपी किया गया!"
+    copied: "कॉपी किया गया!",
+    deckTemplate: "डेक टेम्प्लेट",
+    bgMotion: "बैकग्राउंड मोशन",
+    contextFiles: "संदर्भ फ़ाइलें",
+    deckDesign: "डेक डिज़ाइन",
+    saveChangesNote: "इस डेक डिज़ाइन को सहेजने के लिए Edit Slide में Save changes का उपयोग करें।",
+    mobileTemplateNote: "टेम्प्लेट और मोशन परिवर्तन तैयार हैं। इन्हें इस डेक के साथ सहेजने के लिए Edit Slide में Save changes का उपयोग करें।",
+    saveToDevice: "डिवाइस में सहेजें",
+    liveShare: "लाइव शेयर",
+    livePresent: "लाइव प्रेजेंट",
+    chat: "चैट",
+    useArrowKeys: "नेविगेट करने के लिए Arrow Keys का उपयोग करें",
+    editSlide: "स्लाइड संपादित करें",
+    closeEditor: "संपादक बंद करें",
+    script: "स्क्रिप्ट",
+    copySlide: "स्लाइड कॉपी करें",
+    editSlideTitle: "स्लाइड संपादित करें",
+    saveChanges: "परिवर्तन सहेजें",
+    editTitleLabel: "शीर्षक",
+    editPointsLabel: "बिंदु (प्रति पंक्ति एक)",
+    editNotesLabel: "स्पीकर नोट्स",
+    newDeck: "नया डेक",
+    done: "संपन्न",
+    createDeck: "डेक बनाएं"
   }
 };
 
@@ -74,10 +143,10 @@ const animationStyles = [
 ] as const;
 type AnimationStyle = typeof animationStyles[number]['id'];
 
-function TemplatePicker({ value, onChange, compact = false }: { value: TemplateId; onChange: (value: TemplateId) => void; compact?: boolean }) {
+function TemplatePicker({ value, onChange, compact = false, label = "Deck Template" }: { value: TemplateId; onChange: (value: TemplateId) => void; compact?: boolean; label?: string }) {
   return (
     <div>
-      <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-3 flex items-center gap-2"><LayoutTemplate size={14} /> Deck Template</label>
+      <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-3 flex items-center gap-2"><LayoutTemplate size={14} /> {label}</label>
       <div className={`grid grid-cols-2 ${compact ? 'gap-2' : 'gap-3'}`}>
         {presentationTemplates.map((template) => (
           <button key={template.id} type="button" onClick={() => onChange(template.id)} className={`text-left rounded-xl border p-3 transition-all ${value === template.id ? 'border-violet-400 ring-1 ring-violet-400 bg-violet-500/15' : 'border-slate-800 bg-slate-900 hover:border-slate-600'}`}>
@@ -91,9 +160,9 @@ function TemplatePicker({ value, onChange, compact = false }: { value: TemplateI
   );
 }
 
-function AnimationPicker({ value, onChange }: { value: AnimationStyle; onChange: (value: AnimationStyle) => void }) {
+function AnimationPicker({ value, onChange, label = "Background motion" }: { value: AnimationStyle; onChange: (value: AnimationStyle) => void; label?: string }) {
   return <div>
-    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-3">Background motion</label>
+    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-3">{label}</label>
     <div className="flex flex-wrap gap-2">{animationStyles.map((style) => <button key={style.id} type="button" onClick={() => onChange(style.id)} className={`px-3 py-2 rounded-xl text-xs font-black border transition ${value === style.id ? 'bg-violet-500/20 border-violet-400 text-violet-200' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-600'}`}>{style.name}</button>)}</div>
   </div>;
 }
@@ -443,12 +512,12 @@ export default function PresentationPage() {
               </div>
             </div>
 
-            <TemplatePicker value={templateId} onChange={setTemplateId} />
-            <AnimationPicker value={animationStyle} onChange={setAnimationStyle} />
+            <TemplatePicker value={templateId} onChange={setTemplateId} label={t.deckTemplate} />
+            <AnimationPicker value={animationStyle} onChange={setAnimationStyle} label={t.bgMotion} />
 
             {/* Context Files */}
             <div>
-              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-3">Context Files</label>
+              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-3">{t.contextFiles}</label>
               <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
                 {files.map(file => (
                   <div key={file.id} onClick={() => {
@@ -513,10 +582,10 @@ export default function PresentationPage() {
               <button onClick={() => { setIsDesktopTemplateOpen((open) => !open); setIsDesktopShareOpen(false); }} aria-label="Presentation template" className="p-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white shadow-lg"><LayoutTemplate size={18}/></button>
               {isDesktopTemplateOpen && (
                 <div className="absolute right-0 top-14 w-[360px] max-h-[calc(100vh-110px)] overflow-y-auto p-5 rounded-2xl bg-slate-950 border border-slate-700 shadow-2xl space-y-6 custom-scrollbar">
-                  <div className="flex items-center justify-between"><h3 className="font-black text-white">Deck design</h3><button onClick={() => setIsDesktopTemplateOpen(false)} className="text-slate-400 hover:text-white"><X size={18}/></button></div>
-                  <TemplatePicker value={templateId} onChange={slidesData ? updateDeckTemplate : setTemplateId} />
-                  <AnimationPicker value={animationStyle} onChange={slidesData ? updateDeckAnimation : setAnimationStyle} />
-                  {slidesData && <p className="text-xs text-slate-400">Use <strong>Save changes</strong> in Edit Slide to persist this deck design.</p>}
+                  <div className="flex items-center justify-between"><h3 className="font-black text-white">{t.deckDesign}</h3><button onClick={() => setIsDesktopTemplateOpen(false)} className="text-slate-400 hover:text-white"><X size={18}/></button></div>
+                  <TemplatePicker value={templateId} onChange={slidesData ? updateDeckTemplate : setTemplateId} label={t.deckTemplate} />
+                  <AnimationPicker value={animationStyle} onChange={slidesData ? updateDeckAnimation : setAnimationStyle} label={t.bgMotion} />
+                  {slidesData && <p className="text-xs text-slate-400">{t.saveChangesNote}</p>}
                 </div>
               )}
             </div>
@@ -524,13 +593,13 @@ export default function PresentationPage() {
               <button onClick={() => { setIsDesktopShareOpen((open) => !open); setIsDesktopTemplateOpen(false); }} aria-label="Presentation share options" className="p-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg"><Share2 size={18}/></button>
               {isDesktopShareOpen && (
                 <div className="absolute right-0 top-14 w-48 p-2 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl space-y-1">
-                  <button onClick={() => { downloadPresentation(); setIsDesktopShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Download size={15}/> Save to device</button>
-                  <button onClick={() => { void shareLivePresentation(); setIsDesktopShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Share2 size={15}/> Live Share</button>
-                  <button onClick={() => { void openLivePresentation(); setIsDesktopShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><MonitorUp size={15}/> Live Present</button>
+                  <button onClick={() => { downloadPresentation(); setIsDesktopShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Download size={15}/> {t.saveToDevice}</button>
+                  <button onClick={() => { void shareLivePresentation(); setIsDesktopShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Share2 size={15}/> {t.liveShare}</button>
+                  <button onClick={() => { void openLivePresentation(); setIsDesktopShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><MonitorUp size={15}/> {t.livePresent}</button>
                 </div>
               )}
             </div>
-            <button onClick={() => window.location.href='/chat'} className="px-3 py-3 font-black rounded-xl transition uppercase tracking-wider text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg">Chat</button>
+            <button onClick={() => window.location.href='/chat'} className="px-3 py-3 font-black rounded-xl transition uppercase tracking-wider text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg">{t.chat}</button>
           </div>
 
           {/* Mobile Smart Header */}
@@ -542,12 +611,12 @@ export default function PresentationPage() {
             <div className="relative flex items-center gap-1.5">
               <button onClick={() => setIsMobileDrawerOpen('template')} aria-label="Presentation template" className="p-2 rounded-lg bg-violet-600 text-white shadow-md"><LayoutTemplate size={16}/></button>
               <button onClick={() => setIsMobileShareOpen((open) => !open)} aria-label="Presentation share options" className="p-2 rounded-lg bg-emerald-600 text-white shadow-md"><Share2 size={16}/></button>
-              <button onClick={() => window.location.href='/chat'} className="px-2 py-2 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+              <button onClick={() => window.location.href='/chat'} className="px-2 py-2 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chat}</button>
               {isMobileShareOpen && (
                 <div className="absolute right-0 top-11 w-48 p-2 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl z-50 space-y-1">
-                  <button onClick={() => { downloadPresentation(); setIsMobileShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Download size={15}/> Save to device</button>
-                  <button onClick={() => { void shareLivePresentation(); setIsMobileShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Share2 size={15}/> Live Share</button>
-                  <button onClick={() => { void openLivePresentation(); setIsMobileShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><MonitorUp size={15}/> Live Present</button>
+                  <button onClick={() => { downloadPresentation(); setIsMobileShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Download size={15}/> {t.saveToDevice}</button>
+                  <button onClick={() => { void shareLivePresentation(); setIsMobileShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><Share2 size={15}/> {t.liveShare}</button>
+                  <button onClick={() => { void openLivePresentation(); setIsMobileShareOpen(false); }} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left text-xs font-bold text-slate-200 hover:bg-slate-800"><MonitorUp size={15}/> {t.livePresent}</button>
                 </div>
               )}
             </div>
@@ -628,24 +697,24 @@ export default function PresentationPage() {
                   <button onClick={() => setCurrentSlideIndex(p => Math.min(slidesData.slides.length - 1, p + 1))} disabled={currentSlideIndex === slidesData.slides.length - 1} className="flex-1 lg:flex-none p-3 lg:p-3 bg-slate-900 lg:bg-white border border-slate-800 lg:border-slate-200 hover:bg-slate-800 lg:hover:bg-slate-100 disabled:opacity-50 rounded-xl transition-all shadow-sm flex justify-center items-center">
                     <ChevronRight size={20} className="text-slate-300 lg:text-slate-700"/>
                   </button>
-                  <span className="text-xs font-bold text-slate-500 lg:text-slate-400 ml-2 hidden lg:block">Use Arrow Keys to Navigate</span>
+                  <span className="text-xs font-bold text-slate-500 lg:text-slate-400 ml-2 hidden lg:block">{t.useArrowKeys}</span>
                 </div>
 
                 <div className="flex gap-3 w-full lg:w-auto">
                   <button onClick={openLivePresentation} className="flex-1 lg:flex-none justify-center flex items-center gap-2 px-4 py-3 lg:py-2.5 rounded-xl text-sm font-bold transition-all border bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400/30">
-                    <MonitorUp size={16} /> Live Present
+                    <MonitorUp size={16} /> {t.livePresent}
                   </button>
                   <button onClick={downloadPresentation} className="flex-1 lg:flex-none justify-center flex items-center gap-2 px-4 py-3 lg:py-2.5 rounded-xl text-sm font-bold transition-all border bg-slate-900 lg:bg-white text-slate-300 lg:text-slate-600 border-slate-800 lg:border-slate-200">
-                    <Download size={16} /> Save to device
+                    <Download size={16} /> {t.saveToDevice}
                   </button>
                   <button onClick={() => setIsEditing((current) => !current)} className={`flex-1 lg:flex-none justify-center flex items-center gap-2 px-4 py-3 lg:py-2.5 rounded-xl text-sm font-bold transition-all border ${isEditing ? 'bg-violet-500/20 text-violet-400 border-violet-500/50' : 'bg-slate-900 lg:bg-white text-slate-300 lg:text-slate-600 border-slate-800 lg:border-slate-200'}`}>
-                    <Pencil size={16} /> {isEditing ? 'Close Editor' : 'Edit Slide'}
+                    <Pencil size={16} /> {isEditing ? t.closeEditor : t.editSlide}
                   </button>
                   <button onClick={() => setShowNotes(!showNotes)} className={`flex-1 lg:flex-none justify-center flex items-center gap-2 px-4 py-3 lg:py-2.5 rounded-xl text-sm font-bold transition-all border ${showNotes ? 'bg-violet-500/20 lg:bg-violet-100 text-violet-400 lg:text-violet-700 border-violet-500/50 lg:border-violet-200' : 'bg-slate-900 lg:bg-white text-slate-300 lg:text-slate-600 border-slate-800 lg:border-slate-200 hover:bg-slate-800 lg:hover:bg-slate-50'}`}>
-                    <Mic size={16} /> Script
+                    <Mic size={16} /> {t.script}
                   </button>
                   <button onClick={copySlideText} className="flex-1 lg:flex-none justify-center flex items-center gap-2 px-4 py-3 lg:py-2.5 rounded-xl text-sm font-bold transition-all border bg-slate-900 lg:bg-white text-slate-300 lg:text-slate-600 border-slate-800 lg:border-slate-200 hover:bg-slate-800 lg:hover:bg-slate-50 shadow-sm">
-                    {copied ? <Check size={16} className="text-emerald-400 lg:text-emerald-500"/> : <Copy size={16} />} {copied ? t.copied : "Copy Slide"}
+                    {copied ? <Check size={16} className="text-emerald-400 lg:text-emerald-500"/> : <Copy size={16} />} {copied ? t.copied : t.copySlide}
                   </button>
                 </div>
               </div>
@@ -653,29 +722,29 @@ export default function PresentationPage() {
               {isEditing && (
                 <div className="mt-4 p-5 bg-slate-900 lg:bg-white border border-violet-500/30 lg:border-violet-200 rounded-2xl shadow-xl space-y-4">
                   <div className="flex items-center justify-between gap-3">
-                    <h4 className="font-black text-slate-100 lg:text-slate-800 flex items-center gap-2"><Pencil size={16} className="text-violet-400" /> Edit slide {currentSlideIndex + 1}</h4>
+                    <h4 className="font-black text-slate-100 lg:text-slate-800 flex items-center gap-2"><Pencil size={16} className="text-violet-400" /> {t.editSlideTitle} {currentSlideIndex + 1}</h4>
                     <button onClick={saveDeckEdits} disabled={!activeDeckId || isSavingDeck} className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:bg-slate-700 text-white text-sm font-black flex items-center gap-2">
-                      {isSavingDeck ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} Save changes
+                      {isSavingDeck ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />} {t.saveChanges}
                     </button>
                   </div>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Title
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{t.editTitleLabel}
                     <input value={slidesData.slides[currentSlideIndex].title} onChange={(e) => updateCurrentSlide('title', e.target.value)} className="mt-2 w-full rounded-xl border border-slate-700 lg:border-slate-200 bg-slate-950 lg:bg-slate-50 text-slate-100 lg:text-slate-800 p-3 font-semibold outline-none focus:ring-2 focus:ring-violet-500" />
                   </label>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Points (one per line)
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{t.editPointsLabel}
                     <textarea value={slidesData.slides[currentSlideIndex].points.join('\n')} onChange={(e) => updateCurrentSlide('points', e.target.value)} rows={5} className="mt-2 w-full rounded-xl border border-slate-700 lg:border-slate-200 bg-slate-950 lg:bg-slate-50 text-slate-100 lg:text-slate-800 p-3 font-medium outline-none focus:ring-2 focus:ring-violet-500" />
                   </label>
-                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">Speaker notes
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">{t.editNotesLabel}
                     <textarea value={slidesData.slides[currentSlideIndex].speakerNotes || ''} onChange={(e) => updateCurrentSlide('speakerNotes', e.target.value)} rows={4} className="mt-2 w-full rounded-xl border border-slate-700 lg:border-slate-200 bg-slate-950 lg:bg-slate-50 text-slate-100 lg:text-slate-800 p-3 font-medium outline-none focus:ring-2 focus:ring-violet-500" />
                   </label>
-                  <TemplatePicker value={templateId} onChange={updateDeckTemplate} compact />
-                  <AnimationPicker value={animationStyle} onChange={updateDeckAnimation} />
+                  <TemplatePicker value={templateId} onChange={updateDeckTemplate} compact label={t.deckTemplate} />
+                  <AnimationPicker value={animationStyle} onChange={updateDeckAnimation} label={t.bgMotion} />
                 </div>
               )}
 
               {/* Speaker Notes Drawer */}
               {showNotes && (
                 <div className="mt-4 p-5 bg-amber-500/10 lg:bg-amber-50 border border-amber-500/30 lg:border-amber-200 rounded-2xl shadow-inner animate-in slide-in-from-bottom-4">
-                  <h4 className="text-xs font-black text-amber-500 lg:text-amber-600 uppercase tracking-widest flex items-center gap-2 mb-2"><Mic size={14}/> Script</h4>
+                  <h4 className="text-xs font-black text-amber-500 lg:text-amber-600 uppercase tracking-widest flex items-center gap-2 mb-2"><Mic size={14}/> {t.script}</h4>
                   <p className="text-sm font-medium text-amber-200 lg:text-amber-900 leading-relaxed">
                     {slidesData.slides[currentSlideIndex].speakerNotes}
                   </p>
@@ -718,7 +787,7 @@ export default function PresentationPage() {
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all active:scale-95 border border-violet-400/50"
               >
-                <Sparkles size={18} /> Create Deck
+                <Sparkles size={18} /> {t.createDeck}
               </button>
             </div>
           </div>
@@ -735,7 +804,7 @@ export default function PresentationPage() {
 
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-violet-400"/> {t.historyTitle}</> : isMobileDrawerOpen === 'template' ? <><LayoutTemplate size={18} className="text-violet-400"/> Deck design</> : <><Sparkles size={18} className="text-violet-400"/> New Deck</>}
+              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-violet-400"/> {t.historyTitle}</> : isMobileDrawerOpen === 'template' ? <><LayoutTemplate size={18} className="text-violet-400"/> {t.deckDesign}</> : <><Sparkles size={18} className="text-violet-400"/> {t.newDeck}</>}
             </h3>
           </div>
 
@@ -767,10 +836,10 @@ export default function PresentationPage() {
               </div>
             ) : isMobileDrawerOpen === 'template' ? (
               <div className="space-y-6 pb-8">
-                <TemplatePicker value={templateId} onChange={slidesData ? updateDeckTemplate : setTemplateId} />
-                <AnimationPicker value={animationStyle} onChange={slidesData ? updateDeckAnimation : setAnimationStyle} />
-                {slidesData && <p className="text-xs text-slate-400 leading-relaxed">Template and motion changes are ready. Use <strong>Save changes</strong> in Edit Slide to keep them with this deck.</p>}
-                <button onClick={() => setIsMobileDrawerOpen('none')} className="w-full py-3 rounded-xl bg-violet-600 text-white font-black">Done</button>
+                <TemplatePicker value={templateId} onChange={slidesData ? updateDeckTemplate : setTemplateId} label={t.deckTemplate} />
+                <AnimationPicker value={animationStyle} onChange={slidesData ? updateDeckAnimation : setAnimationStyle} label={t.bgMotion} />
+                {slidesData && <p className="text-xs text-slate-400 leading-relaxed">{t.mobileTemplateNote}</p>}
+                <button onClick={() => setIsMobileDrawerOpen('none')} className="w-full py-3 rounded-xl bg-violet-600 text-white font-black">{t.done}</button>
               </div>
             ) : (
               <form onSubmit={(e) => { submitPresentation(e); if(topic.trim()) setIsMobileDrawerOpen('none'); }} className="space-y-5">
@@ -801,7 +870,7 @@ export default function PresentationPage() {
 
                 {/* Context Files */}
                 <div>
-                  <label className="block text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3">Context Files</label>
+                  <label className="block text-[11px] font-black tracking-widest text-slate-400 uppercase mb-3">{t.contextFiles}</label>
                   <div className="space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
                     {files.map(file => (
                       <div key={file.id} onClick={() => {

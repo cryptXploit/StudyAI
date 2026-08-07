@@ -42,7 +42,14 @@ const translations = {
     matchGame: "Match Game",
     dragAnswerHere: "Drag correct answer here",
     gameComplete: "Awesome! You matched all correctly! 🎉",
-    playAgain: "Play Again"
+    playAgain: "Play Again",
+    backToChat: "Back to AI Chat",
+    filesTab: "Files",
+    library: "Library",
+    knowledgeBase: "Knowledge Base",
+    noIndexedNotes: "No Indexed Notes Found",
+    incorrect: "Incorrect",
+    matched: "Matched"
   },
   Bangla: {
     brainDeck: "ব্রেইন ডেক",
@@ -68,7 +75,14 @@ const translations = {
     matchGame: "ম্যাচিং গেম",
     dragAnswerHere: "সঠিক উত্তরটি টেনে এখানে বসান",
     gameComplete: "অসাধারণ! আপনি সব কটি সঠিকভাবে মিলিয়েছেন! 🎉",
-    playAgain: "আবার খেলুন"
+    playAgain: "আবার খেলুন",
+    backToChat: "এআই চ্যাটে ফিরে যান",
+    filesTab: "ফাইল",
+    library: "লাইব্রেরি",
+    knowledgeBase: "নলেজ বেস",
+    noIndexedNotes: "কোনো ইনডেক্স করা নোট পাওয়া যায়নি",
+    incorrect: "ভুল",
+    matched: "মিলেছে"
   },
   Hindi: {
     brainDeck: "ब्रेन डेक",
@@ -94,7 +108,14 @@ const translations = {
     matchGame: "मैच गेम",
     dragAnswerHere: "सही उत्तर को खींचकर यहां छोड़ें",
     gameComplete: "बहुत बढ़िया! आपने सभी का सही मिलान किया! 🎉",
-    playAgain: "फिर से खेलें"
+    playAgain: "फिर से खेलें",
+    backToChat: "एआई चैट पर वापस जाएं",
+    filesTab: "फ़ाइलें",
+    library: "पुस्तकालय",
+    knowledgeBase: "ज्ञानकोष",
+    noIndexedNotes: "कोई अनुक्रमित नोट्स नहीं मिले",
+    incorrect: "गलत",
+    matched: "मिलान किया गया"
   }
 };
 
@@ -512,7 +533,7 @@ function FlashcardsPageContent() {
                       onClick={() => router.push('/chat')}
                       className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-black text-sm bg-indigo-600 text-white hover:bg-indigo-700 transition-all shadow-md uppercase tracking-wider"
                     >
-                      💬 Back to AI Chat
+                      💬 {t.backToChat}
                     </button>
                     <div className="flex bg-slate-700/60 p-1.5 rounded-2xl shadow-inner">
                       <button
@@ -645,7 +666,7 @@ function FlashcardsPageContent() {
                                {matchedPairs.includes(i) ? (
                                  <div className="p-4 bg-emerald-600 text-white rounded-xl font-medium animate-in zoom-in duration-300">
                                    <div className="flex items-center gap-2 mb-1 opacity-80 text-sm">
-                                      <CheckCircle2 size={16} /> Matched
+                                      <CheckCircle2 size={16} /> {t.matched}
                                    </div>
                                    <ReactMarkdown remarkPlugins={[remarkMath, remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize, rehypeKatex]}>{card.a}</ReactMarkdown>
                                  </div>
@@ -656,7 +677,7 @@ function FlashcardsPageContent() {
                                    className="w-full h-24 rounded-xl border-2 border-dashed border-slate-300 bg-slate-950 flex items-center justify-center text-slate-400 font-medium transition hover:border-indigo-400 hover:bg-indigo-50/50"
                                  >
                                    {wrongMatch === i ? (
-                                     <span className="text-red-500 flex items-center gap-2"><X size={18}/> Incorrect</span>
+                                     <span className="text-red-500 flex items-center gap-2"><X size={18}/> {t.incorrect}</span>
                                    ) : (
                                      <span className="flex items-center gap-2"><Puzzle size={18}/> {t.dragAnswerHere}</span>
                                    )}
@@ -698,10 +719,10 @@ function FlashcardsPageContent() {
             {/* Mobile Action Pills */}
             <div className="flex gap-2 overflow-x-auto mb-3 pointer-events-auto custom-scrollbar-hide px-1 pb-1">
               <button onClick={() => setIsMobileDrawerOpen('files')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${selectedFileIds.length > 0 ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-slate-900 border-slate-700 text-slate-400'}`}>
-                <BookOpen size={12}/> Files {selectedFileIds.length > 0 && `(${selectedFileIds.length})`}
+                <BookOpen size={12}/> {t.filesTab} {selectedFileIds.length > 0 && `(${selectedFileIds.length})`}
               </button>
               <button onClick={() => setIsMobileDrawerOpen('history')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-900 border-slate-700 text-slate-400">
-                <History size={12}/> Library
+                <History size={12}/> {t.library}
               </button>
             </div>
 
@@ -734,8 +755,8 @@ function FlashcardsPageContent() {
 
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-slate-200">
-              {isMobileDrawerOpen === 'files' && <><BookOpen size={18} className="text-indigo-500"/> Knowledge Base</>}
-              {isMobileDrawerOpen === 'history' && <><History size={18} className="text-indigo-500"/> Saved Decks</>}
+              {isMobileDrawerOpen === 'files' && <><BookOpen size={18} className="text-indigo-500"/> {t.knowledgeBase}</>}
+              {isMobileDrawerOpen === 'history' && <><History size={18} className="text-indigo-500"/> {t.savedDecks}</>}
             </h3>
           </div>
 
@@ -743,7 +764,7 @@ function FlashcardsPageContent() {
           {isMobileDrawerOpen === 'files' && (
             <div className="space-y-2 pb-10">
               {files.length === 0 ? (
-                <div className="text-center mt-4 p-6 border-2 border-dashed rounded-3xl border-slate-700 bg-slate-950"><p className="text-sm text-slate-500 font-medium">No Indexed Notes Found</p></div>
+                <div className="text-center mt-4 p-6 border-2 border-dashed rounded-3xl border-slate-700 bg-slate-950"><p className="text-sm text-slate-500 font-medium">{t.noIndexedNotes}</p></div>
               ) : (
                 files.map(file => (
                   <div key={file.id} onClick={() => toggleFile(file.id)}

@@ -74,10 +74,17 @@ export async function voiceProcessHandler(req: Request, res: Response): Promise<
     // 2. LLM Processing
     const languageInstructions: Record<string, string> = {
       English: 'Reply only in natural, warm conversational English.',
-      Bengali: 'Reply only in natural Bangla/Bengali written in Bangla script. Do not use English unless the user explicitly asks for it.',
+      Bangla: 'Reply only in natural Bangla/Bengali written in Bangla script. Do not use English unless the user explicitly asks for it.',
       Hindi: 'Reply only in natural Hindi written in Devanagari script. Do not use English unless the user explicitly asks for it.',
     };
     const selectedLanguage = languageInstructions[language] || languageInstructions.English;
+
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
 
     const systemPrompt = `You are a lively, friendly, and engaging AI Podcast Host/Conversational Partner. 
 You are having a real-time voice conversation with the user.
@@ -86,7 +93,7 @@ CRITICAL RULES:
 1. Speak like a thoughtful human conversation partner, not a robotic assistant.
 2. Keep your answers brief and easy to hear: normally 1-2 sentences maximum.
 3. DO NOT use markdown, emojis, asterisks (*), hashtags, or lists. Your text will be sent directly to a Text-To-Speech engine.
-4. MANDATORY LANGUAGE: ${selectedLanguage}`;
+4. MANDATORY LANGUAGE: ${selectedLanguage}${strictLangInstruction}`;
 
     const messages = [
       { role: 'system', content: systemPrompt },
@@ -106,7 +113,7 @@ CRITICAL RULES:
     // 3. TTS with Edge-TTS
     const tts = new MsEdgeTTS();
     let voiceName = "en-US-AriaNeural";
-    if (language === 'Bengali') voiceName = "bn-BD-NabanitaNeural";
+    if (language === 'Bangla') voiceName = "bn-BD-NabanitaNeural";
     if (language === 'Hindi') voiceName = "hi-IN-SwaraNeural";
 
     await tts.setMetadata(voiceName, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);

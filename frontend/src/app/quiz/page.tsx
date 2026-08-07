@@ -27,7 +27,7 @@ const translations = {
     previous: "Previous", next: "Next", submitExam: "Submit Exam", examCompleted: "Exam Completed!",
     youScored: "You scored", outOf: "out of", yourAnswer: "Your Answer:", skipped: "Skipped",
     correctAnswer: "Correct Answer:", explanation: "Explanation:", takeAnother: "Take Another Quiz",
-    generatedLatexCode: "Generated LaTeX Code", copyCode: "Copy Code", close: "Close"
+    generatedLatexCode: "Generated LaTeX Code", copyCode: "Copy Code", close: "Close", joinBattle: "Join a Battle", enterRoomCode: "Enter a Room Code to compete live with others.", join: "Join", joinBattleArena: "Join Battle Arena", menu: "Menu", coursesMax1: "Courses (Max 1)", chaptersMulti: "Chapters (Multi Select)", topicsMulti: "Topics (Multi Select)", backToChat: "Back to Chat", backToAIChat: "Back to AI Chat", battle: "Battle", egRoomCode: "e.g. A7B9XX"
   },
   Bangla: {
     newQuiz: "নতুন কুইজ", pastResults: "পূর্বের ফলাফল", studyMaterials: "RAG সোর্স",
@@ -115,7 +115,7 @@ function QuizGeneratorPageContent() {
   const [language, setLanguage] = useState<LanguageType>('English');
   const [uiTheme, setUiTheme] = useState<'dark'|'light'>('dark');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const t = translations[language] || translations['English'];
+  const t = (translations[language] || translations['English']) as any;
 
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [requiredTokensForModal, setRequiredTokensForModal] = useState(5);
@@ -408,7 +408,7 @@ function QuizGeneratorPageContent() {
             {/* Mobile Sidebar Close Button */}
             {isMobileSidebarOpen && (
               <div className="flex justify-between items-center mb-4 md:hidden">
-                <span className={`font-black text-lg ${uiTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>Menu</span>
+                <span className={`font-black text-lg ${uiTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{t.menu}</span>
                 <button onClick={() => setIsMobileSidebarOpen(false)} className={`p-2 rounded-full ${uiTheme === 'dark' ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'}`}>
                   <X size={18} />
                 </button>
@@ -422,7 +422,7 @@ function QuizGeneratorPageContent() {
               <History size={18} /> {t.pastResults}
             </button>
             <button onClick={() => { setActiveTab('join-arena'); setIsMobileSidebarOpen(false); }} className={`flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl shadow-lg font-black tracking-wide transition-all active:scale-95 mb-8 border ${activeTab === 'join-arena' ? 'bg-gradient-to-r from-amber-500 to-orange-500 border-amber-400 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]' : (uiTheme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-amber-400 hover:border-amber-500 hover:bg-slate-800' : 'bg-white border-amber-300 text-amber-600 hover:border-amber-400')}`}>
-              <Target size={18} /> Join Battle Arena
+              <Target size={18} /> {t.joinBattleArena}
             </button>
 
           {/* RAG Materials */}
@@ -445,7 +445,7 @@ function QuizGeneratorPageContent() {
             <div className={`pt-2 border-t ${uiTheme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
               <h3 className={`text-[11px] font-black tracking-widest uppercase mb-3 flex items-center gap-1.5 ${uiTheme === 'dark' ? 'text-amber-500' : 'text-amber-600'}`}><ListTree size={14}/> {t.syllabusVault}</h3>
               
-              <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>Courses (Max 1)</p>
+              <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>{t.coursesMax1}</p>
               <div className="space-y-1.5">
                 {syllabuses.map(syl => (
                   <div key={syl.id} onClick={() => handleSyllabusSelect(syl.id)} className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer text-xs font-bold transition-all border ${selectedSyllabusId === syl.id ? (uiTheme === 'dark' ? 'bg-amber-500/20 border-amber-500 text-amber-400' : 'bg-amber-50 border-amber-500 text-amber-700') : (uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300')}`}>
@@ -457,7 +457,7 @@ function QuizGeneratorPageContent() {
 
               {selectedSyllabusId && availableChapters.length > 0 && (
                 <div className={`mt-3 pl-2 border-l-2 space-y-1.5 ${uiTheme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}>
-                  <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>Chapters (Multi Select)</p>
+                  <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>{t.chaptersMulti}</p>
                   {availableChapters.map((chap: any) => (
                     <div key={chap.id} onClick={() => toggleChapterSelection(chap.id)} className={`flex items-center gap-2 p-1.5 rounded-lg cursor-pointer text-[11px] font-bold transition-all border ${selectedChapterIds.includes(chap.id) || selectedChapterIds.length === 0 ? (uiTheme === 'dark' ? 'bg-amber-500/10 border-amber-500/50 text-amber-400' : 'bg-amber-50 border-amber-300 text-amber-700') : (uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600' : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300')}`}>
                       {(selectedChapterIds.includes(chap.id) || selectedChapterIds.length === 0) ? <CheckCircle2 size={12} className={uiTheme === 'dark' ? 'text-amber-500 shrink-0' : 'text-amber-500 shrink-0'}/> : <Circle size={12} className={`shrink-0 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}/>}
@@ -469,7 +469,7 @@ function QuizGeneratorPageContent() {
 
               {selectedSyllabusId && availableTopics.length > 0 && (
                 <div className={`mt-3 pl-4 border-l-2 ${uiTheme === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}>
-                  <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}><Target size={10}/> Topics (Multi Select)</p>
+                  <p className={`text-[9px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}><Target size={10}/> {t.topicsMulti}</p>
                   <div className="flex flex-wrap gap-1">
                     {availableTopics.map((topic: string, idx: number) => (
                       <button key={idx} onClick={() => toggleTopicSelection(topic)} className={`text-[9px] font-black tracking-wide px-1.5 py-0.5 rounded border transition-all ${selectedTopics.includes(topic) ? (uiTheme === 'dark' ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-emerald-50 border-emerald-500 text-emerald-700') : (uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600' : 'bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-300')}`}>
@@ -491,7 +491,7 @@ function QuizGeneratorPageContent() {
             <button 
                onClick={() => setIsMobileSidebarOpen(true)} 
                className={`flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl font-black uppercase tracking-widest shadow-xl border transition-all active:scale-95 ${uiTheme === 'dark' ? 'bg-slate-800/90 border-slate-600 text-white shadow-[0_0_15px_rgba(0,0,0,0.5)] backdrop-blur-md' : 'bg-white border-slate-300 text-slate-800 shadow-[0_0_15px_rgba(0,0,0,0.1)]'}`}>
-               <Menu size={18} /> Menu
+               <Menu size={18} /> {t.menu}
             </button>
             <button 
                onClick={() => { setActiveTab('join-arena'); setAppState('config'); }} 
@@ -626,13 +626,13 @@ function QuizGeneratorPageContent() {
           {activeTab === 'join-arena' && (
             <div className={`max-w-2xl mx-auto animate-in fade-in zoom-in duration-300 flex flex-col items-center justify-center py-12 p-8 rounded-3xl border shadow-sm ${uiTheme === 'dark' ? 'bg-slate-800/50 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
               <Target size={64} className={`mb-6 ${uiTheme === 'dark' ? 'text-amber-500' : 'text-amber-600'}`} />
-              <h1 className={`text-3xl font-black mb-2 text-center ${uiTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'}`}>Join a Battle</h1>
-              <p className={`mb-8 text-center font-bold ${uiTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>Enter a Room Code to compete live with others.</p>
+              <h1 className={`text-3xl font-black mb-2 text-center ${uiTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'}`}>{t.joinBattle}</h1>
+              <p className={`mb-8 text-center font-bold ${uiTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>{t.enterRoomCode}</p>
 
               <div className="flex flex-col md:flex-row items-center gap-4 w-full max-w-md">
                 <input 
                   type="text" 
-                  placeholder="e.g. A7B9XX" 
+                  placeholder={t.egRoomCode} 
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value.toUpperCase())} 
                   className={`w-full px-6 py-4 border font-black text-2xl rounded-2xl outline-none focus:border-indigo-500 text-center uppercase tracking-widest transition-all ${uiTheme === 'dark' ? 'bg-slate-900 border-slate-700 text-emerald-400' : 'bg-white border-slate-300 text-emerald-600'}`} 
@@ -643,7 +643,7 @@ function QuizGeneratorPageContent() {
                   className="w-full md:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-lg rounded-2xl transition-all active:scale-95 disabled:opacity-50"
                   disabled={roomCode.length < 3}
                 >
-                  Join
+                  {t.join}
                 </button>
               </div>
             </div>
@@ -663,7 +663,7 @@ function QuizGeneratorPageContent() {
             <div className="max-w-3xl mx-auto h-full flex flex-col animate-in fade-in duration-300">
               <div className={`flex flex-col md:flex-row justify-between items-center mb-8 pb-4 border-b gap-4 ${uiTheme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
                 <div className="flex items-center gap-4">
-                  <button onClick={() => router.push('/chat')} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs md:text-sm bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 transition-all active:scale-95 shadow-lg uppercase tracking-wider">💬 <span className="hidden sm:inline">Back to AI Chat</span></button>
+                  <button onClick={() => router.push('/chat')} className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-xs md:text-sm bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 transition-all active:scale-95 shadow-lg uppercase tracking-wider">💬 <span className="hidden sm:inline">{t.backToAIChat}</span></button>
                   <h2 className={`text-xl md:text-2xl font-black ${uiTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>{t.question} {currentQIndex + 1} {t.of} {questions.length}</h2>
                 </div>
                 {timeLimit > 0 && (

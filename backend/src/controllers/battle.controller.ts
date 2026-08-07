@@ -40,10 +40,17 @@ export async function generateBattleHandler(req: Request, res: Response): Promis
     }
 
     // 🟢 Strict Prompt to structure the versus data
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const systemPrompt = `You are an Elite Academic Concept Analyzer.
 Compare the two concepts provided by the user. 
 Output ONLY a valid JSON object. No markdown wrapping outside the JSON.
-Translate the ENTIRE output (headers, table content, pros, cons) into ${language.toUpperCase()}.
+Translate the ENTIRE output (headers, table content, pros, cons) into ${language.toUpperCase()}.${strictLangInstruction}
 
 JSON SCHEMA TO FOLLOW:
 {

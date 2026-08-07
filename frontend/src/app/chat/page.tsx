@@ -25,7 +25,10 @@ const translations = {
     howCanIAssist: "How can I assist you?", assistDesc: "Select your study materials from the sidebar and ask me to explain concepts, solve problems, or summarize topics.",
     copyAnswer: "Copy Answer", copied: "Copied!", thinking: "Thinking and retrieving memory...",
     placeholderEmpty: "Please select a file or syllabus to start...", placeholderActive: "Ask anything about selected topics...",
-    noHistory: "No chat history found."
+    noHistory: "No chat history found.",
+    interactiveConcept: "Interactive Concept:", suggestedNextSteps: "Suggested Next Steps", files: "Files", syllabus: "Syllabus",
+    newChat: "New Chat", ragKnowledgeBase: "RAG Knowledge Base", noSyllabusFound: "No Syllabus Found", courseMax1: "Course (Max 1)",
+    chaptersMultiSelect: "Chapters (Multi Select)", topicsMultiSelect: "Topics (Multi Select)", done: "Done"
   },
   Bangla: {
     startNewChat: "নতুন চ্যাট শুরু করুন", chatHistory: "চ্যাট হিস্ট্রি", knowledgeBase: "RAG সোর্স",
@@ -34,7 +37,10 @@ const translations = {
     howCanIAssist: "আমি আপনাকে কীভাবে সাহায্য করতে পারি?", assistDesc: "সাইডবার থেকে আপনার স্টাডি ম্যাটেরিয়াল বেছে নিন এবং আমাকে ধারণাগুলো ব্যাখ্যা করতে বা সমস্যা সমাধান করতে বলুন।",
     copyAnswer: "উত্তর কপি করুন", copied: "কপি হয়েছে!", thinking: "চিন্তা করছি এবং মেমরি খুঁজছি...",
     placeholderEmpty: "শুরু করতে একটি ফাইল বা সিলেবাস নির্বাচন করুন...", placeholderActive: "নির্বাচিত টপিক সম্পর্কে জিজ্ঞাসা করুন...",
-    noHistory: "কোনো চ্যাট হিস্ট্রি নেই।"
+    noHistory: "কোনো চ্যাট হিস্ট্রি নেই।",
+    interactiveConcept: "ইন্টারেক্টিভ কনসেপ্ট:", suggestedNextSteps: "প্রস্তাবিত পরবর্তী পদক্ষেপ", files: "ফাইলসমূহ", syllabus: "সিলেবাস",
+    newChat: "নতুন চ্যাট", ragKnowledgeBase: "RAG নলেজ বেস", noSyllabusFound: "কোনো সিলেবাস পাওয়া যায়নি", courseMax1: "কোর্স (সর্বোচ্চ ১)",
+    chaptersMultiSelect: "অধ্যায় (একাধিক নির্বাচন)", topicsMultiSelect: "বিষয় (একাধিক নির্বাচন)", done: "সম্পন্ন"
   },
   Hindi: {
     startNewChat: "नई चैट शुरू करें", chatHistory: "चैट इतिहास", knowledgeBase: "RAG स्रोत",
@@ -117,7 +123,7 @@ export default function ChatPage() {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'files'|'syllabus'|'menu'>('none');
 
   const [language, setLanguage] = useState<LanguageType>('English');
-  const t = translations[language] || translations['English'];
+  const t = (translations[language] || translations['English']) as any;
   const [uiTheme, setUiTheme] = useState<'dark'|'light'>('dark');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -494,7 +500,7 @@ export default function ChatPage() {
             <div className={`pt-4 border-t ${uiTheme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
               <h3 className="text-[11px] font-black tracking-widest text-amber-500 uppercase mb-3 flex items-center gap-1.5"><ListTree size={14}/> {t.syllabusVault}</h3>
               
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Course (Max 1)</p>
+              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">{t.courseMax1}</p>
               <div className="space-y-1.5">
                 {syllabuses.map(syl => (
                   <div key={syl.id} onClick={() => handleSyllabusSelect(syl.id)} className={`flex items-center gap-2 p-2 rounded-xl cursor-pointer text-xs font-bold transition-all border ${selectedSyllabusId === syl.id ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : (uiTheme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300')}`}>
@@ -506,7 +512,7 @@ export default function ChatPage() {
 
               {selectedSyllabusId && availableChapters.length > 0 && (
                 <div className={`mt-3 pl-2 border-l-2 ${uiTheme === 'dark' ? 'border-slate-800' : 'border-slate-200'} space-y-1.5`}>
-                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Chapters (Multi Select)</p>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">{t.chaptersMultiSelect}</p>
                   {availableChapters.map((chap: any) => (
                     <div key={chap.id} onClick={() => toggleChapterSelection(chap.id)} className={`flex items-center gap-2 p-1.5 rounded-lg cursor-pointer text-[11px] font-bold transition-all border ${selectedChapterIds.includes(chap.id) || selectedChapterIds.length === 0 ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : (uiTheme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-500' : 'bg-slate-50 border-slate-200 text-slate-500')}`}>
                       {(selectedChapterIds.includes(chap.id) || selectedChapterIds.length === 0) ? <CheckCircle2 size={12} className="text-amber-400 shrink-0"/> : <Circle size={12} className="text-slate-600 shrink-0"/>}
@@ -518,7 +524,7 @@ export default function ChatPage() {
 
               {selectedSyllabusId && availableTopics.length > 0 && (
                 <div className={`mt-3 pl-4 border-l-2 ${uiTheme === 'dark' ? 'border-slate-800' : 'border-slate-200'}`}>
-                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1"><Target size={10}/> Topics (Multi Select)</p>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 flex items-center gap-1"><Target size={10}/> {t.topicsMultiSelect}</p>
                   <div className="flex flex-wrap gap-1">
                     {availableTopics.map((topic: string, idx: number) => (
                       <button key={idx} onClick={() => toggleTopicSelection(topic)} className={`text-[9px] font-black tracking-wide px-1.5 py-0.5 rounded border transition-all ${selectedTopics.includes(topic) ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' : (uiTheme === 'dark' ? 'bg-slate-900 border-slate-700 text-slate-500' : 'bg-slate-50 border-slate-200 text-slate-500')}`}>
@@ -575,7 +581,7 @@ export default function ChatPage() {
                       {msg.role === 'assistant' && msg.simulation && (
                         <div className="mt-6 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
                           <div className="flex items-center gap-2 text-cyan-400 font-black uppercase tracking-widest text-xs mb-3">
-                            <MonitorPlay size={16} /> Interactive Concept: {msg.simulation.title}
+                            <MonitorPlay size={16} /> {t.interactiveConcept} {msg.simulation.title}
                           </div>
                           {/* 🟢 SPONSORSHIP BADGE (COMMENTED OUT FOR NOW)
                           <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-800 rounded-lg border border-slate-700 text-[10px] text-slate-400 font-bold tracking-widest uppercase mb-3 w-fit">
@@ -591,7 +597,7 @@ export default function ChatPage() {
                       {/* 🟢 INTELLIGENT SUGGESTED ACTIONS (ANTI-LAYOUT CHIPS) */}
                       {msg.role === 'assistant' && msg.suggestions && msg.suggestions.length > 0 && (
                         <div className="mt-5 flex flex-col gap-2 border-t border-slate-700/30 pt-4">
-                          <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-black mb-1">Suggested Next Steps</p>
+                          <p className="text-[10px] uppercase tracking-widest text-indigo-400 font-black mb-1">{t.suggestedNextSteps}</p>
                           {msg.suggestions.map((suggestion, sIdx) => {
                              const IconMap: Record<string, any> = {
                                'quiz': BrainCircuit, 'podcast': Headphones, 'flashcards': Layers, 'molecule': Beaker,
@@ -644,7 +650,7 @@ export default function ChatPage() {
                           {activeSimulation && (
                             <div className="mt-6 bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg">
                               <div className="flex items-center gap-2 text-cyan-400 font-black uppercase tracking-widest text-xs mb-3">
-                                <MonitorPlay size={16} /> Interactive Concept: {activeSimulation.title}
+                                <MonitorPlay size={16} /> {t.interactiveConcept} {activeSimulation.title}
                               </div>
                               <div className="w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-950 aspect-video relative">
                                 <iframe src={activeSimulation.embed_url} width="100%" height="100%" className="absolute inset-0 border-none" allowFullScreen />
@@ -667,13 +673,13 @@ export default function ChatPage() {
             {/* Mobile Action Pills */}
             <div className="flex gap-2 overflow-x-auto lg:hidden mb-3 pointer-events-auto custom-scrollbar-hide px-1 pb-1">
               <button onClick={() => setIsMobileDrawerOpen('files')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${selectedFileIds.length > 0 ? (uiTheme === 'dark' ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' : 'bg-indigo-50 border-indigo-200 text-indigo-600') : (uiTheme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-600')}`}>
-                <FileText size={12}/> Files {selectedFileIds.length > 0 && `(${selectedFileIds.length})`}
+                <FileText size={12}/> {t.files} {selectedFileIds.length > 0 && `(${selectedFileIds.length})`}
               </button>
               <button onClick={() => setIsMobileDrawerOpen('syllabus')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${selectedSyllabusId ? (uiTheme === 'dark' ? 'bg-amber-500/20 border-amber-500/50 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-600') : (uiTheme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-600')}`}>
-                <ListTree size={12}/> Syllabus {selectedSyllabusId && <CheckCircle2 size={12} className="ml-1"/>}
+                <ListTree size={12}/> {t.syllabus} {selectedSyllabusId && <CheckCircle2 size={12} className="ml-1"/>}
               </button>
               <button onClick={handleNewChat} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${uiTheme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-emerald-400' : 'bg-white border-slate-200 text-emerald-600'}`}>
-                <PlusCircle size={12}/> New Chat
+                <PlusCircle size={12}/> {t.newChat}
               </button>
             </div>
 
@@ -703,7 +709,7 @@ export default function ChatPage() {
           
           <div className="flex justify-between items-center mb-4">
             <h3 className={`text-lg font-black tracking-tight flex items-center gap-2 ${uiTheme === 'dark' ? 'text-slate-100' : 'text-slate-800'}`}>
-              {isMobileDrawerOpen === 'files' ? <><FileText size={18} className="text-indigo-500"/> RAG Knowledge Base</> : <><ListTree size={18} className="text-amber-500"/> Syllabus Vault</>}
+              {isMobileDrawerOpen === 'files' ? <><FileText size={18} className="text-indigo-500"/> {t.ragKnowledgeBase}</> : <><ListTree size={18} className="text-amber-500"/> {t.syllabusVault}</>}
             </h3>
             <button onClick={() => setIsMobileDrawerOpen('none')} className={`p-1.5 rounded-full transition-colors ${uiTheme === 'dark' ? 'bg-slate-800 text-slate-400 hover:bg-slate-700' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}><X size={16}/></button>
           </div>
@@ -726,10 +732,10 @@ export default function ChatPage() {
           {isMobileDrawerOpen === 'syllabus' && (
             <div className="pb-10">
               {syllabuses.length === 0 ? (
-                 <div className={`text-center mt-4 p-6 border-2 border-dashed rounded-3xl ${uiTheme === 'dark' ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white'}`}><p className="text-sm text-slate-500 font-medium">No Syllabus Found</p></div>
+                 <div className={`text-center mt-4 p-6 border-2 border-dashed rounded-3xl ${uiTheme === 'dark' ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white'}`}><p className="text-sm text-slate-500 font-medium">{t.noSyllabusFound}</p></div>
               ) : (
                 <>
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Course (Max 1)</p>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">{t.courseMax1}</p>
                   <div className="space-y-2 mb-6">
                     {syllabuses.map(syl => (
                       <div key={syl.id} onClick={() => handleSyllabusSelect(syl.id)} className={`flex items-center gap-3 p-4 rounded-2xl cursor-pointer text-sm font-bold transition-all border-2 active:scale-95 ${selectedSyllabusId === syl.id ? 'bg-amber-500/10 border-amber-500/50 text-amber-500' : (uiTheme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-300' : 'bg-white border-slate-100 text-slate-700 shadow-sm')}`}>
@@ -741,7 +747,7 @@ export default function ChatPage() {
 
                   {selectedSyllabusId && availableChapters.length > 0 && (
                     <div className="space-y-4">
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-t border-slate-200 dark:border-slate-800 pt-4">Chapters (Multi Select)</p>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-t border-slate-200 dark:border-slate-800 pt-4">{t.chaptersMultiSelect}</p>
                       {availableChapters.map((chap: any) => (
                         <div key={chap.id} onClick={() => toggleChapterSelection(chap.id)} className={`flex items-center gap-3 p-3.5 rounded-xl cursor-pointer text-sm font-bold transition-all border-2 active:scale-95 ${selectedChapterIds.includes(chap.id) || selectedChapterIds.length === 0 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400' : (uiTheme === 'dark' ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-100 text-slate-600')}`}>
                           {(selectedChapterIds.includes(chap.id) || selectedChapterIds.length === 0) ? <CheckCircle2 size={16} className="text-amber-400 shrink-0"/> : <Circle size={16} className="text-slate-500 shrink-0"/>}
@@ -753,7 +759,7 @@ export default function ChatPage() {
 
                   {selectedSyllabusId && availableTopics.length > 0 && (
                     <div className="mt-6">
-                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5 border-t border-slate-200 dark:border-slate-800 pt-4"><Target size={14}/> Topics (Multi Select)</p>
+                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-1.5 border-t border-slate-200 dark:border-slate-800 pt-4"><Target size={14}/> {t.topicsMultiSelect}</p>
                       <div className="flex flex-wrap gap-2">
                         {availableTopics.map((topic: string, idx: number) => (
                           <button key={idx} onClick={() => toggleTopicSelection(topic)} className={`text-[11px] font-black tracking-wide px-3 py-2 rounded-xl border-2 transition-all active:scale-95 ${selectedTopics.includes(topic) ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-500' : (uiTheme === 'dark' ? 'bg-slate-900 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-600')}`}>
@@ -771,7 +777,7 @@ export default function ChatPage() {
           {/* Mobile Bottom Sheet Done Button */}
           <div className={`sticky bottom-0 left-0 w-full pt-4 pb-2 bg-gradient-to-t ${uiTheme === 'dark' ? 'from-slate-900 via-slate-900 to-transparent' : 'from-white via-white to-transparent'}`}>
             <button onClick={() => setIsMobileDrawerOpen('none')} className={`w-full py-3 rounded-xl font-black tracking-wide shadow-md transition-all active:scale-95 flex justify-center items-center gap-2 ${uiTheme === 'dark' ? 'bg-indigo-600 text-white' : 'bg-indigo-600 text-white'}`}>
-              <CheckCircle2 size={16}/> Done
+              <CheckCircle2 size={16}/> {t.done}
             </button>
           </div>
         </div>

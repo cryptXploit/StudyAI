@@ -8,6 +8,101 @@ import { createClient } from '@/lib/supabase/client';
 import { Flame, CheckCircle2, Gift, UserCheck, CalendarDays, Loader2, Zap, Activity, Target, Settings, Share2, RefreshCcw, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
+
+const translations = {
+  English: {
+    headerTitle: "Daily Quests & Bounties",
+    headerSubtitle: "Complete tasks to earn tokens and unlock premium AI features.",
+    heatmapTitle: "Your Consistency Heatmap",
+    heatmapSubtitle: "Last 52 Weeks",
+    heatmapLess: "Less",
+    heatmapMore: "More",
+    settingsTitle: "Dream Varsity Settings",
+    settingsConfig: "Configuration",
+    settingsEmpty: "Select your dream university to track your preparation.",
+    currentProgress: "Current Progress:",
+    share: "Share",
+    reset: "Reset",
+    trackingMode: "Tracking Mode",
+    manualControlTitle: "Manual Control",
+    manualControlDesc: "Update progress manually from the dashboard widget using +XP and Skip buttons.",
+    autoStreakTitle: "Auto Streak Link",
+    autoStreakDesc: "Progress is automatically calculated based on your daily activity streak.",
+    dailyLoginTitle: "Daily Login Drip",
+    dayStreak: "Day Streak",
+    dailyLoginDesc: "Log in every day to claim your daily free tokens.",
+    claimedToday: "Claimed for Today",
+    claim30Tokens: "Claim 30 Tokens",
+    completeProfileTitle: "Complete Profile",
+    completeProfileDesc: "Add your university details, country, and DOB.",
+    bountyClaimed: "Bounty Claimed",
+    goToProfile: "Go to Profile",
+    claim100Tokens: "Claim 100 Tokens",
+    tasksOn: "tasks on"
+  },
+  Bangla: {
+    headerTitle: "দৈনিক কোয়েস্ট ও বাউন্টি",
+    headerSubtitle: "টোকেন অর্জন করতে এবং প্রিমিয়াম এআই ফিচার আনলক করতে টাস্ক সম্পূর্ণ করুন।",
+    heatmapTitle: "আপনার ধারাবাহিকতা হিটম্যাপ",
+    heatmapSubtitle: "গত ৫২ সপ্তাহ",
+    heatmapLess: "কম",
+    heatmapMore: "বেশি",
+    settingsTitle: "স্বপ্নের ভার্সিটি সেটিংস",
+    settingsConfig: "কনফিগারেশন",
+    settingsEmpty: "আপনার প্রস্তুতির ট্র্যাকিং করতে স্বপ্নের ভার্সিটি নির্বাচন করুন।",
+    currentProgress: "বর্তমান অগ্রগতি:",
+    share: "শেয়ার",
+    reset: "রিসেট",
+    trackingMode: "ট্র্যাকিং মোড",
+    manualControlTitle: "ম্যানুয়াল কন্ট্রোল",
+    manualControlDesc: "ড্যাশবোর্ড উইজেট থেকে +XP এবং স্কিপ বোতাম ব্যবহার করে ম্যানুয়ালি অগ্রগতি আপডেট করুন।",
+    autoStreakTitle: "অটো স্ট্রাইক লিঙ্ক",
+    autoStreakDesc: "আপনার দৈনিক অ্যাক্টিভিটি স্ট্রাইকের উপর ভিত্তি করে অগ্রগতি স্বয়ংক্রিয়ভাবে গণনা করা হয়।",
+    dailyLoginTitle: "দৈনিক লগইন ড্রিপ",
+    dayStreak: "দিনের স্ট্রাইক",
+    dailyLoginDesc: "দৈনিক ফ্রি টোকেন পেতে প্রতিদিন লগইন করুন।",
+    claimedToday: "আজকের জন্য দাবি করা হয়েছে",
+    claim30Tokens: "৩০ টোকেন দাবি করুন",
+    completeProfileTitle: "প্রোফাইল সম্পূর্ণ করুন",
+    completeProfileDesc: "আপনার বিশ্ববিদ্যালয়ের বিবরণ, দেশ এবং জন্ম তারিখ যোগ করুন।",
+    bountyClaimed: "বাউন্টি দাবি করা হয়েছে",
+    goToProfile: "প্রোফাইলে যান",
+    claim100Tokens: "১০০ টোকেন দাবি করুন",
+    tasksOn: "টি টাস্ক সম্পন্ন হয়েছে"
+  },
+  Hindi: {
+    headerTitle: "दैनिक क्वेस्ट और बाउंटी",
+    headerSubtitle: "टोकन अर्जित करने और प्रीमियम एआई सुविधाओं को अनलॉक करने के लिए कार्य पूरा करें।",
+    heatmapTitle: "आपका निरंतरता हीटमैप",
+    heatmapSubtitle: "पिछले 52 सप्ताह",
+    heatmapLess: "कम",
+    heatmapMore: "अधिक",
+    settingsTitle: "ड्रीम यूनिवर्सिटी सेटिंग्स",
+    settingsConfig: "कॉन्फ़िगरेशन",
+    settingsEmpty: "अपनी तैयारी को ट्रैक करने के लिए अपने सपनों का विश्वविद्यालय चुनें।",
+    currentProgress: "वर्तमान प्रगति:",
+    share: "शेयर",
+    reset: "रीसेट",
+    trackingMode: "ट्रैकिंग मोड",
+    manualControlTitle: "मैनुअल नियंत्रण",
+    manualControlDesc: "डैशबोर्ड विजेट से +XP और स्किप बटन का उपयोग करके प्रगति को मैन्युअल रूप से अपडेट करें।",
+    autoStreakTitle: "ऑटो स्ट्रीक लिंक",
+    autoStreakDesc: "आपकी प्रगति स्वचालित रूप से आपकी दैनिक गतिविधि स्ट्रीक के आधार पर गणना की जाती है।",
+    dailyLoginTitle: "दैनिक लॉगिन ड्रिप",
+    dayStreak: "दिन की स्ट्रीक",
+    dailyLoginDesc: "दैनिक मुफ्त टोकन प्राप्त करने के लिए प्रतिदिन लॉग इन करें।",
+    claimedToday: "आज के लिए दावा किया गया",
+    claim30Tokens: "30 टोकन का दावा करें",
+    completeProfileTitle: "प्रोफ़ाइल पूरी करें",
+    completeProfileDesc: "अपने विश्वविद्यालय का विवरण, देश और जन्म तिथि जोड़ें।",
+    bountyClaimed: "बाउंटी का दावा किया गया",
+    goToProfile: "प्रोफ़ाइल पर जाएं",
+    claim100Tokens: "100 टोकन का दावा करें",
+    tasksOn: "कार्य किए गए"
+  }
+};
+
 export default function QuestsPage() {
   const supabase = createClient();
   const router = useRouter();
@@ -24,10 +119,15 @@ export default function QuestsPage() {
   const [dreamVarsity, setDreamVarsity] = useState<any>(null);
   const UNIVERSITIES = ['BUET', 'DMC', 'DU', 'MIT', 'Harvard'];
 
+  const [language, setLanguage] = useState<LanguageType>('English');
+
   useEffect(() => {
     fetchUserData();
     fetchHeatmapData();
     fetchDreamVarsity();
+
+    const savedLang = localStorage.getItem('Prepia_language');
+    if (savedLang) setLanguage(savedLang as LanguageType);
   }, []);
 
   const fetchUserData = async () => {
@@ -108,7 +208,8 @@ export default function QuestsPage() {
 
       const response = await fetch(fetchUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` }
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ language })
       });
 
       const data = await response.json();
@@ -163,6 +264,8 @@ export default function QuestsPage() {
   const dbDate = userData?.last_login_date ? new Date(userData.last_login_date).toISOString().split('T')[0] : null;
   const isDailyClaimed = dbDate === todayStr;
 
+  const t = translations[language];
+
   return (
     <SecureLayout>
       <div className="max-w-5xl mx-auto p-6 md:p-10 mt-4 font-sans">
@@ -171,16 +274,16 @@ export default function QuestsPage() {
         <div className="flex flex-col md:flex-row justify-between items-center bg-slate-950 p-8 rounded-3xl shadow-xl border border-slate-800 mb-8 relative overflow-hidden">
            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
            <div>
-             <h1 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3"><Gift className="text-indigo-400"/> Daily Quests & Bounties</h1>
-             <p className="text-slate-400 mt-2 font-medium">Complete tasks to earn tokens and unlock premium AI features.</p>
+             <h1 className="text-3xl md:text-4xl font-black text-white flex items-center gap-3"><Gift className="text-indigo-400"/> {t.headerTitle}</h1>
+             <p className="text-slate-400 mt-2 font-medium">{t.headerSubtitle}</p>
            </div>
         </div>
 
         {/* 🟢 NEW: GitHub-Style Engineering Heatmap */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2"><Activity className="text-emerald-500"/> Your Consistency Heatmap</h2>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Last 52 Weeks</p>
+            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2"><Activity className="text-emerald-500"/> {t.heatmapTitle}</h2>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t.heatmapSubtitle}</p>
           </div>
 
           <div className="w-full overflow-x-auto pb-4">
@@ -190,7 +293,7 @@ export default function QuestsPage() {
                 {generateHeatmapGrid().map((day, idx) => (
                   <div
                     key={idx}
-                    title={`${day.count} tasks on ${day.date}`}
+                    title={`${day.count} ${t.tasksOn} ${day.date}`}
                     className={`w-[11px] h-[11px] rounded-[2px] transition-colors duration-200 ${getHeatmapColor(day.count)} cursor-pointer`}
                   ></div>
                 ))}
@@ -200,27 +303,27 @@ export default function QuestsPage() {
 
           {/* Heatmap Legend */}
           <div className="flex items-center justify-end gap-2 text-xs font-medium text-slate-500 mt-2">
-            <span>Less</span>
+            <span>{t.heatmapLess}</span>
             <div className="flex gap-[3px]">
               <div className="w-[11px] h-[11px] rounded-[2px] bg-slate-100"></div>
               <div className="w-[11px] h-[11px] rounded-[2px] bg-emerald-200"></div>
               <div className="w-[11px] h-[11px] rounded-[2px] bg-emerald-400"></div>
               <div className="w-[11px] h-[11px] rounded-[2px] bg-emerald-600"></div>
             </div>
-            <span>More</span>
+            <span>{t.heatmapMore}</span>
           </div>
         </div>
 
         {/* 🟢 NEW: Dream Varsity Settings */}
         <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm mb-8">
            <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-             <h2 className="text-xl font-black text-slate-800 flex items-center gap-2"><Target className="text-indigo-500"/> Dream Varsity Settings</h2>
-             <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest">Configuration</span>
+             <h2 className="text-xl font-black text-slate-800 flex items-center gap-2"><Target className="text-indigo-500"/> {t.settingsTitle}</h2>
+             <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest">{t.settingsConfig}</span>
            </div>
 
            {!dreamVarsity?.varsity_name ? (
              <div className="text-center py-6">
-                <p className="text-slate-500 font-medium mb-4">Select your dream university to track your preparation.</p>
+                <p className="text-slate-500 font-medium mb-4">{t.settingsEmpty}</p>
                 <div className="flex flex-wrap justify-center gap-3">
                   {UNIVERSITIES.map(uni => (
                     <button key={uni} onClick={() => updateDreamVarsity({ varsity_name: uni, progress: 10 })} className="px-5 py-2.5 rounded-xl border-2 border-slate-200 font-black text-slate-700 hover:border-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all active:scale-95">
@@ -236,38 +339,38 @@ export default function QuestsPage() {
                      <div className="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center"><GraduationCap size={28}/></div>
                      <div>
                        <h3 className="text-2xl font-black text-slate-800">{dreamVarsity.varsity_name}</h3>
-                       <p className="text-sm font-bold text-slate-500">Current Progress: {dreamVarsity.tracking_mode === 'auto' ? (userData?.streak_count || 0) * 5 : (dreamVarsity.progress || 0)}%</p>
+                       <p className="text-sm font-bold text-slate-500">{t.currentProgress} {dreamVarsity.tracking_mode === 'auto' ? (userData?.streak_count || 0) * 5 : (dreamVarsity.progress || 0)}%</p>
                      </div>
                    </div>
 
                    <div className="flex gap-2">
                      <button onClick={shareToStory} className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:shadow-md transition-all active:scale-95">
-                       <Share2 size={16}/> Share
+                       <Share2 size={16}/> {t.share}
                      </button>
                      <button onClick={() => updateDreamVarsity({ varsity_name: null, progress: 0, tracking_mode: 'manual' })} className="flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95">
-                       <RefreshCcw size={16}/> Reset
+                       <RefreshCcw size={16}/> {t.reset}
                      </button>
                    </div>
                 </div>
 
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-                   <h4 className="font-black text-slate-700 text-sm mb-4 uppercase tracking-widest flex items-center gap-2"><Settings size={16}/> Tracking Mode</h4>
+                   <h4 className="font-black text-slate-700 text-sm mb-4 uppercase tracking-widest flex items-center gap-2"><Settings size={16}/> {t.trackingMode}</h4>
 
                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <button
                         onClick={() => updateDreamVarsity({ tracking_mode: 'manual' })}
                         className={`p-4 rounded-xl border-2 text-left transition-all ${(!dreamVarsity.tracking_mode || dreamVarsity.tracking_mode === 'manual') ? 'bg-white border-indigo-500 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}
                       >
-                         <h5 className={`font-black text-sm mb-1 ${(!dreamVarsity.tracking_mode || dreamVarsity.tracking_mode === 'manual') ? 'text-indigo-600' : 'text-slate-700'}`}>Manual Control</h5>
-                         <p className="text-xs font-medium text-slate-500 leading-relaxed">Update progress manually from the dashboard widget using +XP and Skip buttons.</p>
+                         <h5 className={`font-black text-sm mb-1 ${(!dreamVarsity.tracking_mode || dreamVarsity.tracking_mode === 'manual') ? 'text-indigo-600' : 'text-slate-700'}`}>{t.manualControlTitle}</h5>
+                         <p className="text-xs font-medium text-slate-500 leading-relaxed">{t.manualControlDesc}</p>
                       </button>
 
                       <button
                         onClick={() => updateDreamVarsity({ tracking_mode: 'auto' })}
                         className={`p-4 rounded-xl border-2 text-left transition-all ${dreamVarsity.tracking_mode === 'auto' ? 'bg-white border-emerald-500 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}
                       >
-                         <h5 className={`font-black text-sm mb-1 ${dreamVarsity.tracking_mode === 'auto' ? 'text-emerald-600' : 'text-slate-700'}`}>Auto Streak Link</h5>
-                         <p className="text-xs font-medium text-slate-500 leading-relaxed">Progress is automatically calculated based on your daily activity streak.</p>
+                         <h5 className={`font-black text-sm mb-1 ${dreamVarsity.tracking_mode === 'auto' ? 'text-emerald-600' : 'text-slate-700'}`}>{t.autoStreakTitle}</h5>
+                         <p className="text-xs font-medium text-slate-500 leading-relaxed">{t.autoStreakDesc}</p>
                       </button>
                    </div>
                 </div>
@@ -283,11 +386,11 @@ export default function QuestsPage() {
               <div className="flex items-center gap-3 mb-4 relative z-10">
                  <div className="w-12 h-12 bg-orange-100 text-orange-500 rounded-xl flex items-center justify-center"><CalendarDays size={24}/></div>
                  <div>
-                   <h3 className="text-xl font-black text-slate-800">Daily Login Drip</h3>
-                   <p className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1"><Flame size={14}/> {userData?.streak_count || 0} Day Streak</p>
+                   <h3 className="text-xl font-black text-slate-800">{t.dailyLoginTitle}</h3>
+                   <p className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1"><Flame size={14}/> {userData?.streak_count || 0} {t.dayStreak}</p>
                  </div>
               </div>
-              <p className="text-slate-500 text-sm font-medium mb-6 relative z-10 flex-1">Log in every day to claim your daily free tokens.</p>
+              <p className="text-slate-500 text-sm font-medium mb-6 relative z-10 flex-1">{t.dailyLoginDesc}</p>
               <button
                 onClick={() => claimQuest('daily-drip', 'daily')}
                 disabled={isDailyClaimed || claiming === 'daily'}
@@ -296,7 +399,7 @@ export default function QuestsPage() {
                 }`}
               >
                 {claiming === 'daily' ? <Loader2 className="animate-spin"/> : isDailyClaimed ? <CheckCircle2/> : <Zap/>}
-                {isDailyClaimed ? 'Claimed for Today' : 'Claim 30 Tokens'}
+                {isDailyClaimed ? t.claimedToday : t.claim30Tokens}
               </button>
            </motion.div>
 
@@ -306,7 +409,7 @@ export default function QuestsPage() {
               <div className="flex items-center gap-3 mb-4 relative z-10">
                  <div className="w-12 h-12 bg-indigo-100 text-indigo-500 rounded-xl flex items-center justify-center"><UserCheck size={24}/></div>
                  <div className="w-full">
-                   <h3 className="text-xl font-black text-slate-800">Complete Profile</h3>
+                   <h3 className="text-xl font-black text-slate-800">{t.completeProfileTitle}</h3>
                    <div className="flex items-center gap-2 mt-1 w-full max-w-[200px]">
                       <div className="h-2 bg-slate-200 rounded-full flex-1 overflow-hidden">
                          <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${completionPercentage}%` }}></div>
@@ -315,7 +418,7 @@ export default function QuestsPage() {
                    </div>
                  </div>
               </div>
-              <p className="text-slate-500 text-sm font-medium mb-6 relative z-10 flex-1">Add your university details, country, and DOB.</p>
+              <p className="text-slate-500 text-sm font-medium mb-6 relative z-10 flex-1">{t.completeProfileDesc}</p>
               <button
                 onClick={() => claimQuest('claim-profile', 'profile')}
                 disabled={userData?.is_profile_optimized || claiming === 'profile'}
@@ -324,7 +427,7 @@ export default function QuestsPage() {
                 }`}
               >
                 {claiming === 'profile' ? <Loader2 className="animate-spin"/> : userData?.is_profile_optimized ? <CheckCircle2/> : <Gift/>}
-                {userData?.is_profile_optimized ? 'Bounty Claimed' : completionPercentage < 100 ? 'Go to Profile' : 'Claim 100 Tokens'}
+                {userData?.is_profile_optimized ? t.bountyClaimed : completionPercentage < 100 ? t.goToProfile : t.claim100Tokens}
               </button>
            </motion.div>
         </div>

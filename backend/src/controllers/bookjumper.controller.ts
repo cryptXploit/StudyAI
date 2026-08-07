@@ -236,7 +236,7 @@ export async function getJumperHistoryHandler(req: Request, res: Response): Prom
 export async function explainSnippetHandler(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user?.id;
-    const { snippet, query } = req.body;
+    const { snippet, query, language } = req.body;
     if (!userId || !snippet) {
       res.status(400).json({ success: false, error: 'Missing required fields' });
       return;
@@ -254,7 +254,16 @@ export async function explainSnippetHandler(req: Request, res: Response): Promis
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const prompt = `You are a helpful study assistant. Explain the following snippet of a book simply and concisely in 2-3 sentences. Context query: "${query || 'General'}". Snippet: "${snippet}"`;
+    let prompt = `You are a helpful study assistant. Explain the following snippet of a book simply and concisely in 2-3 sentences. Context query: "${query || 'General'}". Snippet: "${snippet}"`;
+
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    prompt += strictLangInstruction;
+
     const result = await model.generateContent(prompt);
     const explanation = result.response.text();
 

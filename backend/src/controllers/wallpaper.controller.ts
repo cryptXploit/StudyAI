@@ -18,7 +18,7 @@ const supabase = createClient(
 export async function generateWallpaperHandler(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user?.id;
-    const { topic, formulas, theme = 'minimalist' } = req.body;
+    const { topic, formulas, theme = 'minimalist', language } = req.body;
 
     if (!userId || !topic || !formulas || !Array.isArray(formulas)) {
       res.status(400).json({ error: 'Missing topic or formulas array' });

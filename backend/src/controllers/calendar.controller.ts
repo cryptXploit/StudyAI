@@ -33,8 +33,13 @@ export async function generateScheduleHandler(req: Request, res: Response): Prom
         res.status(402).json({ error: 'INSUFFICIENT_TOKENS', required: cost });
         return;
       }
-      
-      
+    }
+
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
     }
 
     const systemPrompt = `You are an Elite Academic Planner. Create a highly effective daily study schedule leading up to the exam date.
@@ -54,7 +59,7 @@ JSON SCHEMA TO FOLLOW:
       "description": "1 sentence study goal without line breaks."
     }
   ]
-}`;
+}${strictLangInstruction}`;
 
     const router = new ModelRouter();
     const responseText = await router.generate(
@@ -93,13 +98,12 @@ JSON SCHEMA TO FOLLOW:
           }
         })();
 
+        // 🟢 DEDUCT TOKENS ONLY ON SUCCESS
+        if (tier.toLowerCase() !== 'pro') {
+          await applyCreditMutation({ userId, amount: -cost, reason: 'Calendar Sync', idempotencyKey: `calendar-sync:${userId}:${Date.now()}` });
+        }
         
-      // 🟢 DEDUCT TOKENS ONLY ON SUCCESS
-      if (tier.toLowerCase() !== 'pro') {
-        await applyCreditMutation({ userId, amount: -cost, reason: 'Calendar Sync', idempotencyKey: `calendar-sync:${userId}:${Date.now()}` });
-      }
-      
-      res.json({ valid: true, schedule, savedId: null });
+        res.json({ valid: true, schedule, savedId: null });
       } else {
         throw new Error("No JSON format detected");
       }

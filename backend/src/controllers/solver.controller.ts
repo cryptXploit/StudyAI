@@ -69,6 +69,13 @@ export async function solveProblemHandler(req: Request, res: Response): Promise<
       syllabusConstraint += `\nYou MUST limit your scope, terminology, and complexity to be strictly relevant ONLY to these specific boundaries.`;
     }
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const systemPrompt = `You are an Elite Academic Problem Solver and Data Analyst (Pro-Tier AI).
 Your objective is to solve complex user problems with 100% accuracy.${syllabusConstraint}
 
@@ -79,7 +86,7 @@ CRITICAL RULES:
    - **Step-by-Step Execution:** Show the progression.
    - **Final Answer:** Clearly highlight the final conclusion.
 2. LATEX MASTERY: You MUST use proper LaTeX for all math ($ for inline, $$ for block).
-3. MANDATORY LANGUAGE: Generate the ENTIRE response fluently in ${language.toUpperCase()}.`;
+3. MANDATORY LANGUAGE: Generate the ENTIRE response fluently in ${language.toUpperCase()}.${strictLangInstruction}`;
 
     const userPrompt = `PROBLEM TO SOLVE:\n"${safeProblem}"\n\n${contextChunks ? `RAG DOCUMENT CONTEXT TO USE AS REFERENCE:\n${contextChunks}` : ''}`;
 

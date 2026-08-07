@@ -63,10 +63,18 @@ JSON SCHEMA TO FOLLOW EXACTLY:
   ]
 }`;
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const router = new ModelRouter();
     // 🟢 Temperature lowered to 0.1 for maximum JSON structural rigidity
+    const finalPrompt = systemPrompt + strictLangInstruction;
     const responseText = await router.generate(
-      [{ role: 'system', content: systemPrompt }], 
+      [{ role: 'system', content: finalPrompt }], 
       userId, tier, { temperature: 0.1 }
     );
 

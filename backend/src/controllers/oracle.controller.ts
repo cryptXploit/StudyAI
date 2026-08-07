@@ -21,6 +21,7 @@ export const runOracleExtraction = async (req: Request, res: Response) => {
     const userId = (req as any).user?.id || 'anonymous';
     const userTier = (req as any).user?.tier || 'Free';
     const files = req.files as Express.Multer.File[];
+    const language = req.body.language || 'English';
 
     if (!files || files.length === 0) {
       return res.status(400).json({ error: 'Past papers are required for extraction.' });
@@ -34,7 +35,8 @@ export const runOracleExtraction = async (req: Request, res: Response) => {
     const job = await oracleQueue.add('oracle-extraction', {
       filesData,
       userId,
-      userTier
+      userTier,
+      language
     });
 
     return res.status(200).json({ jobId: job.id });
@@ -67,7 +69,7 @@ export const runOraclePrediction = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id || 'anonymous';
     const userTier = (req as any).user?.tier || 'Free';
-    const { syllabusId, chapterId, questions } = req.body;
+    const { syllabusId, chapterId, questions, language } = req.body;
 
     if (!syllabusId || !questions || !Array.isArray(questions)) {
       return res.status(400).json({ error: 'Syllabus ID and extracted questions are required.' });
@@ -179,6 +181,13 @@ export const runOraclePrediction = async (req: Request, res: Response) => {
     // Step 5: Oracle Core (LLM Generation)
     const contextString = topRawMatches.map((m, i) => `[Topic Snippet: ${m.topic} | Confidence: ${m.confidence}%]\nRaw Fragment: ${m.rawText}`).join('\n\n');
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const systemPrompt = `You are the ultimate Board Exam Oracle for students. Your task is to analyze raw, messy OCR text fragments from past board exams and synthesize them into perfectly formatted, highly probable exam questions.
 
 CRITICAL INSTRUCTIONS:
@@ -186,7 +195,7 @@ CRITICAL INSTRUCTIONS:
 2. Group related fragments and synthesize them into a fully formed, meaningful board-standard question.
 3. If the topic is essay-type or creative, divide the question into logical subquestions (e.g., a, b, c, d).
 4. Assign a realistic confidence score (75-99%) based on the context's provided confidence.
-5. You MUST return ONLY a strict JSON array. No markdown blocks, no extra text.
+5. You MUST return ONLY a strict JSON array. No markdown blocks, no extra text.${strictLangInstruction}
 
 JSON FORMAT:
 [

@@ -31,7 +31,14 @@ const translations = {
     secureRewards: "Secure Rewards", 
     loginToSecure: "Login to Secure Rewards",
     join: "Join Arena", 
-    orCreate: "or Create your own battle"
+    orCreate: "or Create your own battle",
+    expiredLink: "⏳ This battle link has expired! Keys are only valid for 1 hour.",
+    roomNotFound: "Battle Room not found!",
+    timeout: "Timeout: Server took too long to load the battle arena.",
+    arena: "Arena",
+    liveBattle: "Live Battle",
+    viewLeaderboard: "View Leaderboard",
+    placeholderCode: "e.g. A7B9XX"
   },
   Bangla: {
     waiting: "খেলোয়াড়দের জন্য অপেক্ষা...", 
@@ -53,7 +60,14 @@ const translations = {
     secureRewards: "রিওয়ার্ড সুরক্ষিত করুন", 
     loginToSecure: "লগইন করে সুরক্ষিত করুন",
     join: "প্রবেশ করুন", 
-    orCreate: "অথবা নিজের কুইজ তৈরি করুন"
+    orCreate: "অথবা নিজের কুইজ তৈরি করুন",
+    expiredLink: "⏳ এই ব্যাটেল লিংকটির মেয়াদ শেষ! কীগুলো শুধুমাত্র ১ ঘণ্টার জন্য বৈধ।",
+    roomNotFound: "ব্যাটেল রুম পাওয়া যায়নি!",
+    timeout: "টাইমআউট: সার্ভার ব্যাটেল এরিনা লোড করতে অনেক বেশি সময় নিয়েছে।",
+    arena: "এরিনা",
+    liveBattle: "লাইভ ব্যাটেল",
+    viewLeaderboard: "লিডারবোর্ড দেখুন",
+    placeholderCode: "উদা. A7B9XX"
   },
   Hindi: {
     waiting: "खिलाड़ियों की प्रतीक्षा...", 
@@ -75,9 +89,18 @@ const translations = {
     secureRewards: "इनाम सुरक्षित करें", 
     loginToSecure: "सुरक्षित करने के लिए लॉगिन करें",
     join: "शामिल हों", 
-    orCreate: "या अपना स्वयं का बनाएं"
+    orCreate: "या अपना स्वयं का बनाएं",
+    expiredLink: "⏳ इस युद्ध लिंक की समय सीमा समाप्त हो गई है! कुंजी केवल 1 घंटे के लिए वैध हैं।",
+    roomNotFound: "बैटल रूम नहीं मिला!",
+    timeout: "टाइमआउट: सर्वर ने बैटल एरिना लोड करने में बहुत अधिक समय लिया।",
+    arena: "एरिना",
+    liveBattle: "लाइव बैटल",
+    viewLeaderboard: "लीडरबोर्ड देखें",
+    placeholderCode: "उदा. A7B9XX"
   }
 };
+
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 function BattleArenaContent() {
   const supabase = createClient();
@@ -85,7 +108,7 @@ function BattleArenaContent() {
   const router = useRouter();
   const roomCode = searchParams.get('room');
 
-  const [language, setLanguage] = useState<'English'|'Bangla'|'Hindi'>('English');
+  const [language, setLanguage] = useState<LanguageType>('English');
   const t = translations[language];
 
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -119,7 +142,7 @@ function BattleArenaContent() {
 
   useEffect(() => {
     const savedLang = localStorage.getItem('Prepia_language');
-    if (savedLang) setLanguage(savedLang as any);
+    if (savedLang) setLanguage(savedLang as LanguageType);
     
     if (!roomCode) return;
 
@@ -183,14 +206,14 @@ function BattleArenaContent() {
           socketRef.current.emit('join-battle', { roomCode, user: { id: tempUser.id, name: tempUser.name } });
         }
       } else if (data.expired) {
-        alert("⏳ This battle link has expired! Keys are only valid for 1 hour.");
+        alert(t.expiredLink);
         router.push('/quiz');
       } else {
-        alert("Battle Room not found!"); router.push('/quiz'); 
+        alert(t.roomNotFound); router.push('/quiz'); 
       }
     } catch (e: any) {
       if (e.name === 'AbortError') {
-        alert("Timeout: Server took too long to load the battle arena.");
+        alert(t.timeout);
       }
       router.push('/quiz'); 
     }
@@ -250,7 +273,7 @@ function BattleArenaContent() {
          <div className="z-10 flex flex-col md:flex-row items-center gap-4 w-full max-w-md">
             <input 
               type="text" 
-              placeholder="e.g. A7B9XX" 
+              placeholder={t.placeholderCode} 
               value={manualCode}
               onChange={(e) => setManualCode(e.target.value.toUpperCase())} 
               className="w-full px-6 py-4 bg-slate-900 border border-slate-700 text-emerald-400 font-black text-2xl rounded-2xl outline-none focus:border-indigo-500 text-center uppercase tracking-widest transition-all" 
@@ -324,8 +347,8 @@ function BattleArenaContent() {
            {/* Mobile Smart Header */}
            <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0`}>
              <div className="flex flex-col">
-               <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><Swords size={16} className="text-indigo-400"/> Arena</h2>
-               <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">Live Battle</p>
+               <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><Swords size={16} className="text-indigo-400"/> {t.arena}</h2>
+               <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.liveBattle}</p>
              </div>
              <div className="flex items-center gap-1 font-mono font-black text-lg text-slate-300 bg-slate-800 px-3 py-1 rounded-lg border border-slate-700">
                <Clock size={14} className="text-indigo-400"/> 00:{timeLeft.toString().padStart(2, '0')}
@@ -408,7 +431,7 @@ function BattleArenaContent() {
                   onClick={() => setIsMobileDrawerOpen('leaderboard')} 
                   className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400/50"
                 >
-                  <Trophy size={18} /> View Leaderboard
+                  <Trophy size={18} /> {t.viewLeaderboard}
                 </button>
               </div>
             </div>

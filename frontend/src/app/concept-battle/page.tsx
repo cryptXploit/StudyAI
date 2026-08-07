@@ -26,7 +26,12 @@ const translations = {
     proBadge: "PRO TIER FEATURE",
     whenToUse: "When to use?",
     pros: "Advantages",
-    cons: "Disadvantages"
+    cons: "Disadvantages",
+    backToChat: "💬 Back to AI Chat",
+    comparisonMatrix: "Comparison Matrix",
+    basisForComparison: "Basis for Comparison",
+    newBattle: "New Battle",
+    historyShort: "History"
   },
   Bangla: {
     title: "কনসেপ্ট ব্যাটল",
@@ -44,7 +49,12 @@ const translations = {
     proBadge: "প্রো-টিয়ার ফিচার",
     whenToUse: "কখন ব্যবহার করবেন?",
     pros: "সুবিধাসমূহ",
-    cons: "অসুবিধাসমূহ"
+    cons: "অসুবিধাসমূহ",
+    backToChat: "💬 এআই চ্যাটে ফিরুন",
+    comparisonMatrix: "তুলনামূলক ছক",
+    basisForComparison: "তুলনার ভিত্তি",
+    newBattle: "নতুন ব্যাটল",
+    historyShort: "হিস্ট্রি"
   },
   Hindi: {
     title: "कांसेप्ट बैटल",
@@ -62,7 +72,12 @@ const translations = {
     proBadge: "प्रो टियर फ़ीचर",
     whenToUse: "कब उपयोग करें?",
     pros: "फायदे",
-    cons: "नुकसान"
+    cons: "नुकसान",
+    backToChat: "💬 एआई चैट पर वापस",
+    comparisonMatrix: "तुलना मैट्रिक्स",
+    basisForComparison: "तुलना का आधार",
+    newBattle: "नया बैटल",
+    historyShort: "इतिहास"
   }
 };
 
@@ -368,7 +383,7 @@ function ConceptBattleContent() {
                {/* 🟢 BATTLE HEADER */}
                <div className="p-6 md:p-10 flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 bg-slate-900 border-b border-slate-700 relative overflow-hidden shrink-0">
                   <div className="absolute top-4 left-4 z-50">
-                    <button onClick={() => router.push('/chat')} className="flex items-center gap-2 px-4 py-2 font-black rounded-lg transition uppercase tracking-wider text-xs bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">💬 Back to AI Chat</button>
+                    <button onClick={() => router.push('/chat')} className="flex items-center gap-2 px-4 py-2 font-black rounded-lg transition uppercase tracking-wider text-xs bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">{t.backToChat}</button>
                   </div>
                   <div className="absolute -left-32 -top-32 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl"></div>
                   <div className="absolute -right-32 -top-32 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
@@ -388,13 +403,13 @@ function ConceptBattleContent() {
                  <div className="bg-slate-900 rounded-3xl border border-slate-700 shadow-sm overflow-hidden">
                      <div className="bg-slate-900 px-6 py-4 flex items-center gap-2">
                         <Scale size={18} className="text-amber-400"/>
-                        <h3 className="text-white font-black tracking-wide">Comparison Matrix</h3>
+                        <h3 className="text-white font-black tracking-wide">{t.comparisonMatrix}</h3>
                      </div>
                      <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                            <thead>
                               <tr className="bg-slate-950 border-b border-slate-700">
-                                 <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-widest border-r border-slate-700 w-1/4">Basis for Comparison</th>
+                                 <th className="p-4 text-xs font-black text-slate-400 uppercase tracking-widest border-r border-slate-700 w-1/4">{t.basisForComparison}</th>
                                  <th className="p-4 text-sm font-black text-rose-600 border-r border-slate-700 w-3/8">{battleData.conceptA}</th>
                                  <th className="p-4 text-sm font-black text-blue-600 w-3/8">{battleData.conceptB}</th>
                               </tr>
@@ -499,14 +514,14 @@ function ConceptBattleContent() {
                 onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
-                <History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}
+                <History size={16}/> {t.historyShort}
               </button>
 
               <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(225,29,72,0.3)] transition-all active:scale-95 border border-rose-400/50"
               >
-                <Swords size={18} /> New Battle
+                <Swords size={18} /> {t.newBattle}
               </button>
             </div>
           </div>
@@ -521,7 +536,7 @@ function ConceptBattleContent() {
 
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-rose-400"/> {t.historyTitle}</> : <><Swords size={18} className="text-rose-400"/> New Battle</>}
+                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-rose-400"/> {t.historyTitle}</> : <><Swords size={18} className="text-rose-400"/> {t.newBattle}</>}
               </h3>
             </div>
 

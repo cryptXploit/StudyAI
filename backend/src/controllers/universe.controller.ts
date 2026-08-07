@@ -60,12 +60,18 @@ JSON SCHEMA:
 }
 Note: 'val' determines the 3D node size (Main node should have highest val like 10, sub-nodes 4-6).`;
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const router = new ModelRouter();
     const responseText = await router.generate(
-      [{ role: 'system', content: systemPrompt }, { role: 'user', content: `TOPIC TO MAP: ${safeTopic}` }], 
+      [{ role: 'system', content: systemPrompt + strictLangInstruction }, { role: 'user', content: `TOPIC TO MAP: ${safeTopic}` }], 
       userId, tier, { temperature: 0.2 }
     );
-
     try {
       let cleanJson = responseText.replace(/```json/gi, '').replace(/```/g, '').trim();
       const startIdx = cleanJson.indexOf('{');

@@ -32,7 +32,13 @@ const translations = {
     noHistory: "No universes created yet.",
     canvasAwaits: "The Void Awaits",
     awaitsDesc: "Search a topic on the left. Watch as AI maps out a beautiful 3D network of connected knowledge.",
-    proBadge: "PRO TIER FEATURE"
+    proBadge: "PRO TIER FEATURE",
+    chatBtn: "Chat",
+    nodeInsights: "Node Insights",
+    noDetails: "No specific details mapped for this constellation.",
+    universeOf: "Universe of {topic}",
+    controlsHint: "Left Click & Drag to Rotate • Scroll to Zoom • Click Node for Details",
+    newUniverseBtn: "New Universe"
   },
   Bangla: {
     title: "থ্রিডি নলেজ ইউনিভার্স",
@@ -45,7 +51,13 @@ const translations = {
     noHistory: "এখনো কোনো গ্যালাক্সি তৈরি করা হয়নি।",
     canvasAwaits: "শূন্যতা আপনার অপেক্ষায়",
     awaitsDesc: "বামে একটি টপিক সার্চ দিন। এআই জাদুর মতো থ্রিডি গ্রাফে পুরো টপিকটি আপনার সামনে ফুটিয়ে তুলবে।",
-    proBadge: "প্রো-টিয়ার ফিচার"
+    proBadge: "প্রো-টিয়ার ফিচার",
+    chatBtn: "চ্যাট",
+    nodeInsights: "নোড ইনসাইটস",
+    noDetails: "এই কনস্টেলেশনের জন্য কোন নির্দিষ্ট তথ্য ম্যাপ করা হয়নি।",
+    universeOf: "{topic} এর ইউনিভার্স",
+    controlsHint: "ঘোরাতে লেফট ক্লিক করে ড্র্যাগ করুন • জুম করতে স্ক্রোল করুন • বিস্তারিত দেখতে নোডে ক্লিক করুন",
+    newUniverseBtn: "নতুন ইউনিভার্স"
   },
   Hindi: {
     title: "3D नॉलेज यूनिवर्स",
@@ -58,7 +70,13 @@ const translations = {
     noHistory: "अभी तक कोई यूनिवर्स नहीं बनाया गया।",
     canvasAwaits: "शून्यता आपकी प्रतीक्षा में है",
     awaitsDesc: "बाईं ओर एक विषय खोजें। AI तुरंत जुड़े हुए ज्ञान का एक 3D नेटवर्क तैयार करेगा।",
-    proBadge: "प्रो टियर फ़ीचर"
+    proBadge: "प्रो टियर फ़ीचर",
+    chatBtn: "चैट",
+    nodeInsights: "नोड इनसाइट्स",
+    noDetails: "इस तारामंडल के लिए कोई विशिष्ट विवरण मैप नहीं किया गया है।",
+    universeOf: "{topic} का यूनिवर्स",
+    controlsHint: "घुमाने के लिए लेफ्ट क्लिक करके ड्रैग करें • ज़ूम करने के लिए स्क्रॉल करें • विवरण के लिए नोड पर क्लिक करें",
+    newUniverseBtn: "नया यूनिवर्स"
   }
 };
 

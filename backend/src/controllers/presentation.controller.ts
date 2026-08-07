@@ -69,7 +69,7 @@ export async function generatePresentationHandler(req: Request, res: Response): 
     };
     const selectedAnimation = animationStyles[animationStyle] || animationStyles.bubbles;
 
-    const systemPrompt = `You are an Elite Presentation Creator.
+    let systemPrompt = `You are an Elite Presentation Creator.
 Create a highly professional ${slideCount}-slide presentation.
 DESIGN DIRECTION: ${selectedTemplate}
 BACKGROUND MOTION DIRECTION: ${selectedAnimation}
@@ -90,6 +90,14 @@ JSON SCHEMA TO FOLLOW:
     }
   ]
 }`;
+
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    systemPrompt += strictLangInstruction;
 
     const userPrompt = `TOPIC: "${topic}"\n\n${contextChunks ? `REFERENCE MATERIAL:\n${contextChunks}` : ''}`;
 

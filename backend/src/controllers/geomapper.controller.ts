@@ -98,7 +98,15 @@ JSON SCHEMA TO FOLLOW:
   ]
 }`;
 
-    const userPrompt = `Generate map data for the following topic: "${safeTopic}"`;
+    let userPrompt = `Generate map data for the following topic: "${safeTopic}"`;
+
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    userPrompt += strictLangInstruction;
 
     // 3. DIRECT DB CONFIG FETCH (Bypass ModelRouter to ensure connection)
     const targetTaskType = tier.toLowerCase() === 'pro' ? 'complex' : 'general';

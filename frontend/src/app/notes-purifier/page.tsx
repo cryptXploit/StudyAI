@@ -28,7 +28,15 @@ const translations = {
     copyBtn: "Copy Notes",
     compareBtn: "Compare Original",
     copied: "Copied!",
-    proBadge: "PRO TIER FEATURE"
+    proBadge: "PRO TIER FEATURE",
+    newNote: "New Note",
+    ocrRunning: "Running local OCR & AI formatting...",
+    successMsg: "Digitized & Purified successfully",
+    compareTitle: "Parallel Comparison",
+    compareSub: "Original vs Purified",
+    closeView: "Close View",
+    originalNotes: "Original Messy Notes",
+    purifiedDoc: "AI Purified Document"
   },
   Bangla: {
     title: "নোটস পিউরিফায়ার",
@@ -43,7 +51,15 @@ const translations = {
     copyBtn: "নোটস কপি করুন",
     compareBtn: "আসল নোটের সাথে মিলান",
     copied: "কপি হয়েছে!",
-    proBadge: "প্রো-টিয়ার ফিচার"
+    proBadge: "প্রো-টিয়ার ফিচার",
+    newNote: "নতুন নোট",
+    ocrRunning: "লোকাল ওসিআর ও এআই ফরম্যাটিং চলছে...",
+    successMsg: "ডিজিটাইজ ও পিউরিফাই সফল হয়েছে",
+    compareTitle: "প্যারালাল কম্প্যারিজন",
+    compareSub: "আসল বনাম পিউরিফাইড",
+    closeView: "ভিউ বন্ধ করুন",
+    originalNotes: "আসল খাতা",
+    purifiedDoc: "এআই পিউরিফাইড ডক"
   },
   Hindi: {
     title: "नोट्स प्यूरीफायर",
@@ -58,7 +74,15 @@ const translations = {
     copyBtn: "नोट्स कॉपी करें",
     compareBtn: "मूल से तुलना करें",
     copied: "कॉपी हो गया!",
-    proBadge: "प्रो टियर फ़ीचर"
+    proBadge: "प्रो टियर फ़ीचर",
+    newNote: "नया नोट",
+    ocrRunning: "लोकल OCR और AI फ़ॉर्मेटिंग चल रहा है...",
+    successMsg: "डिजिटाइज़ और प्यूरीफाई सफल हुआ",
+    compareTitle: "समानांतर तुलना",
+    compareSub: "मूल बनाम शुद्ध",
+    closeView: "दृश्य बंद करें",
+    originalNotes: "मूल गंदे नोट्स",
+    purifiedDoc: "AI शुद्ध दस्तावेज़"
   }
 };
 
@@ -399,7 +423,7 @@ export default function PurifierPage() {
             <div className="h-full flex flex-col items-center justify-center text-center p-10">
               <Loader2 size={48} className="text-emerald-500 animate-spin mb-4" />
               <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">{t.generating}</p>
-              <p className="text-xs text-slate-400 mt-2">Running local OCR & AI formatting...</p>
+              <p className="text-xs text-slate-400 mt-2">{t.ocrRunning}</p>
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-700 bg-slate-900">
@@ -407,7 +431,7 @@ export default function PurifierPage() {
                <div className="p-8 border-b border-slate-700 bg-slate-900 flex justify-between items-start z-10 shadow-sm">
                   <div>
                     <h2 className="text-3xl font-black text-slate-200 mb-1">{purifiedContent?.title}</h2>
-                    <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest">Digitized & Purified successfully</p>
+                    <p className="text-emerald-400 text-xs font-bold uppercase tracking-widest">{t.successMsg}</p>
                   </div>
                   <div className="flex gap-3">
                     {/* 🟢 NEW: Compare Mode Button (Visible only for active session) */}
@@ -449,7 +473,7 @@ export default function PurifierPage() {
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 border border-emerald-400/50"
               >
-                <Sparkles size={18} /> New Note
+                <Sparkles size={18} /> {t.newNote}
               </button>
             </div>
           </div>
@@ -464,7 +488,7 @@ export default function PurifierPage() {
 
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-emerald-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-emerald-400"/> New Note</>}
+                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-emerald-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-emerald-400"/> {t.newNote}</>}
               </h3>
             </div>
 
@@ -551,12 +575,12 @@ export default function PurifierPage() {
                 <div className="p-3 bg-emerald-500/20 rounded-xl">
                   <Columns className="text-emerald-400" size={24} />
                 </div>
-                <h2 className="text-2xl font-black text-slate-200 tracking-tight">Parallel Comparison</h2>
-                <span className="text-xs font-black text-emerald-400 uppercase tracking-widest ml-4 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/30">Original vs Purified</span>
+                <h2 className="text-2xl font-black text-slate-200 tracking-tight">{t.compareTitle}</h2>
+                <span className="text-xs font-black text-emerald-400 uppercase tracking-widest ml-4 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/30">{t.compareSub}</span>
               </div>
               <button onClick={() => setCompareMode(false)} className="px-5 py-2.5 bg-slate-800 border border-slate-700 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 text-slate-300 rounded-xl transition-all flex items-center gap-2 shadow-sm">
                  <X size={18} />
-                 <span className="text-sm font-bold">Close View</span>
+                 <span className="text-sm font-bold">{t.closeView}</span>
               </button>
             </div>
 
@@ -565,7 +589,7 @@ export default function PurifierPage() {
                {/* Left: Original Images */}
                <div className="w-full md:w-1/2 h-1/2 md:h-full bg-[#0f172a] p-4 md:p-10 overflow-y-auto custom-scrollbar md:border-r border-b md:border-b-0 border-slate-700 shadow-[inset_0_0_40px_rgba(0,0,0,0.6)] flex flex-col items-center">
                   <div className="w-full max-w-2xl">
-                     <p className="text-slate-400 font-mono text-sm font-black tracking-widest uppercase mb-8 text-center bg-slate-900 py-3 rounded-xl border border-slate-800">Original Messy Notes</p>
+                     <p className="text-slate-400 font-mono text-sm font-black tracking-widest uppercase mb-8 text-center bg-slate-900 py-3 rounded-xl border border-slate-800">{t.originalNotes}</p>
                      {sessionImages.map((src, idx) => (
                         <div key={idx} className="relative mb-10">
                           <span className="absolute -top-3 -left-3 bg-indigo-500 text-white w-8 h-8 flex items-center justify-center rounded-full font-black text-xs shadow-lg border-2 border-[#0f172a] z-10">{idx + 1}</span>
@@ -578,7 +602,7 @@ export default function PurifierPage() {
                {/* Right: Purified Text */}
                <div className="w-full md:w-1/2 h-1/2 md:h-full bg-slate-900 p-6 md:p-12 overflow-y-auto custom-scrollbar">
                   <div className="w-full max-w-3xl mx-auto">
-                     <p className="text-emerald-400 font-mono text-sm font-black tracking-widest uppercase mb-8 text-center bg-emerald-500/10 py-3 rounded-xl border border-emerald-500/30">AI Purified Document</p>
+                     <p className="text-emerald-400 font-mono text-sm font-black tracking-widest uppercase mb-8 text-center bg-emerald-500/10 py-3 rounded-xl border border-emerald-500/30">{t.purifiedDoc}</p>
                      <div className="prose prose-slate prose-lg max-w-none prose-headings:font-black prose-headings:text-slate-200 prose-p:leading-relaxed prose-p:text-slate-300 prose-strong:text-white prose-a:text-emerald-600 prose-li:marker:text-emerald-500 bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-xl">
                         <MemoizedMarkdown content={purifiedContent.content} />
                      </div>

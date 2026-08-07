@@ -14,7 +14,21 @@ const translations = {
     completed: "Completed", progress: "Progress", levelUp: "Milestone Reached! +10 Aura ✨", selectToView: "Select a quest to view your map.",
     forgeMethod: "Select Forge Method", typeManual: "Manual Type (Free)", typeDashboard: "Dashboard Vault (Pro)",
     courseName: "Course/Subject Name", chapters: "Chapters & Topics", createSyllabus: "Forge Quest Map",
-    addChapter: "Add Chapter", loadDashboard: "Load from Dashboard Library", startQuest: "Start Selected Quest"
+    addChapter: "Add Chapter", loadDashboard: "Load from Dashboard Library", startQuest: "Start Selected Quest",
+    chapterNamePlaceholder: "Chapter Name",
+    topicsPlaceholder: "Topics (Optional - one per line)",
+    chPrefix: "Ch",
+    chooseSyllabus: "-- Choose Syllabus --",
+    selectChaptersOptional: "Select Chapters (Optional)",
+    selectTopicsOptional: "Select Topics (Optional)",
+    tracker: "Tracker",
+    syllabusQuest: "Syllabus Quest",
+    chatBtn: "Chat",
+    epicQuestLine: "Epic Quest Line",
+    chapterPrefixText: "Chapter",
+    questMastered: "Quest Mastered!",
+    questMasteredDesc: "You have conquered the entire syllabus. A true scholar!",
+    forgeTab: "Forge"
   },
   Bangla: {
     title: "সিলেবাস কোয়েস্ট ম্যাপ", subtitle: "বোরিং সিলেবাসকে বানান এপিক আরপিজি (RPG) অ্যাডভেঞ্চার!",
@@ -22,15 +36,43 @@ const translations = {
     completed: "সম্পন্ন", progress: "অগ্রগতি", levelUp: "মাইলস্টোন সম্পন্ন! +১০ অরা ✨", selectToView: "আপনার ম্যাপ দেখতে একটি কোয়েস্ট সিলেক্ট করুন।",
     forgeMethod: "তৈরির মাধ্যম সিলেক্ট করুন", typeManual: "ম্যানুয়াল টাইপ (Free)", typeDashboard: "ড্যাশবোর্ড ভল্ট (Pro)",
     courseName: "কোর্সের নাম", chapters: "চ্যাপ্টার ও টপিক", createSyllabus: "কোয়েস্ট ম্যাপ তৈরি করুন",
-    addChapter: "চ্যাপ্টার যুক্ত করুন", loadDashboard: "ড্যাশবোর্ড লাইব্রেরি থেকে লোড করুন", startQuest: "সিলেক্টেড কোয়েস্ট শুরু করুন"
+    addChapter: "চ্যাপ্টার যুক্ত করুন", loadDashboard: "ড্যাশবোর্ড লাইব্রেরি থেকে লোড করুন", startQuest: "সিলেক্টেড কোয়েস্ট শুরু করুন",
+    chapterNamePlaceholder: "চ্যাপ্টারের নাম",
+    topicsPlaceholder: "টপিক (ঐচ্ছিক - প্রতি লাইনে একটি)",
+    chPrefix: "চ্যাপ্টার",
+    chooseSyllabus: "-- সিলেবাস বেছে নিন --",
+    selectChaptersOptional: "চ্যাপ্টার বেছে নিন (ঐচ্ছিক)",
+    selectTopicsOptional: "টপিক বেছে নিন (ঐচ্ছিক)",
+    tracker: "ট্র্যাকার",
+    syllabusQuest: "সিলেবাস কোয়েস্ট",
+    chatBtn: "চ্যাট",
+    epicQuestLine: "এপিক কোয়েস্ট লাইন",
+    chapterPrefixText: "অধ্যায়",
+    questMastered: "কোয়েস্ট সম্পন্ন!",
+    questMasteredDesc: "আপনি সম্পূর্ণ সিলেবাস জয় করেছেন। একজন সত্যিকারের স্কলার!",
+    forgeTab: "তৈরি"
   },
   Hindi: {
-    title: "लेबस क्वेस्ट मैप", subtitle: "अपने उबाऊ सिलेबस को महाकाव्य आरपीजी रोमांच में बदलें!",
+    title: "सिलेबस क्वेस्ट मैप", subtitle: "अपने उबाऊ सिलेबस को महाकाव्य आरपीजी रोमांच में बदलें!",
     myQuests: "मेरे सक्रिय क्वेस्ट", noQuests: "कोई सक्रिय क्वेस्ट नहीं। एक बनाएं या डैशबोर्ड से लोड करें!",
     completed: "पूरा हुआ", progress: "प्रगति", levelUp: "मील का पत्थर पार! +10 ऑरा ✨", selectToView: "अपना मैप देखने के लिए एक क्वेस्ट चुनें।",
     forgeMethod: "बनाने का तरीका चुनें", typeManual: "मैनुअल टाइप (Free)", typeDashboard: "डैशबोर्ड तिजोरी (Pro)",
     courseName: "कोर्स का नाम", chapters: "अध्याय और विषय", createSyllabus: "क्वेस्ट मैप बनाएं",
-    addChapter: "अध्याय जोड़ें", loadDashboard: "डैशबोर्ड लाइब्रेरी से लोड करें", startQuest: "चयनित क्वेस्ट शुरू करें"
+    addChapter: "अध्याय जोड़ें", loadDashboard: "डैशबोर्ड लाइब्रेरी से लोड करें", startQuest: "चयनित क्वेस्ट शुरू करें",
+    chapterNamePlaceholder: "अध्याय का नाम",
+    topicsPlaceholder: "विषय (वैकल्पिक - प्रति पंक्ति एक)",
+    chPrefix: "अध्याय",
+    chooseSyllabus: "-- सिलेबस चुनें --",
+    selectChaptersOptional: "अध्याय चुनें (वैकल्पिक)",
+    selectTopicsOptional: "विषय चुनें (वैकल्पिक)",
+    tracker: "ट्रैकर",
+    syllabusQuest: "सिलेबस क्वेस्ट",
+    chatBtn: "चैट",
+    epicQuestLine: "महाकाव्य क्वेस्ट लाइन",
+    chapterPrefixText: "अध्याय",
+    questMastered: "क्वेस्ट पूर्ण!",
+    questMasteredDesc: "आपने पूरा सिलेबस जीत लिया है। एक सच्चे विद्वान!",
+    forgeTab: "बनाएं"
   }
 };
 
@@ -147,7 +189,7 @@ export default function SyllabusQuestPage() {
 
       const res = await fetch(apiUrl, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ courseName, chapters: chapterList })
+        body: JSON.stringify({ courseName, chapters: chapterList, language })
       });
       const data = await res.json();
 
@@ -292,8 +334,8 @@ export default function SyllabusQuestPage() {
             {courseName.length >= 2 && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pt-2 space-y-3">
                 <div className="bg-slate-900 p-3 rounded-xl border border-slate-700 space-y-2">
-                  <input value={tempChapterName} onChange={e => setTempChapterName(e.target.value)} placeholder="Chapter Name" className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-xs font-bold text-white focus:border-indigo-500 outline-none" />
-                  <textarea value={tempTopicsText} onChange={e => setTempTopicsText(e.target.value)} placeholder="Topics (Optional - one per line)" rows={2} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-xs text-slate-300 focus:border-indigo-500 outline-none resize-none" />
+                  <input value={tempChapterName} onChange={e => setTempChapterName(e.target.value)} placeholder={t.chapterNamePlaceholder} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-xs font-bold text-white focus:border-indigo-500 outline-none" />
+                  <textarea value={tempTopicsText} onChange={e => setTempTopicsText(e.target.value)} placeholder={t.topicsPlaceholder} rows={2} className="w-full bg-slate-950 border border-slate-800 p-2 rounded-lg text-xs text-slate-300 focus:border-indigo-500 outline-none resize-none" />
                   <button type="button" onClick={handleAddChapter} disabled={!tempChapterName.trim()} className="w-full py-2 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-xs font-black uppercase tracking-widest rounded-lg transition-colors flex items-center justify-center gap-1 disabled:opacity-50 border border-indigo-500/30">
                     <Plus size={14}/> {t.addChapter}
                   </button>
@@ -305,7 +347,7 @@ export default function SyllabusQuestPage() {
                     {chapterList.map((chap, idx) => (
                       <div key={chap.id} className="p-3 bg-slate-900 border border-slate-700 rounded-xl flex justify-between items-start">
                         <div>
-                          <h4 className="font-bold text-slate-200 text-xs mb-1">Ch {idx + 1}: {chap.chapterName}</h4>
+                          <h4 className="font-bold text-slate-200 text-xs mb-1">{t.chPrefix} {idx + 1}: {chap.chapterName}</h4>
                           {chap.topics.length > 0 && (
                             <div className="flex flex-wrap gap-1 mt-1">
                               {chap.topics.map((tp, i) => <span key={i} className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-bold">{tp}</span>)}
@@ -331,7 +373,7 @@ export default function SyllabusQuestPage() {
           <div>
             <label className="block text-[10px] font-black tracking-widest text-amber-500 uppercase mb-2 flex items-center gap-1.5"><ListTree size={14}/> {t.loadDashboard}</label>
             <select value={selectedSyllabusId} onChange={(e) => { setSelectedSyllabusId(e.target.value); setSelectedChapterIds([]); setSelectedTopics([]); }} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm font-bold focus:border-amber-500 outline-none text-slate-300">
-               <option value="">-- Choose Syllabus --</option>
+               <option value="">{t.chooseSyllabus}</option>
                {quests.map(q => <option key={q.id} value={q.id}>{q.course_name}</option>)}
             </select>
           </div>
@@ -339,7 +381,7 @@ export default function SyllabusQuestPage() {
           {/* Chapters (Multiple Toggle) */}
           {selectedSyllabusId && activeCourseDropdown?.chapters?.length > 0 && (
             <div className="pt-2 border-t border-slate-800">
-              <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-2 flex items-center gap-1.5"><CheckCircle2 size={14}/> Select Chapters (Optional)</label>
+              <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-2 flex items-center gap-1.5"><CheckCircle2 size={14}/> {t.selectChaptersOptional}</label>
               <div className="flex flex-col gap-1.5 max-h-32 overflow-y-auto custom-scrollbar">
                 {activeCourseDropdown.chapters.map((chap: any) => (
                   <div key={chap.id} onClick={() => toggleChapterSelection(chap.id)} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-xs font-bold transition-all border ${selectedChapterIds.includes(chap.id) || selectedChapterIds.length === 0 ? 'bg-amber-500/10 border-amber-500/50 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-600'}`}>
@@ -354,7 +396,7 @@ export default function SyllabusQuestPage() {
           {/* Topics (Multiple Select) */}
           {selectedSyllabusId && availableTopicsDropdown.length > 0 && (
             <div className="pt-2 border-t border-slate-800">
-              <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-2 flex items-center gap-1.5"><Target size={14}/> Select Topics (Optional)</label>
+              <label className="block text-[10px] font-black tracking-widest text-slate-400 uppercase mb-2 flex items-center gap-1.5"><Target size={14}/> {t.selectTopicsOptional}</label>
               <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto custom-scrollbar">
                 {availableTopicsDropdown.map((topic: string, idx: number) => (
                   <button key={idx} type="button" onClick={() => toggleTopicSelection(topic)} className={`text-[10px] font-black tracking-wide px-2 py-1 rounded-md border transition-all ${selectedTopics.includes(topic) ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300' : 'bg-slate-950 border-slate-700 text-slate-500 hover:border-slate-500'}`}>
@@ -413,10 +455,10 @@ export default function SyllabusQuestPage() {
         {/* Mobile Smart Header */}
         <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0`}>
           <div className="flex flex-col">
-            <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><Map size={16} className="text-amber-500"/> Tracker</h2>
-            <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">Syllabus Quest</p>
+            <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><Map size={16} className="text-amber-500"/> {t.tracker}</h2>
+            <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.syllabusQuest}</p>
           </div>
-          <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-amber-600 text-slate-900 shadow-md hover:bg-amber-500">Chat</button>
+          <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-amber-600 text-slate-900 shadow-md hover:bg-amber-500">{t.chatBtn}</button>
         </div>
 
         {/* Floating XP Popups */}
@@ -462,7 +504,7 @@ export default function SyllabusQuestPage() {
 
                <div className="text-center mb-12 md:mb-16 animate-in slide-in-from-top-10 mt-6 md:mt-0">
                  <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-600 drop-shadow-sm mb-2">{activeQuest.course_name}</h1>
-                 <p className="text-amber-500/70 font-bold uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2"><Trophy size={16}/> Epic Quest Line</p>
+                 <p className="text-amber-500/70 font-bold uppercase tracking-widest text-xs md:text-sm flex items-center justify-center gap-2"><Trophy size={16}/> {t.epicQuestLine}</p>
                </div>
 
                {/* Map Path Generation */}
@@ -486,7 +528,7 @@ export default function SyllabusQuestPage() {
 
                          <div className={`w-[calc(50%-28px)] md:w-[calc(50%-40px)] ${isLeft ? 'pr-4 md:pr-6 text-right' : 'pl-4 md:pl-6 text-left'}`}>
                            <div className={`p-3 md:p-4 rounded-2xl border transition-all duration-500 ${isDone ? 'bg-amber-500/10 border-amber-500/50 shadow-lg shadow-amber-500/10' : 'bg-slate-900 border-slate-800 opacity-70'}`}>
-                             <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest block mb-1 ${isDone ? 'text-amber-400' : 'text-slate-500'}`}>Chapter {index + 1}</span>
+                             <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest block mb-1 ${isDone ? 'text-amber-400' : 'text-slate-500'}`}>{t.chapterPrefixText} {index + 1}</span>
                              <h3 className={`font-bold text-xs md:text-base mb-2 transition-colors ${isDone ? 'text-white' : 'text-slate-400'}`}>{chapter.title}</h3>
 
                              {/* 🟢 TOPICS AS HIERARCHICAL SUBNODES */}
@@ -519,8 +561,8 @@ export default function SyllabusQuestPage() {
                {activeQuest.chapters?.every((c:any) => c.is_completed) && activeQuest.chapters?.length > 0 && (
                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="mt-20 flex flex-col items-center bg-gradient-to-t from-amber-500/20 to-transparent p-10 rounded-full">
                     <Trophy size={80} className="text-amber-400 drop-shadow-[0_0_40px_rgba(251,191,36,0.8)] animate-pulse mb-4"/>
-                    <h2 className="text-2xl font-black text-amber-300 text-center">Quest Mastered!</h2>
-                    <p className="text-amber-500/80 font-bold mt-2 text-center max-w-xs text-sm">You have conquered the entire syllabus. A true scholar!</p>
+                    <h2 className="text-2xl font-black text-amber-300 text-center">{t.questMastered}</h2>
+                    <p className="text-amber-500/80 font-bold mt-2 text-center max-w-xs text-sm">{t.questMasteredDesc}</p>
                  </motion.div>
                )}
             </div>
@@ -540,7 +582,7 @@ export default function SyllabusQuestPage() {
               onClick={() => setIsMobileDrawerOpen('forge')}
               className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all active:scale-95 border border-amber-400/50"
             >
-              <Swords size={18} /> Forge
+              <Swords size={18} /> {t.forgeTab}
             </button>
           </div>
         </div>

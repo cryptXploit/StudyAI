@@ -311,6 +311,13 @@ export async function decodeYoutubeHandler(req: Request, res: Response): Promise
         .replace(/\s+/g, ' ')
         .substring(0, 4500); 
 
+      let strictLangInstruction = "";
+      if (language === 'Bangla') {
+        strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+      } else if (language === 'Hindi') {
+        strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+      }
+
       const systemPrompt = `You are an Elite Academic Professor creating a segment of a Crash Course.
 If the transcript is not in English, generate the notes in that original language unless explicitly asked otherwise. 
 Target language: ${language}.
@@ -328,7 +335,7 @@ Your Catchy Title Here
 </title>
 <content>
 Your detailed markdown notes here...
-</content>`;
+</content>` + strictLangInstruction;
 
       const userPrompt = `[CACHE_KEY: YT_XML_${videoId}_CH_${chunk.id}_LANG_${language}]\nTRANSCRIPT TO DECODE:\n${cleanTranscript}`;
 

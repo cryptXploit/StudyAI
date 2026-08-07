@@ -133,9 +133,16 @@ CRITICAL RULES:
     // ========================================================================
     // Step 4: ModelRouter Streaming
     // ========================================================================
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const router = new ModelRouter();
     const streamResponse = router.generateStream(
-      [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }], 
+      [{ role: 'system', content: systemPrompt + strictLangInstruction }, { role: 'user', content: userPrompt }], 
       userId, tier, { temperature: 0.3 }
     );
 

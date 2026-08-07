@@ -9,6 +9,74 @@ import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import { ScatterChart, Scatter, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Label } from 'recharts';
 
+const translations = {
+  English: {
+    autoGrapher: "Auto-Grapher",
+    labReportVisualizer: "Lab Report Visualizer",
+    proTierFeature: "PRO TIER FEATURE",
+    graphPrompt: "Graph Prompt (Optional)",
+    graphPromptPlaceholder: "e.g., Plot a Scatter graph of Voltage vs Current",
+    rawLabData: "Raw Lab Data",
+    rawLabDataPlaceholder: "Copy & Paste Excel/Table data here...\n\nVoltage Current\n1.5 3.2\n2.0 4.1\n2.5 5.0",
+    plottingGraph: "Plotting Graph...",
+    generateGraph: "Generate Graph",
+    savedGraphs: "Saved Graphs",
+    noGraphsPlotted: "No graphs plotted yet.",
+    chat: "Chat",
+    canvasAwaits: "Canvas Awaits",
+    pasteLabData: "Paste your messy lab data on the left to generate a precise, lab-report ready plot.",
+    processingData: "Processing Data points...",
+    plotRendered: "PLOT RENDERED",
+    exportAsPNG: "Export as PNG",
+    saved: "Saved",
+    plotData: "Plot Data"
+  },
+  Bangla: {
+    autoGrapher: "অটো-গ্রাফার",
+    labReportVisualizer: "ল্যাব রিপোর্ট ভিজ্যুয়ালাইজার",
+    proTierFeature: "প্রো টিয়ার ফিচার",
+    graphPrompt: "গ্রাফ প্রম্পট (ঐচ্ছিক)",
+    graphPromptPlaceholder: "যেমন, ভোল্টেজ বনাম কারেন্টের একটি স্ক্যাটার গ্রাফ আঁকুন",
+    rawLabData: "র (Raw) ল্যাব ডেটা",
+    rawLabDataPlaceholder: "এখানে এক্সেল/টেবিল ডেটা কপি এবং পেস্ট করুন...\n\nভোল্টেজ কারেন্ট\n১.৫ ৩.২\n২.০ ৪.১\n২.৫ ৫.০",
+    plottingGraph: "গ্রাফ আঁকা হচ্ছে...",
+    generateGraph: "গ্রাফ তৈরি করুন",
+    savedGraphs: "সংরক্ষিত গ্রাফসমূহ",
+    noGraphsPlotted: "এখনো কোনো গ্রাফ আঁকা হয়নি।",
+    chat: "চ্যাট",
+    canvasAwaits: "ক্যানভাস প্রস্তুত",
+    pasteLabData: "একটি নির্ভুল এবং ল্যাব-রিপোর্ট উপযোগী প্লট তৈরি করতে বাম দিকে আপনার অগোছালো ল্যাব ডেটা পেস্ট করুন।",
+    processingData: "ডেটা পয়েন্ট প্রসেস করা হচ্ছে...",
+    plotRendered: "প্লট রেন্ডার করা হয়েছে",
+    exportAsPNG: "PNG হিসেবে এক্সপোর্ট করুন",
+    saved: "সংরক্ষিত",
+    plotData: "প্লট ডেটা"
+  },
+  Hindi: {
+    autoGrapher: "ऑटो-ग्राफर",
+    labReportVisualizer: "लैब रिपोर्ट विज़ुअलाइज़र",
+    proTierFeature: "प्रो टियर फीचर",
+    graphPrompt: "ग्राफ प्रॉम्प्ट (वैकल्पिक)",
+    graphPromptPlaceholder: "उदा., वोल्टेज बनाम करंट का एक स्कैटर ग्राफ प्लॉट करें",
+    rawLabData: "कच्चा (Raw) लैब डेटा",
+    rawLabDataPlaceholder: "यहाँ एक्सेल/टेबल डेटा कॉपी और पेस्ट करें...\n\nवोल्टेज करंट\n1.5 3.2\n2.0 4.1\n2.5 5.0",
+    plottingGraph: "ग्राफ प्लॉट किया जा रहा है...",
+    generateGraph: "ग्राफ उत्पन्न करें",
+    savedGraphs: "सहेजे गए ग्राफ",
+    noGraphsPlotted: "अभी तक कोई ग्राफ प्लॉट नहीं किया गया है।",
+    chat: "चैट",
+    canvasAwaits: "कैनवास तैयार है",
+    pasteLabData: "एक सटीक और लैब-रिपोर्ट के लिए तैयार प्लॉट उत्पन्न करने के लिए बाईं ओर अपना अव्यवस्थित लैब डेटा पेस्ट करें।",
+    processingData: "डेटा बिंदु प्रोसेस किए जा रहे हैं...",
+    plotRendered: "प्लॉट रेंडर किया गया",
+    exportAsPNG: "PNG के रूप में निर्यात करें",
+    saved: "सहेजा गया",
+    plotData: "प्लॉट डेटा"
+  }
+};
+
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
+
 export default function LabGraphPage() {
   const supabase = createClient();
   const [prompt, setPrompt] = useState('');
@@ -29,6 +97,7 @@ export default function LabGraphPage() {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'history'|'config'>('none');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = React.useRef(0);
+  const [language, setLanguage] = useState<LanguageType>('English');
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const currentScrollY = e.currentTarget.scrollTop;
@@ -42,6 +111,8 @@ export default function LabGraphPage() {
 
   useEffect(() => {
     fetchHistory();
+    const savedLang = localStorage.getItem('Prepia_language');
+    if (savedLang) setLanguage(savedLang as LanguageType);
   }, []);
 
   const fetchHistory = async () => {
@@ -74,7 +145,7 @@ export default function LabGraphPage() {
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ prompt, rawData })
+        body: JSON.stringify({ prompt, rawData, language })
       });
 
       if (response.status === 402) {
@@ -187,6 +258,8 @@ export default function LabGraphPage() {
     }
   };
 
+  const t = translations[language];
+
   return (
     <SecureLayout>
       <OutOfTokensModal
@@ -200,7 +273,7 @@ export default function LabGraphPage() {
         {/* Left Panel: Inputs (Desktop Only) */}
         <div className="hidden lg:flex w-full lg:w-1/3 bg-slate-950 border-r border-slate-800 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative z-10">
           <div className="absolute top-0 right-0 bg-gradient-to-l from-blue-500 to-cyan-600 text-white text-[10px] font-black tracking-widest px-4 py-1.5 rounded-bl-xl shadow-md z-10 flex items-center gap-1">
-             <ShieldCheck size={12}/> PRO TIER FEATURE
+             <ShieldCheck size={12}/> {t.proTierFeature}
           </div>
 
           <div className="flex items-center gap-3 mb-8 mt-2">
@@ -208,28 +281,28 @@ export default function LabGraphPage() {
               <ChartIcon size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-slate-100 tracking-tight">Auto-Grapher</h2>
-              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lab Report Visualizer</p>
+              <h2 className="text-2xl font-black text-slate-100 tracking-tight">{t.autoGrapher}</h2>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t.labReportVisualizer}</p>
             </div>
           </div>
 
           <form onSubmit={handleGenerate} className="space-y-5">
             <div>
-              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Settings2 size={14}/> Graph Prompt (Optional)</label>
+              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Settings2 size={14}/> {t.graphPrompt}</label>
               <input
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="e.g., Plot a Scatter graph of Voltage vs Current"
+                placeholder={t.graphPromptPlaceholder}
                 className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-200 placeholder:text-slate-300 shadow-inner"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Table2 size={14}/> Raw Lab Data</label>
+              <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Table2 size={14}/> {t.rawLabData}</label>
               <textarea
                 value={rawData}
                 onChange={(e) => setRawData(e.target.value)}
-                placeholder={`Copy & Paste Excel/Table data here...\n\nVoltage Current\n1.5 3.2\n2.0 4.1\n2.5 5.0`}
+                placeholder={t.rawLabDataPlaceholder}
                 className="w-full p-4 bg-slate-900 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none font-mono text-xs text-slate-300 placeholder:text-slate-300 shadow-inner custom-scrollbar"
                 rows={7}
                 required
@@ -238,18 +311,18 @@ export default function LabGraphPage() {
 
             <button type="submit" disabled={isLoading || !rawData.trim()} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 transition-all active:scale-95">
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-              {isLoading ? "Plotting Graph..." : "Generate Graph"}
+              {isLoading ? t.plottingGraph : t.generateGraph}
             </button>
           </form>
 
           {/* History Library */}
           <div className="mt-8 pt-6 border-t border-slate-800/50 flex-1 overflow-hidden flex flex-col">
             <h3 className="text-xs font-black tracking-widest text-slate-500 uppercase mb-3 flex items-center gap-2 shrink-0">
-              <History size={14} className="text-blue-400" /> Saved Graphs
+              <History size={14} className="text-blue-400" /> {t.savedGraphs}
             </h3>
             <div className="space-y-2 overflow-y-auto custom-scrollbar pr-2 pb-4">
               {historyList.length === 0 ? (
-                <p className="text-xs text-slate-400 text-center py-4 bg-slate-900 rounded-xl">No graphs plotted yet.</p>
+                <p className="text-xs text-slate-400 text-center py-4 bg-slate-900 rounded-xl">{t.noGraphsPlotted}</p>
               ) : (
                 historyList.map((item) => (
                   <div
@@ -275,10 +348,10 @@ export default function LabGraphPage() {
           {/* Mobile Smart Header */}
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)]`}>
             <div className="flex flex-col">
-              <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><ChartIcon size={16} className="text-blue-400"/> Auto-Grapher</h2>
-              <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">Lab Report Visualizer</p>
+              <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><ChartIcon size={16} className="text-blue-400"/> {t.autoGrapher}</h2>
+              <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.labReportVisualizer}</p>
             </div>
-            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chat}</button>
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col p-0 relative bg-slate-900">
@@ -286,13 +359,13 @@ export default function LabGraphPage() {
           {!chartConfig && !isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60 p-10">
               <ChartIcon size={80} className="text-slate-300 mb-6" />
-              <h3 className="text-3xl font-black text-slate-400">Canvas Awaits</h3>
-              <p className="text-slate-500 mt-2 max-w-sm">Paste your messy lab data on the left to generate a precise, lab-report ready plot.</p>
+              <h3 className="text-3xl font-black text-slate-400">{t.canvasAwaits}</h3>
+              <p className="text-slate-500 mt-2 max-w-sm">{t.pasteLabData}</p>
             </div>
           ) : isLoading ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-10">
               <Loader2 size={48} className="text-blue-500 animate-spin mb-4" />
-              <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">Processing Data points...</p>
+              <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">{t.processingData}</p>
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in fade-in zoom-in-95 duration-700">
@@ -302,11 +375,11 @@ export default function LabGraphPage() {
                   <div className="text-center md:text-left">
                     <h2 className="text-2xl md:text-3xl font-black text-slate-200 mb-1">{chartConfig?.title}</h2>
                     <p className="text-blue-600 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                       <Activity size={14}/> {chartConfig?.chartType.toUpperCase()} PLOT RENDERED
+                       <Activity size={14}/> {chartConfig?.chartType.toUpperCase()} {t.plotRendered}
                     </p>
                   </div>
                   <button onClick={downloadChartAsPNG} className="w-full md:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95">
-                    <Download size={18} /> Export as PNG
+                    <Download size={18} /> {t.exportAsPNG}
                   </button>
                </div>
 
@@ -334,14 +407,14 @@ export default function LabGraphPage() {
                 onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
-                <History size={16}/> Saved
+                <History size={16}/> {t.saved}
               </button>
 
               <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all active:scale-95 border border-blue-400/50"
               >
-                <Sparkles size={18} /> Plot Data
+                <Sparkles size={18} /> {t.plotData}
               </button>
             </div>
           </div>
@@ -356,7 +429,7 @@ export default function LabGraphPage() {
 
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-blue-400"/> Saved Graphs</> : <><ChartIcon size={18} className="text-blue-400"/> Plot Data</>}
+                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-blue-400"/> {t.savedGraphs}</> : <><ChartIcon size={18} className="text-blue-400"/> {t.plotData}</>}
               </h3>
             </div>
 
@@ -364,7 +437,7 @@ export default function LabGraphPage() {
               {isMobileDrawerOpen === 'history' ? (
                 <div className="space-y-3">
                   {historyList.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">No graphs plotted yet.</p>
+                    <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">{t.noGraphsPlotted}</p>
                   ) : (
                     historyList.map(item => (
                       <div
@@ -388,21 +461,21 @@ export default function LabGraphPage() {
               ) : (
                 <form onSubmit={(e) => { handleGenerate(e); if(rawData.trim()) setIsMobileDrawerOpen('none'); }} className="space-y-5">
                   <div>
-                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Settings2 size={14}/> Graph Prompt (Optional)</label>
+                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Settings2 size={14}/> {t.graphPrompt}</label>
                     <input
                       value={prompt}
                       onChange={(e) => setPrompt(e.target.value)}
-                      placeholder="e.g., Plot a Scatter graph of Voltage vs Current"
+                      placeholder={t.graphPromptPlaceholder}
                       className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-200 placeholder:text-slate-300 shadow-inner"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Table2 size={14}/> Raw Lab Data</label>
+                    <label className="block text-xs font-black tracking-widest text-slate-500 uppercase mb-2 flex items-center gap-2"><Table2 size={14}/> {t.rawLabData}</label>
                     <textarea
                       value={rawData}
                       onChange={(e) => setRawData(e.target.value)}
-                      placeholder={`Copy & Paste Excel/Table data here...\n\nVoltage Current\n1.5 3.2\n2.0 4.1\n2.5 5.0`}
+                      placeholder={t.rawLabDataPlaceholder}
                       className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 outline-none resize-none font-mono text-xs text-slate-300 placeholder:text-slate-300 shadow-inner custom-scrollbar"
                       rows={5}
                       required
@@ -411,7 +484,7 @@ export default function LabGraphPage() {
 
                   <button type="submit" disabled={isLoading || !rawData.trim()} className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 transition-all active:scale-95">
                     {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-                    {isLoading ? "Plotting Graph..." : "Generate Graph"}
+                    {isLoading ? t.plottingGraph : t.generateGraph}
                   </button>
                 </form>
               )}

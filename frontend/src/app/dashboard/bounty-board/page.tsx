@@ -7,6 +7,120 @@ import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Briefcase, Award, TrendingUp, Search, PlusCircle, CheckCircle2, Zap, Target, ExternalLink, ShieldCheck, Coins, Loader2, ThumbsUp, ThumbsDown, X, Globe, Crown } from 'lucide-react';
 
+
+const translations = {
+  English: {
+    wallOfFame: "Wall of Fame",
+    noEntriesYet: "No entries yet.",
+    anonymousScholar: "Anonymous Scholar",
+    unknownUniversity: "Unknown University",
+    unknownDept: "Unknown Dept",
+    karma: "Karma",
+    viewGlobalRankings: "View Global Rankings",
+    academicLinkedIn: "Academic LinkedIn Ecosystem",
+    alumniBountyBoard: "Alumni Bounty Board",
+    solveComplexProblems: "Solve complex problems for juniors, earn Karma Points, and build your digital reputation.",
+    top10Contributors: "🚀 Top 10 Contributors this month will get their Resumes directly forwarded to our Global Tech Partners.",
+    yourKarmaBalance: "Your Karma Balance",
+    postABounty: "Post a Bounty",
+    cancel: "Cancel",
+    explore: "Explore",
+    myBounties: "My Bounties",
+    searchTopics: "Search topics...",
+    requestKnowledge: "Request Knowledge",
+    egHeatmap: "E.g., I need a heatmap summary for Chapter 4...",
+    rewardBounty: "Reward Bounty:",
+    publish: "Publish",
+    noBountiesFound: "No bounties found",
+    requestedBy: "Requested by @",
+    solved: "Solved",
+    solveAndClaim: "Solve & Claim",
+    claimed: "Claimed",
+    solvedBy: "Solved by @",
+    rateAnswer: "Rate Answer:",
+    earn: "Earn",
+    typeYourExplanation: "Type your explanation or paste a link...",
+    submitSolution: "Submit Solution",
+    globalHierarchy: "Global Hierarchy",
+    top5000: "You are currently in the Top 5,000 Worldwide!",
+    you: "You"
+  },
+  Bangla: {
+    wallOfFame: "খ্যাতির প্রাচীর",
+    noEntriesYet: "এখনো কোনো এন্ট্রি নেই।",
+    anonymousScholar: "বেনামী শিক্ষার্থী",
+    unknownUniversity: "অজানা বিশ্ববিদ্যালয়",
+    unknownDept: "অজানা বিভাগ",
+    karma: "কর্ম",
+    viewGlobalRankings: "বিশ্বব্যাপী র‍্যাঙ্কিং দেখুন",
+    academicLinkedIn: "একাডেমিক লিঙ্কডইন ইকোসিস্টেম",
+    alumniBountyBoard: "অ্যালামনাই বাউন্টি বোর্ড",
+    solveComplexProblems: "জুনিয়রদের জন্য জটিল সমস্যার সমাধান করুন, কর্ম পয়েন্ট অর্জন করুন এবং আপনার ডিজিটাল খ্যাতি তৈরি করুন।",
+    top10Contributors: "🚀 এই মাসে সেরা ১০ জন অবদানকারীর জীবনবৃত্তান্ত সরাসরি আমাদের গ্লোবাল টেক পার্টনারদের কাছে ফরোয়ার্ড করা হবে।",
+    yourKarmaBalance: "আপনার কর্ম ব্যালেন্স",
+    postABounty: "বাউন্টি পোস্ট করুন",
+    cancel: "বাতিল করুন",
+    explore: "অন্বেষণ করুন",
+    myBounties: "আমার বাউন্টিগুলো",
+    searchTopics: "বিষয়বস্তু খুঁজুন...",
+    requestKnowledge: "জ্ঞানের অনুরোধ করুন",
+    egHeatmap: "যেমন, আমার চ্যাপ্টার ৪ এর জন্য একটি হিটম্যাপ সারাংশ প্রয়োজন...",
+    rewardBounty: "বাউন্টি পুরস্কার:",
+    publish: "প্রকাশ করুন",
+    noBountiesFound: "কোনো বাউন্টি পাওয়া যায়নি",
+    requestedBy: "অনুরোধ করেছেন @",
+    solved: "সমাধান হয়েছে",
+    solveAndClaim: "সমাধান করুন এবং দাবি করুন",
+    claimed: "দাবি করা হয়েছে",
+    solvedBy: "সমাধান করেছেন @",
+    rateAnswer: "উত্তরটি রেট করুন:",
+    earn: "অর্জন করুন",
+    typeYourExplanation: "আপনার ব্যাখ্যা টাইপ করুন বা একটি লিঙ্ক পেস্ট করুন...",
+    submitSolution: "সমাধান জমা দিন",
+    globalHierarchy: "বিশ্বব্যাপী স্তরবিন্যাস",
+    top5000: "আপনি বর্তমানে বিশ্বব্যাপী শীর্ষ ৫,০০০-এ আছেন!",
+    you: "আপনি"
+  },
+  Hindi: {
+    wallOfFame: "प्रसिद्धि की दीवार",
+    noEntriesYet: "अभी तक कोई प्रविष्टि नहीं।",
+    anonymousScholar: "अज्ञात विद्वान",
+    unknownUniversity: "अज्ञात विश्वविद्यालय",
+    unknownDept: "अज्ञात विभाग",
+    karma: "कर्म",
+    viewGlobalRankings: "वैश्विक रैंकिंग देखें",
+    academicLinkedIn: "अकादमिक लिंक्डइन इकोसिस्टम",
+    alumniBountyBoard: "पूर्व छात्र बाउंटी बोर्ड",
+    solveComplexProblems: "जूनियर्स के लिए जटिल समस्याओं को हल करें, कर्म अंक अर्जित करें और अपनी डिजिटल प्रतिष्ठा बनाएं।",
+    top10Contributors: "🚀 इस महीने के शीर्ष 10 योगदानकर्ताओं के रिज्यूमे सीधे हमारे ग्लोबल टेक पार्टनर्स को भेजे जाएंगे।",
+    yourKarmaBalance: "आपका कर्म बैलेंस",
+    postABounty: "बाउंटी पोस्ट करें",
+    cancel: "रद्द करें",
+    explore: "अन्वेषण करें",
+    myBounties: "मेरी बाउंटी",
+    searchTopics: "विषय खोजें...",
+    requestKnowledge: "ज्ञान का अनुरोध करें",
+    egHeatmap: "उदा., मुझे अध्याय 4 के लिए हीटमैप सारांश की आवश्यकता है...",
+    rewardBounty: "बाउंटी इनाम:",
+    publish: "प्रकाशित करें",
+    noBountiesFound: "कोई बाउंटी नहीं मिली",
+    requestedBy: "अनुरोधकर्ता @",
+    solved: "हल हो गया",
+    solveAndClaim: "हल करें और दावा करें",
+    claimed: "दावा किया गया",
+    solvedBy: "द्वारा हल किया गया @",
+    rateAnswer: "उत्तर को रेट करें:",
+    earn: "कमाएं",
+    typeYourExplanation: "अपना स्पष्टीकरण टाइप करें या कोई लिंक पेस्ट करें...",
+    submitSolution: "समाधान सबमिट करें",
+    globalHierarchy: "वैश्विक पदानुक्रम",
+    top5000: "आप वर्तमान में दुनिया भर में शीर्ष 5,000 में हैं!",
+    you: "आप"
+  }
+};
+
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
+
 export default function BountyBoardPage() {
   const { user } = useAuth();
   const supabase = createClient();
@@ -36,8 +150,14 @@ export default function BountyBoardPage() {
 
   // 🟢 Mobile UI State
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none' | 'leaderboard'>('none');
+  const [language, setLanguage] = useState<LanguageType>('English');
 
   useEffect(() => {
+    const loadSettings = () => {
+      const savedLang = localStorage.getItem('Prepia_language');
+      if (savedLang) setLanguage(savedLang as LanguageType);
+    };
+    loadSettings();
     if (user) loadInitialData();
   }, [user]);
 
@@ -200,6 +320,8 @@ export default function BountyBoardPage() {
     return matchesTab && matchesSearch;
   });
 
+  const t = translations[language];
+
   if (isLoading) {
     return (
       <SecureLayout>
@@ -213,13 +335,13 @@ export default function BountyBoardPage() {
   const renderLeaderboardSection = () => (
     <div className="bg-slate-950 rounded-[2rem] p-6 md:p-8 shadow-2xl border-2 border-slate-800 sticky top-28">
       <div className="flex items-center justify-between mb-6 pb-6 border-b border-white/10">
-        <h3 className="text-xl font-black text-white flex items-center gap-2"><Award className="text-amber-400"/> Wall of Fame</h3>
+        <h3 className="text-xl font-black text-white flex items-center gap-2"><Award className="text-amber-400"/> {t.wallOfFame}</h3>
         <TrendingUp className="text-slate-500" size={20} />
       </div>
 
       <div className="space-y-4">
         {leaderboard.length === 0 ? (
-          <p className="text-slate-500 text-center font-bold text-xs">No entries yet.</p>
+          <p className="text-slate-500 text-center font-bold text-xs">{t.noEntriesYet}</p>
         ) : (
           leaderboard.map((userBoard, idx) => (
             <div key={idx} className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${idx === 0 ? 'bg-amber-500/10 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'bg-slate-900/50 border-slate-800 hover:bg-slate-800'}`}>
@@ -228,13 +350,13 @@ export default function BountyBoardPage() {
                   {userBoard.rank}
                 </span>
                 <div className="min-w-0">
-                  <h4 className={`font-bold text-sm truncate ${idx === 0 ? 'text-amber-400' : 'text-white'}`}>{userBoard.name}</h4>
-                  <p className="text-[10px] text-slate-500 truncate">{userBoard.uni} • {userBoard.dept}</p>
+                  <h4 className={`font-bold text-sm truncate ${idx === 0 ? 'text-amber-400' : 'text-white'}`}>{userBoard.name === 'Anonymous Scholar' ? t.anonymousScholar : userBoard.name}</h4>
+                  <p className="text-[10px] text-slate-500 truncate">{userBoard.uni === 'Unknown University' ? t.unknownUniversity : userBoard.uni} • {userBoard.dept === 'Unknown Dept' ? t.unknownDept : userBoard.dept}</p>
                 </div>
               </div>
               <div className="text-right shrink-0 pl-2">
                 <span className="block text-sm font-black text-white">{userBoard.karma.toLocaleString()}</span>
-                <span className="text-[8px] font-black uppercase tracking-widest text-amber-500">Karma</span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-amber-500">{t.karma}</span>
               </div>
             </div>
           ))
@@ -242,7 +364,7 @@ export default function BountyBoardPage() {
       </div>
 
       <button onClick={() => { setShowGlobalRanking(true); setIsMobileDrawerOpen('none'); }} className="w-full mt-6 py-4 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-colors border border-white/10 flex items-center justify-center gap-2">
-        View Global Rankings <ExternalLink size={14} />
+        {t.viewGlobalRankings} <ExternalLink size={14} />
       </button>
     </div>
   );
@@ -259,27 +381,27 @@ export default function BountyBoardPage() {
           <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-black uppercase tracking-widest mb-6 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-                <Target size={14} /> Academic LinkedIn Ecosystem
+                <Target size={14} /> {t.academicLinkedIn}
               </div>
               <h1 className="text-3xl md:text-5xl font-black mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-amber-200">
-                Alumni Bounty Board
+                {t.alumniBountyBoard}
               </h1>
               <p className="text-slate-400 font-medium text-sm md:text-base leading-relaxed">
-                Solve complex problems for juniors, earn Karma Points, and build your digital reputation. 
+                {t.solveComplexProblems} 
                 <span className="text-amber-400 font-bold block mt-2">
-                  🚀 Top 10 Contributors this month will get their Resumes directly forwarded to our Global Tech Partners.
+                  {t.top10Contributors}
                 </span>
               </p>
             </div>
 
             <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-3xl w-full md:w-64 shrink-0 shadow-xl">
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2 text-center">Your Karma Balance</p>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2 text-center">{t.yourKarmaBalance}</p>
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Coins size={28} className="text-amber-400" />
                 <span className="text-4xl font-black text-white">{userKarma.toLocaleString()}</span>
               </div>
               <button onClick={() => setIsCreating(!isCreating)} className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-widest rounded-xl transition-all active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                {isCreating ? 'Cancel' : 'Post a Bounty'}
+                {isCreating ? t.cancel : t.postABounty}
               </button>
             </div>
           </div>
@@ -298,7 +420,7 @@ export default function BountyBoardPage() {
               </div>
               <div className="relative w-full sm:w-auto">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search topics..." className="w-full sm:w-64 bg-slate-50 border border-slate-200 py-2 pl-10 pr-4 rounded-xl text-sm font-medium focus:border-amber-500 outline-none transition-colors" />
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t.searchTopics} className="w-full sm:w-64 bg-slate-50 border border-slate-200 py-2 pl-10 pr-4 rounded-xl text-sm font-medium focus:border-amber-500 outline-none transition-colors" />
               </div>
             </div>
 
@@ -306,19 +428,19 @@ export default function BountyBoardPage() {
             <AnimatePresence>
               {isCreating && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="bg-slate-950 p-6 rounded-[2rem] border border-slate-800 shadow-xl overflow-hidden">
-                  <h3 className="text-white font-black text-lg mb-4 flex items-center gap-2"><PlusCircle size={20} className="text-amber-500"/> Request Knowledge</h3>
+                  <h3 className="text-white font-black text-lg mb-4 flex items-center gap-2"><PlusCircle size={20} className="text-amber-500"/> {t.requestKnowledge}</h3>
                   <div className="space-y-4">
-                    <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} type="text" placeholder="E.g., I need a heatmap summary for Chapter 4..." className="w-full bg-slate-900 border border-slate-700 text-white p-4 rounded-xl text-sm focus:border-amber-500 outline-none" />
+                    <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} type="text" placeholder={t.egHeatmap} className="w-full bg-slate-900 border border-slate-700 text-white p-4 rounded-xl text-sm focus:border-amber-500 outline-none" />
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900 p-4 rounded-xl border border-slate-700 gap-4">
-                      <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">Reward Bounty:</span>
+                      <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">{t.rewardBounty}</span>
                       <div className="flex items-center gap-4 w-full sm:w-auto">
                         <select value={newReward} onChange={(e) => setNewReward(Number(e.target.value))} className="bg-black text-amber-400 font-black border border-amber-500/30 p-2 rounded-lg outline-none cursor-pointer flex-1 sm:flex-none">
-                          <option value={50}>50 Karma</option>
-                          <option value={100}>100 Karma</option>
-                          <option value={200}>200 Karma</option>
+                          <option value={50}>50 {t.karma}</option>
+                          <option value={100}>100 {t.karma}</option>
+                          <option value={200}>200 {t.karma}</option>
                         </select>
                         <button onClick={handleCreateBounty} disabled={!newTitle.trim() || isSubmitting} className="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black text-xs uppercase tracking-widest rounded-lg hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 w-full sm:w-auto">
-                          {isSubmitting ? <Loader2 size={16} className="animate-spin mx-auto"/> : 'Publish'}
+                          {isSubmitting ? <Loader2 size={16} className="animate-spin mx-auto"/> : t.publish}
                         </button>
                       </div>
                     </div>
@@ -331,7 +453,7 @@ export default function BountyBoardPage() {
             <div className="space-y-4">
               {displayedBounties.length === 0 ? (
                 <div className="p-8 text-center bg-white rounded-3xl border border-slate-100">
-                  <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">No bounties found</p>
+                  <p className="text-slate-400 font-bold uppercase tracking-widest text-sm">{t.noBountiesFound}</p>
                 </div>
               ) : (
                 displayedBounties.map((bounty) => {
@@ -346,9 +468,9 @@ export default function BountyBoardPage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2 flex-wrap">
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-1 rounded-md">
-                              Requested by @{bounty.requester_name}
+                              {t.requestedBy}{bounty.requester_name === 'Anonymous Scholar' ? t.anonymousScholar : (bounty.requester_name === 'You' ? t.you : bounty.requester_name)}
                             </span>
-                            {bounty.status === 'solved' && <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md"><CheckCircle2 size={12}/> Solved</span>}
+                            {bounty.status === 'solved' && <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-100 px-2 py-1 rounded-md"><CheckCircle2 size={12}/> {t.solved}</span>}
                           </div>
                           <h3 className={`text-lg font-black mb-3 ${bounty.status === 'solved' ? 'text-slate-600' : 'text-slate-800'}`}>{bounty.title}</h3>
                           
@@ -375,15 +497,15 @@ export default function BountyBoardPage() {
                         <div className="flex flex-row md:flex-col items-center md:items-end gap-4 w-full md:w-auto">
                           <div className="flex flex-col items-center md:items-end">
                             <span className="text-2xl font-black text-amber-500 flex items-center gap-1"><Coins size={20}/> {bounty.reward_karma}</span>
-                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Karma</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t.karma}</span>
                           </div>
                           {bounty.status === 'open' ? (
                             <button onClick={() => setSolveBountyId(bounty)} className="w-full md:w-auto px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 flex items-center justify-center gap-2">
-                              <Zap size={14} /> Solve & Claim
+                              <Zap size={14} /> {t.solveAndClaim}
                             </button>
                           ) : (
                             <button className="w-full md:w-auto px-6 py-3 bg-slate-200 text-slate-500 text-xs font-black uppercase tracking-widest rounded-xl cursor-not-allowed flex items-center justify-center gap-2">
-                              <ShieldCheck size={14} /> Claimed
+                              <ShieldCheck size={14} /> {t.claimed}
                             </button>
                           )}
                         </div>
@@ -393,12 +515,12 @@ export default function BountyBoardPage() {
                       {bounty.status === 'solved' && bounty.solution && (
                         <div className="mt-6 pt-4 border-t border-slate-200">
                           <div className="bg-slate-100 p-4 rounded-xl border border-slate-200">
-                             <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Solved by @{bounty.solution.solver_name}</p>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">{t.solvedBy}{bounty.solution.solver_name === 'Anonymous Scholar' ? t.anonymousScholar : (bounty.solution.solver_name === 'You' ? t.you : bounty.solution.solver_name)}</p>
                              <p className="text-sm text-slate-700 font-medium whitespace-pre-wrap">{bounty.solution.content_link}</p>
                              
                              {/* 🟢 ANIMATED ANSWER VOTING */}
                              <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-200/50">
-                               <span className="text-[10px] font-bold text-slate-400 uppercase">Rate Answer:</span>
+                               <span className="text-[10px] font-bold text-slate-400 uppercase">{t.rateAnswer}</span>
                                <motion.button 
                                   whileTap={{ scale: 0.8 }} animate={aUpvoted ? { scale: [1, 1.3, 1], color: '#10b981' } : {}}
                                   onClick={() => handleVote('bounty_solutions', bounty.solution.id, 'up', bounty.solution.upvotes || 0, bounty.solution.downvotes || 0)} 
@@ -440,7 +562,7 @@ export default function BountyBoardPage() {
             onClick={() => setIsMobileDrawerOpen('leaderboard')} 
             className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all active:scale-95 border border-amber-400/50"
           >
-            <Award size={18} /> Wall of Fame
+            <Award size={18} /> {t.wallOfFame}
           </button>
         </div>
       </div>
@@ -461,14 +583,14 @@ export default function BountyBoardPage() {
             <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-white rounded-[2rem] p-8 max-w-xl w-full shadow-2xl border border-slate-100 relative">
               <button onClick={() => setSolveBountyId(null)} className="absolute top-6 right-6 text-slate-400 hover:text-rose-500 transition-colors"><X size={24}/></button>
               <div className="mb-6">
-                <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 bg-amber-50 px-2 py-1 rounded-md mb-2 inline-block">Earn {solveBountyId.reward_karma} Karma</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-amber-500 bg-amber-50 px-2 py-1 rounded-md mb-2 inline-block">{t.earn} {solveBountyId.reward_karma} {t.karma}</span>
                 <h2 className="text-2xl font-black text-slate-800 leading-tight">{solveBountyId.title}</h2>
               </div>
-              <textarea value={solutionContent} onChange={(e) => setSolutionContent(e.target.value)} placeholder="Type your explanation or paste a link..." className="w-full h-40 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-sm font-medium focus:border-amber-500 outline-none resize-none mb-6 custom-scrollbar"></textarea>
+              <textarea value={solutionContent} onChange={(e) => setSolutionContent(e.target.value)} placeholder={t.typeYourExplanation} className="w-full h-40 p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-sm font-medium focus:border-amber-500 outline-none resize-none mb-6 custom-scrollbar"></textarea>
               <div className="flex gap-4">
-                <button onClick={() => setSolveBountyId(null)} className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs uppercase tracking-widest rounded-xl transition-all">Cancel</button>
+                <button onClick={() => setSolveBountyId(null)} className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs uppercase tracking-widest rounded-xl transition-all">{t.cancel}</button>
                 <button onClick={submitSolution} disabled={!solutionContent.trim() || isSolving} className="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2">
-                  {isSolving ? <Loader2 size={16} className="animate-spin" /> : <><Zap size={16} /> Submit Solution</>}
+                  {isSolving ? <Loader2 size={16} className="animate-spin" /> : <><Zap size={16} /> {t.submitSolution}</>}
                 </button>
               </div>
             </motion.div>
@@ -488,9 +610,9 @@ export default function BountyBoardPage() {
                 <div className="w-16 h-16 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
                   <Globe size={32} />
                 </div>
-                <h2 className="text-3xl font-black text-white tracking-tight mb-2">Global Hierarchy</h2>
+                <h2 className="text-3xl font-black text-white tracking-tight mb-2">{t.globalHierarchy}</h2>
                 <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl text-sm font-bold">
-                  <Crown size={16} /> You are currently in the Top 5,000 Worldwide!
+                  <Crown size={16} /> {t.top5000}
                 </div>
               </div>
 
@@ -502,8 +624,8 @@ export default function BountyBoardPage() {
                         {userBoard.rank}
                       </span>
                       <div>
-                        <h4 className="font-bold text-white text-base">{userBoard.name}</h4>
-                        <p className="text-xs text-slate-400">{userBoard.uni} • {userBoard.dept}</p>
+                        <h4 className="font-bold text-white text-base">{userBoard.name === 'Anonymous Scholar' ? t.anonymousScholar : userBoard.name}</h4>
+                        <p className="text-xs text-slate-400">{userBoard.uni === 'Unknown University' ? t.unknownUniversity : userBoard.uni} • {userBoard.dept === 'Unknown Dept' ? t.unknownDept : userBoard.dept}</p>
                       </div>
                     </div>
                     <div className="text-right">

@@ -19,7 +19,18 @@ const translations = {
     historyTitle: "Focus Log", minutes: "mins", saved: "Session logged!",
     invite: "Invite Friends", roomCode: "Room Code: ", copied: "Copied!",
     friends: "Friends on Island", distracted: "Distracted!",
-    lofiTrack: "Lo-fi Track", ambientSound: "Ambient Sound"
+    lofiTrack: "Lo-fi Track", ambientSound: "Ambient Sound",
+    chat: "Chat",
+    createRoom: "Create Group Room",
+    room: "ROOM: ",
+    roomAndNotes: "Room & Notes",
+    noSessions: "No focus sessions yet.",
+    editNote: "Edit Note",
+    savePin: "Save Pin",
+    edit: "Edit",
+    save: "Save",
+    logs: "Logs",
+    notesAndRoom: "Notes & Room"
   },
   Bangla: {
     title: "ফোকাস আইল্যান্ড",
@@ -29,7 +40,18 @@ const translations = {
     historyTitle: "ফোকাস হিস্ট্রি", minutes: "মিনিট", saved: "সেশন সেভ হয়েছে!",
     invite: "বন্ধুদের ইনভাইট দিন", roomCode: "রুম কোড: ", copied: "কপি হয়েছে!",
     friends: "আইল্যান্ডে বন্ধুরা", distracted: "ফাঁকি দিচ্ছে!",
-    lofiTrack: "লো-ফাই ট্র্যাক", ambientSound: "এম্বিয়েন্ট সাউন্ড"
+    lofiTrack: "লো-ফাই ট্র্যাক", ambientSound: "এম্বিয়েন্ট সাউন্ড",
+    chat: "চ্যাট",
+    createRoom: "গ্রুপ রুম তৈরি করুন",
+    room: "রুম: ",
+    roomAndNotes: "রুম এবং নোটস",
+    noSessions: "এখনও কোনও ফোকাস সেশন নেই।",
+    editNote: "নোট এডিট করুন",
+    savePin: "পিন সেভ করুন",
+    edit: "এডিট",
+    save: "সেভ",
+    logs: "লগস",
+    notesAndRoom: "নোটস এবং রুম"
   },
   Hindi: {
     title: "फोकस आइलैंड",
@@ -39,7 +61,18 @@ const translations = {
     historyTitle: "फोकस इतिहास", minutes: "मिनट", saved: "सत्र सहेजा गया!",
     invite: "दोस्तों को आमंत्रित करें", roomCode: "रूम कोड: ", copied: "कॉपी हो गया!",
     friends: "द्वीप पर दोस्त", distracted: "विचलित!",
-    lofiTrack: "लो-फ़ाई ट्रैक", ambientSound: "एम्बिएंट साउंड"
+    lofiTrack: "लो-फ़ाई ट्रैक", ambientSound: "एम्बिएंट साउंड",
+    chat: "चैट",
+    createRoom: "ग्रुप রুম बनाएं",
+    room: "रूम: ",
+    roomAndNotes: "रूम और नोट्स",
+    noSessions: "अभी तक कोई फोकस सत्र नहीं।",
+    editNote: "नोट संपादित करें",
+    savePin: "पिन सहेजें",
+    edit: "संपादित करें",
+    save: "सहेजें",
+    logs: "लॉग्स",
+    notesAndRoom: "नोट्स और रूम"
   }
 };
 
@@ -273,7 +306,7 @@ function FocusIslandContent() {
               <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100">{t.title}</h2>
               <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.subtitle}</p>
             </div>
-            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chat}</button>
          </div>
 
          {/* 🟢 Main Island (Left/Center) */}
@@ -300,12 +333,12 @@ function FocusIslandContent() {
 
                {!roomCode ? (
                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={createRoom} className="bg-indigo-600/80 backdrop-blur-md hover:bg-indigo-500 border border-indigo-400/30 px-5 py-2.5 rounded-2xl font-black text-xs text-white flex items-center gap-2 shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all">
-                    <Users size={16}/> Create Group Room
+                    <Users size={16}/> {t.createRoom}
                  </motion.button>
                ) : (
                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2">
                     <span className="text-xs font-black text-indigo-300 bg-indigo-900/50 px-4 py-2.5 rounded-2xl border border-indigo-500/30 backdrop-blur-md">
-                       ROOM: {roomCode}
+                       {t.room}{roomCode}
                     </span>
                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={inviteFriends} className="bg-emerald-600/80 backdrop-blur-md hover:bg-emerald-500 border border-emerald-400/30 px-5 py-2.5 rounded-2xl font-black text-xs text-white flex items-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all">
                        {copied ? <CheckCircle2 size={16}/> : <Share2 size={16}/>} {copied ? t.copied : t.invite}
@@ -393,14 +426,14 @@ function FocusIslandContent() {
                 onClick={() => setIsMobileDrawerOpen('history')}
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
-                <History size={16}/> Logs
+                <History size={16}/> {t.logs}
               </button>
 
               <button
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all active:scale-95 border border-indigo-400/50"
               >
-                <Pin size={18} /> Notes & Room
+                <Pin size={18} /> {t.notesAndRoom}
               </button>
             </div>
          </div>
@@ -440,7 +473,7 @@ function FocusIslandContent() {
                     }}
                     className={`text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm ${isPinned ? 'bg-rose-100 text-rose-600 hover:bg-rose-200' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
                   >
-                    {isPinned ? "Edit Note" : "Save Pin"}
+                    {isPinned ? t.editNote : t.savePin}
                   </button>
                </div>
 
@@ -462,7 +495,7 @@ function FocusIslandContent() {
 
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-indigo-400"/> {t.historyTitle}</> : <><Pin size={18} className="text-indigo-400"/> Room & Notes</>}
+                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-indigo-400"/> {t.historyTitle}</> : <><Pin size={18} className="text-indigo-400"/> {t.roomAndNotes}</>}
               </h3>
             </div>
 
@@ -470,7 +503,7 @@ function FocusIslandContent() {
               {isMobileDrawerOpen === 'history' ? (
                 <div className="space-y-3">
                   {history.length === 0 ? (
-                    <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">No focus sessions yet.</p>
+                    <p className="text-sm text-slate-500 text-center py-6 border border-dashed border-slate-800 rounded-xl bg-slate-950">{t.noSessions}</p>
                   ) : (
                     history.map(item => (
                       <div key={item.id} className="group p-4 bg-slate-950 border border-slate-800 rounded-xl flex justify-between items-center">
@@ -488,12 +521,12 @@ function FocusIslandContent() {
                   <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex flex-col gap-4">
                      {!roomCode ? (
                        <button onClick={createRoom} className="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95">
-                          <Users size={16}/> Create Group Room
+                          <Users size={16}/> {t.createRoom}
                        </button>
                      ) : (
                        <div className="flex flex-col gap-3">
                           <div className="flex items-center justify-between bg-indigo-900/20 p-3 rounded-xl border border-indigo-500/20">
-                             <span className="text-xs font-black text-indigo-300 uppercase">ROOM: {roomCode}</span>
+                             <span className="text-xs font-black text-indigo-300 uppercase">{t.room}{roomCode}</span>
                              <button onClick={inviteFriends} className="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg font-black text-xs text-white flex items-center gap-2 transition-all">
                                 {copied ? <CheckCircle2 size={14}/> : <Share2 size={14}/>} {copied ? t.copied : t.invite}
                              </button>
@@ -526,7 +559,7 @@ function FocusIslandContent() {
                           }}
                           className={`text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm ${isPinned ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-slate-800 text-white hover:bg-slate-700'}`}
                         >
-                          {isPinned ? "Edit" : "Save"}
+                          {isPinned ? t.edit : t.save}
                         </button>
                      </div>
                      <textarea

@@ -73,9 +73,16 @@ CRITICAL RULES FOR TTS COMPATIBILITY:
 
     const userPrompt = `Topic to cover: "${topic}"\n\n${contextChunks ? `Reference Material:\n${contextChunks}` : ''}\n\nGenerate the conversational podcast script now.`;
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const router = new ModelRouter();
     const streamResponse = router.generateStream(
-      [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+      [{ role: 'system', content: systemPrompt + strictLangInstruction }, { role: 'user', content: userPrompt }],
       userId, tier, { temperature: 0.7 }
     );
 
@@ -186,9 +193,16 @@ CRITICAL RULES FOR REALISM & TTS COMPATIBILITY:
 
     const userPrompt = `Debate Topic: "${topic}"\n\n${contextChunks ? `Reference Material:\n${contextChunks}` : ''}\n\nStart the 5-round debate script now.`;
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const router = new ModelRouter();
     const streamResponse = router.generateStream(
-      [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+      [{ role: 'system', content: systemPrompt + strictLangInstruction }, { role: 'user', content: userPrompt }],
       userId, tier, { temperature: 0.8 } 
     );
 

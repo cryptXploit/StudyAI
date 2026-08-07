@@ -22,7 +22,17 @@ const translations = {
     historyTitle: "Your Generated Art",
     noHistory: "No wallpapers created yet.",
     previewTitle: "Live Lockscreen Preview",
-    proBadge: "PRO TIER FEATURE"
+    proBadge: "PRO TIER FEATURE",
+    chatBtn: "Chat",
+    subjectPlaceholder: "SUBJECT TITLE",
+    revisionLockscreen: "REVISION LOCKSCREEN",
+    formulasDisplay: "formulas will display here dynamically.",
+    examWallpaper: "Prepia EXAM WALLPAPER",
+    editConfig: "Edit Config",
+    newWallpaper: "New Wallpaper",
+    themeMinimalist: "☁️ Minimalist Slate Dark",
+    themeCyberpunk: "⚡ Cyberpunk Neon Glow",
+    themeAesthetic: "🔮 Aesthetic Cosmic Violet"
   },
   Bangla: {
     title: "ফর্মুলা ওয়ালপেপার জেনারেটর",
@@ -37,7 +47,17 @@ const translations = {
     historyTitle: "আপনার ওয়ালপেপার হিস্ট্রি",
     noHistory: "এখনো কোনো ওয়ালপেপার তৈরি করা হয়নি।",
     previewTitle: "লাইভ লকস্ক্রিন প্রিভিউ",
-    proBadge: "প্রো-টিয়ার ফিচার"
+    proBadge: "প্রো-টিয়ার ফিচার",
+    chatBtn: "চ্যাট",
+    subjectPlaceholder: "বিষয়ের নাম",
+    revisionLockscreen: "রিভিশন লকস্ক্রিন",
+    formulasDisplay: "এখানে ডায়নামিকভাবে সূত্রগুলি প্রদর্শিত হবে।",
+    examWallpaper: "প্রিপিয়া পরীক্ষার ওয়ালপেপার",
+    editConfig: "কনফিগ এডিট করুন",
+    newWallpaper: "নতুন ওয়ালপেপার",
+    themeMinimalist: "☁️ মিনিমালিস্ট স্লেট ডার্ক",
+    themeCyberpunk: "⚡ সাইবারপাঙ্ক নিয়ন গ্লো",
+    themeAesthetic: "🔮 এসথেটিক কসমিক ভায়োলেট"
   },
   Hindi: {
     title: "फॉर्मूला वॉलपेपर जेनरेटर",
@@ -52,7 +72,17 @@ const translations = {
     historyTitle: "आपका वॉलपेपर इतिहास",
     noHistory: "अभी तक कोई वॉलपेपर नहीं बनाया गया।",
     previewTitle: "लाइव लॉकस्क्रीन पूर्वावलोकन",
-    proBadge: "प्रो टियर फ़ीचर"
+    proBadge: "प्रो टियर फ़ीचर",
+    chatBtn: "चैट",
+    subjectPlaceholder: "विषय का नाम",
+    revisionLockscreen: "रिवीजन लॉकस्क्रीन",
+    formulasDisplay: "यहाँ डायनामिक रूप से सूत्र प्रदर्शित होंगे।",
+    examWallpaper: "प्रीपिया परीक्षा वॉलपेपर",
+    editConfig: "कॉन्फ़िग संपादित करें",
+    newWallpaper: "नया वॉलपेपर",
+    themeMinimalist: "☁️ मिनिमलिस्ट स्लेट डार्क",
+    themeCyberpunk: "⚡ साइबरपंक नियॉन ग्लो",
+    themeAesthetic: "🔮 एस्थेटिक कॉस्मिक वायलेट"
   }
 };
 
@@ -89,15 +119,19 @@ export default function WallpaperPage() {
     lastScrollY.current = currentScrollY;
   };
 
+  const [uiTheme, setUiTheme] = useState<'dark'|'light'>('dark');
+
   useEffect(() => {
     fetchHistory();
-    const loadLanguage = () => {
+    const loadSettings = () => {
+      const savedTheme = localStorage.getItem('Prepia_theme'); 
+      if (savedTheme) setUiTheme(savedTheme as 'dark'|'light');
       const savedLang = localStorage.getItem('Prepia_language');
       if (savedLang) setLanguage(savedLang as LanguageType);
     };
-    loadLanguage();
-    window.addEventListener('languageChanged', loadLanguage);
-    return () => window.removeEventListener('languageChanged', loadLanguage);
+    loadSettings();
+    window.addEventListener('languageChanged', loadSettings);
+    return () => window.removeEventListener('languageChanged', loadSettings);
   }, []);
 
   const fetchHistory = async () => {
@@ -133,7 +167,7 @@ export default function WallpaperPage() {
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ topic, formulas: formulasArray, theme }),
+        body: JSON.stringify({ topic, formulas: formulasArray, theme, language }),
         signal: controller.signal // 🟢 Added Safety Signal
       });
 
@@ -230,9 +264,9 @@ export default function WallpaperPage() {
                 onChange={(e) => setTheme(e.target.value)}
                 className="w-full p-4 bg-slate-900 border border-slate-800 rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none font-bold text-slate-200 cursor-pointer"
               >
-                <option value="minimalist">☁️ Minimalist Slate Dark</option>
-                <option value="cyberpunk">⚡ Cyberpunk Neon Glow</option>
-                <option value="aesthetic">🔮 Aesthetic Cosmic Violet</option>
+                <option value="minimalist">{t.themeMinimalist}</option>
+                <option value="cyberpunk">{t.themeCyberpunk}</option>
+                <option value="aesthetic">{t.themeAesthetic}</option>
               </select>
             </div>
 
@@ -294,7 +328,7 @@ export default function WallpaperPage() {
               <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-cyan-500"><Smartphone size={16}/> {t.title}</h2>
               <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.subtitle}</p>
             </div>
-            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chatBtn}</button>
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col items-center justify-center p-4 lg:p-8 relative">
@@ -317,13 +351,13 @@ export default function WallpaperPage() {
              <div className="relative z-10 flex flex-col h-full pt-4">
                 <h3 className={`text-xl font-black uppercase tracking-wide truncate ${
                   theme === 'cyberpunk' ? 'text-cyan-400' : theme === 'aesthetic' ? 'text-purple-300' : 'text-sky-400'
-                }`}>{topic || "SUBJECT TITLE"}</h3>
-                <p className="text-[8px] font-black text-slate-500 tracking-wider mb-6">REVISION LOCKSCREEN</p>
+                }`}>{topic || t.subjectPlaceholder}</h3>
+                <p className="text-[8px] font-black text-slate-500 tracking-wider mb-6">{t.revisionLockscreen}</p>
 
                 {/* Simulated Grid list matching backend exact SVG coordinates mapping */}
                 <div className="flex-1 space-y-3.5 overflow-hidden opacity-80 font-mono text-xs">
                    {formulasPreview.length === 0 ? (
-                     <div className="text-[10px] text-slate-600 font-bold text-center pt-20">formulas will display here dynamically.</div>
+                     <div className="text-[10px] text-slate-600 font-bold text-center pt-20">{t.formulasDisplay}</div>
                    ) : (
                      formulasPreview.map((item, i) => (
                        <p key={i} className={`truncate flex items-center gap-2 ${
@@ -338,7 +372,7 @@ export default function WallpaperPage() {
                    )}
                 </div>
 
-                <p className="text-[8px] font-black text-slate-600 tracking-widest text-center mt-auto pb-2">Prepia EXAM WALLPAPER</p>
+                <p className="text-[8px] font-black text-slate-600 tracking-widest text-center mt-auto pb-2">{t.examWallpaper}</p>
              </div>
 
            </div>
@@ -358,7 +392,7 @@ export default function WallpaperPage() {
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all active:scale-95 border border-cyan-400/50"
               >
-                <Palette size={18} /> Edit Config
+                <Palette size={18} /> {t.editConfig}
               </button>
             </div>
           </div>
@@ -376,7 +410,7 @@ export default function WallpaperPage() {
 
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-cyan-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-cyan-400"/> New Wallpaper</>}
+              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-cyan-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-cyan-400"/> {t.newWallpaper}</>}
             </h3>
           </div>
 
@@ -429,9 +463,9 @@ export default function WallpaperPage() {
                     onChange={(e) => setTheme(e.target.value)}
                     className="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:ring-2 focus:ring-cyan-500/50 outline-none font-bold text-slate-200 cursor-pointer"
                   >
-                    <option value="minimalist">☁️ Minimalist Slate Dark</option>
-                    <option value="cyberpunk">⚡ Cyberpunk Neon Glow</option>
-                    <option value="aesthetic">🔮 Aesthetic Cosmic Violet</option>
+                    <option value="minimalist">{t.themeMinimalist}</option>
+                    <option value="cyberpunk">{t.themeCyberpunk}</option>
+                    <option value="aesthetic">{t.themeAesthetic}</option>
                   </select>
                 </div>
 

@@ -27,7 +27,16 @@ const translations = {
     historyTitle: "Decoded Courses",
     noHistory: "No videos decoded yet.",
     canvasAwaits: "Lecture Awaits",
-    awaitsDesc: "Paste any YouTube tutorial or lecture link to extract and decode."
+    awaitsDesc: "Paste any YouTube tutorial or lecture link to extract and decode.",
+    selectChaptersTitle: "Select Chapters",
+    selectChaptersDesc: "Select the specific parts of the video you want to decode. This saves processing time and generates high-quality notes.",
+    crashCourse: "Crash Course",
+    chatBtn: "Chat",
+    sourceVideo: "Source Video",
+    crashCourseNotes: "Crash Course Notes",
+    saved: "Saved",
+    newVideo: "New Video",
+    pleaseSelectChapter: "Please select at least one chapter."
   },
   Bangla: {
     title: "ইউটিউব ডিকোডার",
@@ -41,7 +50,16 @@ const translations = {
     historyTitle: "ডিকোড করা কোর্সসমূহ",
     noHistory: "এখনো কোনো ভিডিও ডিকোড করা হয়নি।",
     canvasAwaits: "লেকচারের অপেক্ষায়",
-    awaitsDesc: "ইউটিউব টিউটোরিয়াল বা লেকচারের লিংক দিন। এআই তা ডিকোড করবে।"
+    awaitsDesc: "ইউটিউব টিউটোরিয়াল বা লেকচারের লিংক দিন। এআই তা ডিকোড করবে।",
+    selectChaptersTitle: "চ্যাপ্টার নির্বাচন করুন",
+    selectChaptersDesc: "ভিডিওর নির্দিষ্ট অংশগুলো নির্বাচন করুন যা আপনি ডিকোড করতে চান। এটি সময় বাঁচাবে এবং উচ্চ মানের নোট তৈরি করবে।",
+    crashCourse: "ক্র্যাশ কোর্স",
+    chatBtn: "চ্যাট",
+    sourceVideo: "সোর্স ভিডিও",
+    crashCourseNotes: "ক্র্যাশ কোর্স নোটস",
+    saved: "সংরক্ষিত",
+    newVideo: "নতুন ভিডিও",
+    pleaseSelectChapter: "অনুগ্রহ করে অন্তত একটি চ্যাপ্টার নির্বাচন করুন।"
   },
   Hindi: {
     title: "यूट्यूब डिकोडर",
@@ -55,7 +73,16 @@ const translations = {
     historyTitle: "डिकोड किए गए कोर्स",
     noHistory: "अभी तक कोई वीडियो डिकोड नहीं किया गया।",
     canvasAwaits: "व्याख्यान की प्रतीक्षा है",
-    awaitsDesc: "क्रैश कोर्स के लिए यूट्यूब लिंक पेस्ट करें।"
+    awaitsDesc: "क्रैश कोर्स के लिए यूट्यूब लिंक पेस्ट करें।",
+    selectChaptersTitle: "अध्याय चुनें",
+    selectChaptersDesc: "वीडियो के उन विशिष्ट भागों का चयन करें जिन्हें आप डिकोड करना चाहते हैं। इससे समय की बचत होगी और उच्च गुणवत्ता वाले नोट्स तैयार होंगे।",
+    crashCourse: "क्रैश कोर्स",
+    chatBtn: "चैट",
+    sourceVideo: "स्रोत वीडियो",
+    crashCourseNotes: "क्रैश कोर्स नोट्स",
+    saved: "सहेजा गया",
+    newVideo: "नया वीडियो",
+    pleaseSelectChapter: "कृपया कम से कम एक अध्याय चुनें।"
   }
 };
 
@@ -201,7 +228,7 @@ export default function YoutubeDecoderPage() {
 
   const handleDecode = async () => {
     const selectedChapterIds = chapters.filter(c => c.selected).map(c => c.id);
-    if (selectedChapterIds.length === 0) return alert("Please select at least one chapter.");
+    if (selectedChapterIds.length === 0) return alert(t.pleaseSelectChapter);
 
     if (tier !== 'PRO' && tokens < 15) {
       setRequiredTokensForModal(15);
@@ -286,12 +313,12 @@ export default function YoutubeDecoderPage() {
                <div className="p-6 bg-slate-950 border-b border-slate-800 flex justify-between items-center">
                   <div className="flex items-center gap-2 text-white">
                      <ListChecks size={20} className="text-red-500" />
-                     <h3 className="font-black text-lg">Select Chapters</h3>
+                     <h3 className="font-black text-lg">{t.selectChaptersTitle}</h3>
                   </div>
                   <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white"><X size={20}/></button>
                </div>
                <div className="p-6">
-                  <p className="text-sm font-medium text-slate-500 mb-4">Select the specific parts of the video you want to decode. This saves processing time and generates high-quality notes.</p>
+                  <p className="text-sm font-medium text-slate-500 mb-4">{t.selectChaptersDesc}</p>
                   <div className="max-h-60 overflow-y-auto space-y-2 custom-scrollbar pr-2 mb-6">
                      {chapters.map((ch, idx) => (
                         <label key={ch.id} className={`flex items-center gap-4 p-3 rounded-xl border cursor-pointer transition-all ${ch.selected ? 'bg-red-50 border-red-200' : 'bg-slate-950 border-slate-700 hover:bg-slate-800'}`}>
@@ -378,9 +405,9 @@ export default function YoutubeDecoderPage() {
           <div className={`lg:hidden h-[60px] mx-3 mt-3 rounded-2xl flex items-center justify-between px-4 z-40 sticky backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)]`}>
             <div className="flex flex-col">
               <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-slate-100"><PlaySquare size={16} className="text-red-400"/> {t.title}</h2>
-              <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">Crash Course</p>
+              <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.crashCourse}</p>
             </div>
-            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chatBtn}</button>
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar flex flex-col p-0 relative bg-slate-800">
@@ -410,7 +437,7 @@ export default function YoutubeDecoderPage() {
                {activeVideoId && (
                  <div className={`transition-all duration-300 bg-slate-950 border-slate-800 flex flex-col z-30 shrink-0 shadow-md lg:shadow-none ${isVideoFullscreen ? 'fixed inset-0 z-[100]' : isNotesFullscreen ? 'hidden' : 'w-full lg:w-1/2 h-64 lg:h-full border-b lg:border-b-0 lg:border-r sticky top-0 lg:relative'}`}>
                     <div className="p-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-                       <span className="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-2"><PlaySquare size={12}/> Source Video</span>
+                       <span className="text-[10px] font-black text-red-500 uppercase tracking-widest flex items-center gap-2"><PlaySquare size={12}/> {t.sourceVideo}</span>
                        <button onClick={() => setIsVideoFullscreen(!isVideoFullscreen)} className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors">
                           {isVideoFullscreen ? <Minimize2 size={16}/> : <Maximize2 size={16}/>}
                        </button>
@@ -440,7 +467,7 @@ export default function YoutubeDecoderPage() {
                   <div className="flex-1 w-full relative py-6 px-8 overflow-y-auto custom-scrollbar">
                      <div className="flex items-center gap-2 mb-6">
                         <GraduationCap size={18} className="text-red-500"/>
-                        <h3 className="text-sm font-black text-red-600 uppercase tracking-widest">Crash Course Notes</h3>
+                        <h3 className="text-sm font-black text-red-600 uppercase tracking-widest">{t.crashCourseNotes}</h3>
                      </div>
                      <div className="prose prose-slate prose-sm max-w-none prose-headings:font-black prose-headings:text-slate-200 prose-a:text-red-600">
                        <MemoizedMarkdown content={courseData.markdownContent} />
@@ -461,14 +488,14 @@ export default function YoutubeDecoderPage() {
                 onClick={() => setIsMobileDrawerOpen('history')} 
                 className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"
               >
-                <History size={16}/> Saved
+                <History size={16}/> {t.saved}
               </button>
               
               <button 
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(225,29,72,0.3)] transition-all active:scale-95 border border-red-400/50"
               >
-                <PlaySquare size={18} /> New Video
+                <PlaySquare size={18} /> {t.newVideo}
               </button>
             </div>
           </div>
@@ -483,7 +510,7 @@ export default function YoutubeDecoderPage() {
             
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-red-400"/> {t.historyTitle}</> : <><PlaySquare size={18} className="text-red-400"/> New Video</>}
+                {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-red-400"/> {t.historyTitle}</> : <><PlaySquare size={18} className="text-red-400"/> {t.newVideo}</>}
               </h3>
             </div>
 

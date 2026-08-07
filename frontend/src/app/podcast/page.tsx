@@ -28,7 +28,17 @@ const translations = {
     awaitsDesc: "Generate an audio summary on the left and listen while studying.",
     nowPlaying: "Now Playing",
     teleprompter: "Teleprompter View",
-    previewText: "Hello, how does this voice sound for your podcast?"
+    previewText: "Hello, how does this voice sound for your podcast?",
+    studioNetworkVoice: "Studio Network Voice",
+    debateScriptView: "Debate Script View",
+    backToAiChat: "Back to AI Chat",
+    config: "Config",
+    library: "Library",
+    audioConfiguration: "Audio Configuration",
+    targetTopic: "1. Target Topic",
+    contextFilesNumbered: "2. Context Files",
+    optional: "(Optional)",
+    done: "Done"
   },
   Bangla: {
     audioMode: "অডিও সামারি",
@@ -48,7 +58,17 @@ const translations = {
     awaitsDesc: "বামে টপিক লিখে অডিও সামারি জেনারেট করুন এবং শুনুন।",
     nowPlaying: "এখন বাজছে",
     teleprompter: "টেলিপ্রম্পটার ভিউ",
-    previewText: "হ্যালো, আপনার পডকাস্টের জন্য এই ভয়েসটি কেমন লাগছে?"
+    previewText: "হ্যালো, আপনার পডকাস্টের জন্য এই ভয়েসটি কেমন লাগছে?",
+    studioNetworkVoice: "স্টুডিও নেটওয়ার্ক ভয়েস",
+    debateScriptView: "ডিবেট স্ক্রিপ্ট ভিউ",
+    backToAiChat: "এআই চ্যাটে ফিরে যান",
+    config: "কনফিগ",
+    library: "লাইব্রেরি",
+    audioConfiguration: "অডিও কনফিগারেশন",
+    targetTopic: "১. টার্গেট টপিক",
+    contextFilesNumbered: "২. কনটেক্সট ফাইল",
+    optional: "(ঐচ্ছিক)",
+    done: "সম্পন্ন"
   },
   Hindi: {
     audioMode: "ऑडियो सारांश",
@@ -68,7 +88,17 @@ const translations = {
     awaitsDesc: "बाईं ओर ऑडियो सारांश जनरेट करें और सुनें।",
     nowPlaying: "अब बज रहा है",
     teleprompter: "टेलीप्रॉम्प्टर व्यू",
-    previewText: "नमस्ते, आपके पॉडकास्ट के लिए यह आवाज़ कैसी लग रही है?"
+    previewText: "नमस्ते, आपके पॉडकास्ट के लिए यह आवाज़ कैसी लग रही है?",
+    studioNetworkVoice: "स्टूडियो नेटवर्क वॉयस",
+    debateScriptView: "डिबेट स्क्रिप्ट व्यू",
+    backToAiChat: "एआई चैट पर वापस जाएं",
+    config: "कॉन्फ़िगरेशन",
+    library: "लाइब्रेरी",
+    audioConfiguration: "ऑडियो कॉन्फ़िगरेशन",
+    targetTopic: "१. लक्षित विषय",
+    contextFilesNumbered: "२. संदर्भ फ़ाइलें",
+    optional: "(वैकल्पिक)",
+    done: "संपन्न"
   }
 };
 
@@ -797,7 +827,7 @@ function PodcastPageContent() {
                 onChange={handleVoiceChange}
                 className="bg-slate-900 border border-slate-700 text-slate-300 text-sm rounded-lg p-2.5 outline-none font-medium max-w-[280px] flex-1 cursor-pointer hover:border-rose-500 transition-colors"
               >
-                <option value="cloud_google_voice">☁️ Studio Network Voice ({playbackLanguage})</option>
+                <option value="cloud_google_voice">☁️ {t.studioNetworkVoice} ({playbackLanguage})</option>
 
                 {!isDebateMode && availableLocalVoices.map((v, i) => (
                   <option key={i} value={v.voiceURI}>
@@ -828,9 +858,9 @@ function PodcastPageContent() {
               <div className="p-6 border-b border-slate-800 bg-slate-900/80 flex flex-col lg:flex-row justify-between items-center gap-4 z-10 backdrop-blur-md">
                 <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${isPlaying && !isPaused ? 'bg-rose-500 animate-pulse shadow-[0_0_10px_#f43f5e]' : 'bg-slate-600'}`}></div>
-                  <h3 className="text-lg font-black text-slate-200 tracking-wide uppercase">{isDebateMode ? "Debate Script View" : t.teleprompter}</h3>
+                  <h3 className="text-lg font-black text-slate-200 tracking-wide uppercase">{isDebateMode ? t.debateScriptView : t.teleprompter}</h3>
                 </div>
-                <button onClick={() => router.push('/chat')} className="hidden lg:flex items-center gap-2 px-4 py-2 font-black rounded-lg transition uppercase tracking-wider text-xs bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">💬 Back to AI Chat</button>
+                <button onClick={() => router.push('/chat')} className="hidden lg:flex items-center gap-2 px-4 py-2 font-black rounded-lg transition uppercase tracking-wider text-xs bg-indigo-600 text-white hover:bg-indigo-700 shadow-md">💬 {t.backToAiChat}</button>
               </div>
 
               <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar space-y-6 pb-40">
@@ -892,10 +922,10 @@ function PodcastPageContent() {
             {/* Mobile Action Pills */}
             <div className="flex gap-2 overflow-x-auto mb-3 pointer-events-auto custom-scrollbar-hide px-1 pb-1">
               <button onClick={() => setIsMobileDrawerOpen('config')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${topic ? 'bg-rose-500/20 border-rose-500/50 text-rose-300' : 'bg-slate-800/80 border-slate-700 text-slate-400'}`}>
-                <Settings2 size={12}/> Config
+                <Settings2 size={12}/> {t.config}
               </button>
               <button onClick={() => setIsMobileDrawerOpen('history')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/80 border-slate-700 text-slate-400">
-                <History size={12}/> Library
+                <History size={12}/> {t.library}
               </button>
             </div>
 
@@ -927,8 +957,8 @@ function PodcastPageContent() {
 
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-              {isMobileDrawerOpen === 'config' && <><Settings2 size={18} className="text-rose-500"/> Audio Configuration</>}
-              {isMobileDrawerOpen === 'history' && <><History size={18} className="text-rose-500"/> Podcast Library</>}
+              {isMobileDrawerOpen === 'config' && <><Settings2 size={18} className="text-rose-500"/> {t.audioConfiguration}</>}
+              {isMobileDrawerOpen === 'history' && <><History size={18} className="text-rose-500"/> {t.yourLibrary}</>}
             </h3>
           </div>
 
@@ -936,7 +966,7 @@ function PodcastPageContent() {
           {isMobileDrawerOpen === 'config' && (
              <div className="space-y-6 pb-20">
                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">1. Target Topic</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{t.targetTopic}</label>
                   <textarea
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
@@ -947,7 +977,7 @@ function PodcastPageContent() {
                </div>
 
                <div>
-                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-2">2. Context Files <span className="text-[9px] text-slate-500">(Optional)</span></label>
+                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-2">{t.contextFilesNumbered} <span className="text-[9px] text-slate-500">{t.optional}</span></label>
                  <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
                    {files.map(file => (
                     <div key={file.id} onClick={() => setSelectedFileIds(prev => prev.includes(file.id) ? prev.filter(id => id !== file.id) : [...prev, file.id])}
@@ -1021,7 +1051,7 @@ function PodcastPageContent() {
           {/* Sticky Done Button */}
           <div className="sticky bottom-0 left-0 w-full pt-4 pb-2 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent">
             <button onClick={() => setIsMobileDrawerOpen('none')} className="w-full py-3 rounded-xl font-black tracking-wide shadow-md transition-all active:scale-95 flex justify-center items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">
-              <CheckCircle2 size={16}/> Done
+              <CheckCircle2 size={16}/> {t.done}
             </button>
           </div>
         </div>

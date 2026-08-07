@@ -6,7 +6,7 @@ import { ModelRouter } from '../ai/ModelRouter';
 const { PDFParse } = require('pdf-parse');
 
 // The exact same text extraction logic from oracle.controller.ts, moved to background
-async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: string, userTier: string): Promise<string> {
+async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: string, userTier: string, language: string): Promise<string> {
   const router = new ModelRouter();
 
   if (mimetype === 'application/pdf') {
@@ -51,8 +51,14 @@ async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: s
 
   try {
     logger.info("Running Gemini OCR/Extraction (Free Tier Limits Apply)...");
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
     const response = await model.generateContent([
-      "Please extract all the text, specifically all the exam questions, from this document exactly as they appear.",
+      "Please extract all the text, specifically all the exam questions, from this document exactly as they appear." + strictLangInstruction,
       {
         inlineData: {
           data: buffer.toString('base64'),
@@ -70,7 +76,7 @@ async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: s
 export const oracleWorker = new Worker(
   'oracle-extraction',
   async (job: Job) => {
-    const { filesData, userId, userTier } = job.data;
+    const { filesData, userId, userTier, language } = job.data;
     // filesData is an array of { mimetype, bufferBase64 }
     
     let extractedText = "";
@@ -78,16 +84,24 @@ export const oracleWorker = new Worker(
       const buffer = Buffer.from(file.bufferBase64, 'base64');
       // If we don't have AI OCR integrated into ModelRouter for images, we might use tesseract here for images.
       // For now, we use the AI fallback logic.
-      const text = await extractTextFromBuffer(buffer, file.mimetype, userId, userTier);
+      const text = await extractTextFromBuffer(buffer, file.mimetype, userId, userTier, language);
       extractedText += `\n${text}\n`;
     }
 
     const router = new ModelRouter();
+    
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     const chunkingPrompt = `Extract all distinct questions or exam problems from the following text. Return them as a STRICT JSON array of strings. Do not include answers, only the question text. If a question has subparts, keep them together as one string.
 Text:
 ${extractedText.substring(0, 50000)}
 
-Output ONLY a valid JSON array of strings, e.g. ["What is Newton's First Law?", "Explain Quantum Entanglement"]. No markdown backticks.`;
+Output ONLY a valid JSON array of strings, e.g. ["What is Newton's First Law?", "Explain Quantum Entanglement"]. No markdown backticks.${strictLangInstruction}`;
 
     const chunkingResult = await router.generate([{ role: 'user', content: chunkingPrompt }], userId, userTier, { temperature: 0.1 });
     let cleanChunking = chunkingResult.trim();

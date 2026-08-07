@@ -38,7 +38,7 @@ export async function generateFlowchartHandler(req: Request, res: Response): Pro
     }
 
     // 🟢 Strict Prompt to generate JSON containing Mermaid Code
-    const systemPrompt = `You are an Elite Software Architect and Code Visualizer.
+    let systemPrompt = `You are an Elite Software Architect and Code Visualizer.
 Your task is to analyze the provided source code and generate a logic flowchart using Mermaid.js syntax.
 
 RULES:
@@ -53,6 +53,15 @@ JSON SCHEMA TO FOLLOW STRICTLY:
   "title": "Short descriptive title (e.g., QuickSort Algorithm Logic)",
   "mermaid": "graph TD\\n A[Start] --> B{Is x > 0?}\\n B -- Yes --> C[Do something]\\n B -- No --> D[End]"
 }`;
+
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    
+    systemPrompt += strictLangInstruction;
 
     const userPrompt = `CODE TO ANALYZE:\n\n${safeCode}`;
 

@@ -22,7 +22,10 @@ const translations = {
     awaitsDesc: "Paste any C, Python, Java, or JS code on the left. AI will understand the logic and build a beautiful flowchart.",
     copyCode: "Copy Mermaid",
     copied: "Copied!",
-    proBadge: "PRO TIER FEATURE"
+    proBadge: "PRO TIER FEATURE",
+    chatBtn: "Chat",
+    pasteCode: "Paste Code",
+    newFlowchart: "New Flowchart"
   },
   Bangla: {
     title: "কোড টু ফ্লোচার্ট ভিজ্যুয়ালাইজার",
@@ -37,7 +40,10 @@ const translations = {
     awaitsDesc: "বামে যেকোনো কোড পেস্ট করুন। এআই লজিক বুঝে চমৎকার একটি ফ্লোচার্ট বানিয়ে দেবে।",
     copyCode: "কোড কপি করুন",
     copied: "কপি হয়েছে!",
-    proBadge: "প্রো-টিয়ার ফিচার"
+    proBadge: "প্রো-টিয়ার ফিচার",
+    chatBtn: "চ্যাট",
+    pasteCode: "কোড পেস্ট করুন",
+    newFlowchart: "নতুন ফ্লোচার্ট"
   },
   Hindi: {
     title: "कोड टू फ्लोचार्ट विज़ुअलाइज़र",
@@ -52,7 +58,10 @@ const translations = {
     awaitsDesc: "बाईं ओर अपना कोड पेस्ट करें। AI लॉजिक को समझकर एक शानदार फ्लोचार्ट तैयार करेगा।",
     copyCode: "Mermaid कॉपी करें",
     copied: "कॉपी हो गया!",
-    proBadge: "प्रो टियर फ़ीचर"
+    proBadge: "प्रो टियर फ़ीचर",
+    chatBtn: "चैट",
+    pasteCode: "कोड पेस्ट करें",
+    newFlowchart: "नया फ्लोचार्ट"
   }
 };
 
@@ -336,7 +345,7 @@ export default function FlowchartPage() {
               <h2 className="text-lg font-black tracking-tight flex items-center gap-2 uppercase text-cyan-500"><Network size={16}/> {t.title}</h2>
               <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 uppercase tracking-widest">{t.subtitle}</p>
             </div>
-            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">Chat</button>
+            <button onClick={() => window.location.href='/chat'} className="px-3 py-1.5 font-black rounded-lg transition uppercase tracking-wider text-[10px] bg-indigo-600 text-white shadow-md">{t.chatBtn}</button>
           </div>
 
           <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-auto custom-scrollbar p-4 lg:p-8 pb-40">
@@ -387,7 +396,7 @@ export default function FlowchartPage() {
                 onClick={() => setIsMobileDrawerOpen('config')}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all active:scale-95 border border-cyan-400/50"
               >
-                <Sparkles size={18} /> Paste Code
+                <Sparkles size={18} /> {t.pasteCode}
               </button>
             </div>
           </div>
@@ -404,7 +413,7 @@ export default function FlowchartPage() {
 
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-cyan-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-cyan-400"/> New Flowchart</>}
+              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-cyan-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-cyan-400"/> {t.newFlowchart}</>}
             </h3>
           </div>
 

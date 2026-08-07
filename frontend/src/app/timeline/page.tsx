@@ -19,7 +19,7 @@ const Chrono = dynamic(() => import('react-chrono').then(mod => mod.Chrono), {
   )
 });
 
-const translations = {
+const translations: Record<string, any> = {
   English: {
     title: "Time-Travel Map",
     subtitle: "Interactive Historical Timelines",
@@ -31,7 +31,81 @@ const translations = {
     noHistory: "No timelines generated yet.",
     canvasAwaits: "The Time Machine Awaits",
     awaitsDesc: "Type a historical topic or the evolution of any subject. AI will craft a beautiful, scrollable journey for you.",
-    proBadge: "PRO TIER FEATURE"
+    proBadge: "PRO TIER FEATURE",
+    archive: "Archive",
+    exploreAnother: "Explore another era...",
+    popularJourneys: "Popular Journeys",
+    evolutionOfAI: "Evolution of AI",
+    spaceExploration: "Space Exploration",
+    frenchRevolution: "French Revolution",
+    recentTimelines: "Recent Timelines",
+    noHistoryYet: "No history yet.",
+    traversingTimeline: "Traversing the Timeline",
+    era: "ERA",
+    milestonesMapped: "Milestones Mapped",
+    stopDocu: "Stop Docu",
+    playDocu: "Play Docu",
+    newTimeline: "New Timeline",
+    history: "History",
+    timeoutMsg: "🚨 Timeout: Server took too long. Please try again."
+  },
+  Bangla: {
+    title: "টাইম-ট্রাভেল ম্যাপ",
+    subtitle: "ইন্টারেক্টিভ ঐতিহাসিক টাইমলাইন",
+    promptLabel: "আপনি কোন ইতিহাস অন্বেষণ করতে চান?",
+    placeholder: "যেমন, এআই এর বিবর্তন, ফরাসি বিপ্লব...",
+    generateBtn: "টাইমলাইন তৈরি করুন",
+    generating: "সময়ের মধ্য দিয়ে ভ্রমণ করছি...",
+    historyTitle: "সংরক্ষিত টাইমলাইন",
+    noHistory: "এখনও কোন টাইমলাইন তৈরি করা হয়নি।",
+    canvasAwaits: "টাইম মেশিন অপেক্ষা করছে",
+    awaitsDesc: "একটি ঐতিহাসিক বিষয় বা যেকোনো বিষয়ের বিবর্তন টাইপ করুন। এআই আপনার জন্য একটি সুন্দর, স্ক্রোলযোগ্য যাত্রা তৈরি করবে।",
+    proBadge: "প্রো টিয়ার বৈশিষ্ট্য",
+    archive: "আর্কাইভ",
+    exploreAnother: "অন্য একটি যুগ অন্বেষণ করুন...",
+    popularJourneys: "জনপ্রিয় যাত্রা",
+    evolutionOfAI: "এআই এর বিবর্তন",
+    spaceExploration: "মহাকাশ অন্বেষণ",
+    frenchRevolution: "ফরাসি বিপ্লব",
+    recentTimelines: "সাম্প্রতিক টাইমলাইন",
+    noHistoryYet: "এখনও কোন ইতিহাস নেই।",
+    traversingTimeline: "টাইমলাইন পার হচ্ছি",
+    era: "যুগ",
+    milestonesMapped: "মাইলফলক ম্যাপ করা হয়েছে",
+    stopDocu: "ডকু থামান",
+    playDocu: "ডকু চালান",
+    newTimeline: "নতুন টাইমলাইন",
+    history: "ইতিহাস",
+    timeoutMsg: "🚨 টাইমআউট: সার্ভার খুব বেশি সময় নিয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+  },
+  Hindi: {
+    title: "टाइम-ट्रैवल मैप",
+    subtitle: "इंटरएक्टिव ऐतिहासिक टाइमलाइन",
+    promptLabel: "आप कौन सा इतिहास खोजना चाहते हैं?",
+    placeholder: "उदा., एआई का विकास, फ्रांसीसी क्रांति...",
+    generateBtn: "टाइमलाइन बनाएं",
+    generating: "समय के माध्यम से यात्रा...",
+    historyTitle: "सहेजे गए टाइमलाइन",
+    noHistory: "अभी तक कोई टाइमलाइन नहीं बनाई गई है।",
+    canvasAwaits: "टाइम मशीन प्रतीक्षा कर रही है",
+    awaitsDesc: "एक ऐतिहासिक विषय या किसी भी विषय का विकास टाइप करें। AI आपके लिए एक सुंदर, स्क्रॉल करने योग्य यात्रा तैयार करेगा।",
+    proBadge: "प्रो टियर फीचर",
+    archive: "पुरालेख",
+    exploreAnother: "एक और युग का अन्वेषण करें...",
+    popularJourneys: "लोकप्रिय यात्राएं",
+    evolutionOfAI: "एआई का विकास",
+    spaceExploration: "अंतरिक्ष अन्वेषण",
+    frenchRevolution: "फ्रांसीसी क्रांति",
+    recentTimelines: "हाल के टाइमलाइन",
+    noHistoryYet: "अभी तक कोई इतिहास नहीं।",
+    traversingTimeline: "टाइमलाइन पार कर रहे हैं",
+    era: "युग",
+    milestonesMapped: "माइलस्टोन मैप किए गए",
+    stopDocu: "डोकू रोकें",
+    playDocu: "डोकू चलाएं",
+    newTimeline: "नई टाइमलाइन",
+    history: "इतिहास",
+    timeoutMsg: "🚨 टाइमआउट: सर्वर ने बहुत अधिक समय लिया। कृपया पुनः प्रयास करें।"
   }
 };
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
@@ -47,7 +121,7 @@ export default function TimelinePage() {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [requiredTokensForModal, setRequiredTokensForModal] = useState(15);
   const [language, setLanguage] = useState<LanguageType>('English');
-  const t = translations['English'];
+  const t = translations[language];
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'history'|'config'>('none');
@@ -63,6 +137,11 @@ export default function TimelinePage() {
   };
 
   useEffect(() => {
+    const loadSettings = () => {
+      const savedLang = localStorage.getItem('Prepia_language');
+      if (savedLang) setLanguage(savedLang as LanguageType);
+    };
+    loadSettings();
     fetchHistory();
     return () => { if (window.speechSynthesis) window.speechSynthesis.cancel(); };
   }, []);
@@ -111,7 +190,7 @@ export default function TimelinePage() {
       fetchHistory();
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        alert(`🚨 Timeout: Server took too long. Please try again.`);
+        alert(t.timeoutMsg);
       } else if (error.message && error.message !== "Failed to fetch" && !error.message.includes("Unexpected token")) {
         import('react-hot-toast').then((toast) => toast.default.error(error.message));
       } else {
@@ -185,11 +264,11 @@ export default function TimelinePage() {
           <div className="hidden lg:flex w-full lg:w-80 bg-slate-950/80 backdrop-blur-xl border-r border-slate-800/50 p-6 flex-col shrink-0 h-full overflow-y-auto custom-scrollbar relative z-10 shadow-xl transition-all duration-700 animate-in slide-in-from-left">
             <div className="flex items-center gap-3 mb-6 mt-2">
               <div className="w-10 h-10 bg-amber-500/10 text-amber-500 border border-amber-500/30 rounded-xl flex items-center justify-center shadow-inner shrink-0"><Hourglass size={20} /></div>
-              <div><h2 className="text-xl font-black text-slate-100 tracking-tight leading-none">{t.title}</h2><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Archive</p></div>
+              <div><h2 className="text-xl font-black text-slate-100 tracking-tight leading-none">{t.title}</h2><p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">{t.archive}</p></div>
             </div>
             <form onSubmit={handleSearch} className="space-y-4 mb-6">
               <div className="relative">
-                <input type="text" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Explore another era..." className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all pr-10" />
+                <input type="text" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder={t.exploreAnother} className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-200 placeholder:text-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all pr-10" />
                 <button type="submit" disabled={isLoading || !topic.trim()} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-amber-500 hover:bg-amber-400 text-slate-900 rounded-lg transition-all disabled:opacity-50">{isLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}</button>
               </div>
             </form>
@@ -229,11 +308,11 @@ export default function TimelinePage() {
                   </div>
                 </form>
                 <div className="mt-10 w-full flex flex-col items-center z-10">
-                  <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-4">Popular Journeys</p>
+                  <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-4">{t.popularJourneys}</p>
                   <div className="flex flex-wrap justify-center gap-3">
-                    <button type="button" onClick={() => forceTopic('Evolution of Artificial Intelligence')} className="bg-slate-900/50 backdrop-blur-md border border-slate-700 hover:border-amber-500/50 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-amber-400 transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(245,158,11,0.15)] flex items-center gap-2"><Cpu size={14} className="text-emerald-400"/> Evolution of AI</button>
-                    <button type="button" onClick={() => forceTopic('History of Space Exploration')} className="bg-slate-900/50 backdrop-blur-md border border-slate-700 hover:border-amber-500/50 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-amber-400 transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(245,158,11,0.15)] flex items-center gap-2"><Orbit size={14} className="text-indigo-400"/> Space Exploration</button>
-                    <button type="button" onClick={() => forceTopic('The French Revolution')} className="bg-slate-900/50 backdrop-blur-md border border-slate-700 hover:border-amber-500/50 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-amber-400 transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(245,158,11,0.15)] flex items-center gap-2"><Swords size={14} className="text-rose-400"/> French Revolution</button>
+                    <button type="button" onClick={() => forceTopic('Evolution of Artificial Intelligence')} className="bg-slate-900/50 backdrop-blur-md border border-slate-700 hover:border-amber-500/50 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-amber-400 transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(245,158,11,0.15)] flex items-center gap-2"><Cpu size={14} className="text-emerald-400"/> {t.evolutionOfAI}</button>
+                    <button type="button" onClick={() => forceTopic('History of Space Exploration')} className="bg-slate-900/50 backdrop-blur-md border border-slate-700 hover:border-amber-500/50 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-amber-400 transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(245,158,11,0.15)] flex items-center gap-2"><Orbit size={14} className="text-indigo-400"/> {t.spaceExploration}</button>
+                    <button type="button" onClick={() => forceTopic('The French Revolution')} className="bg-slate-900/50 backdrop-blur-md border border-slate-700 hover:border-amber-500/50 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-amber-400 transition-all hover:-translate-y-1 hover:shadow-[0_10px_20px_rgba(245,158,11,0.15)] flex items-center gap-2"><Swords size={14} className="text-rose-400"/> {t.frenchRevolution}</button>
                   </div>
                 </div>
                 <div className="mt-12 lg:hidden w-full max-w-sm">
@@ -256,13 +335,13 @@ export default function TimelinePage() {
                  <div className="absolute inset-2 border-r-2 border-indigo-500 rounded-full animate-spin reverse-spin"></div>
                  <Hourglass size={32} className="text-amber-400 animate-pulse" />
               </div>
-              <h3 className="text-xl font-black text-white tracking-tight mb-2">Traversing the Timeline</h3>
+              <h3 className="text-xl font-black text-white tracking-tight mb-2">{t.traversingTimeline}</h3>
               <p className="text-amber-500 font-bold uppercase tracking-widest text-xs animate-pulse">{t.generating}</p>
             </div>
           ) : (
             <div className="w-full h-full flex flex-col animate-in slide-in-from-bottom-10 fade-in duration-700 bg-transparent">
                <div className="hidden lg:flex flex-col absolute right-4 top-1/2 -translate-y-1/2 z-50 gap-1.5 bg-slate-950/80 backdrop-blur-xl p-2.5 rounded-[2rem] border border-slate-700/50 shadow-2xl max-h-[70vh] overflow-y-auto custom-scrollbar">
-                  <div className="text-[9px] font-black tracking-widest text-slate-500 uppercase text-center mb-1 flex flex-col items-center gap-1"><Navigation size={12} className="text-amber-400 mb-1"/>ERA</div>
+                  <div className="text-[9px] font-black tracking-widest text-slate-500 uppercase text-center mb-1 flex flex-col items-center gap-1"><Navigation size={12} className="text-amber-400 mb-1"/>{t.era}</div>
                   {timelineData.items.map((item: any, i: number) => (
                     <div key={i} onClick={() => scrollToYearIndex(i)} className="group relative flex items-center justify-center w-10 h-8 bg-slate-900 border border-slate-800 rounded-xl hover:bg-amber-500/20 hover:border-amber-500/50 cursor-pointer transition-all">
                        <span className="text-[10px] font-black text-slate-400 group-hover:text-amber-400 truncate px-1">{item.title.substring(0,4)}</span>
@@ -272,11 +351,11 @@ export default function TimelinePage() {
                <div className="p-5 md:p-8 border-b border-slate-800/30 bg-slate-950/40 backdrop-blur-xl z-20 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0">
                   <div>
                     <h2 className="text-xl md:text-3xl font-black text-white mb-1.5 tracking-tight drop-shadow-md">{timelineData.title}</h2>
-                    <p className="text-amber-400 text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Crosshair size={12}/> {timelineData.items.length} Milestones Mapped</p>
+                    <p className="text-amber-400 text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Crosshair size={12}/> {timelineData.items.length} {t.milestonesMapped}</p>
                   </div>
                   <button onClick={toggleNarration} className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg border ${isPlaying ? 'bg-rose-500/20 text-rose-400 border-rose-500/50 hover:bg-rose-500/30 shadow-[0_0_20px_rgba(225,29,72,0.3)]' : 'bg-slate-900 text-amber-400 border-amber-500/30 hover:bg-amber-500 hover:text-slate-900 hover:shadow-[0_0_20px_rgba(245,158,11,0.4)]'}`}>
                     {isPlaying ? <Square size={14} className="animate-pulse"/> : <Play size={14}/>}
-                    {isPlaying ? 'Stop Docu' : 'Play Docu'}
+                    {isPlaying ? t.stopDocu : t.playDocu}
                   </button>
                </div>
                <div className="flex-1 w-full max-w-5xl mx-auto relative pt-8 pb-32 px-2 md:px-8 overflow-y-auto custom-scrollbar flex justify-center z-10">
@@ -291,8 +370,8 @@ export default function TimelinePage() {
           {timelineData && (
             <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
               <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
-                <button onClick={() => setIsMobileDrawerOpen('history')} className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"><History size={16}/> {t.historyTitle.split(' ')[1] || 'History'}</button>
-                <button onClick={() => setIsMobileDrawerOpen('config')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all active:scale-95 border border-amber-400/50"><Sparkles size={18} /> New Timeline</button>
+                <button onClick={() => setIsMobileDrawerOpen('history')} className="flex items-center gap-1.5 px-4 py-3 rounded-2xl text-[13px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 bg-slate-800/90 border-slate-700 text-slate-300 hover:text-white shrink-0"><History size={16}/> {t.history}</button>
+                <button onClick={() => setIsMobileDrawerOpen('config')} className="flex-1 flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black tracking-wide rounded-2xl shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all active:scale-95 border border-amber-400/50"><Sparkles size={18} /> {t.newTimeline}</button>
               </div>
             </div>
           )}
@@ -306,7 +385,7 @@ export default function TimelinePage() {
           <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-amber-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-amber-400"/> New Timeline</>}
+              {isMobileDrawerOpen === 'history' ? <><History size={18} className="text-amber-400"/> {t.historyTitle}</> : <><Sparkles size={18} className="text-amber-400"/> {t.newTimeline}</>}
             </h3>
           </div>
           <div className="flex-1 overflow-y-auto pb-20 custom-scrollbar">
@@ -329,10 +408,10 @@ export default function TimelinePage() {
             ) : (
               <form onSubmit={(e) => { handleSearch(e); if(topic.trim()) setIsMobileDrawerOpen('none'); }} className="space-y-5">
                 <div className="mb-2">
-                  <label className="block text-[10px] font-black tracking-widest text-slate-500 uppercase mb-3">Popular Journeys</label>
+                  <label className="block text-[10px] font-black tracking-widest text-slate-500 uppercase mb-3">{t.popularJourneys}</label>
                   <div className="flex flex-wrap gap-2">
-                    <button type="button" onClick={() => forceTopic('Evolution of Artificial Intelligence')} className="bg-slate-950 border border-slate-800 hover:border-amber-500/50 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 hover:text-amber-400 transition">Evolution of AI</button>
-                    <button type="button" onClick={() => forceTopic('History of Space Exploration')} className="bg-slate-950 border border-slate-800 hover:border-amber-500/50 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 hover:text-amber-400 transition">Space Exploration</button>
+                    <button type="button" onClick={() => forceTopic('Evolution of Artificial Intelligence')} className="bg-slate-950 border border-slate-800 hover:border-amber-500/50 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 hover:text-amber-400 transition">{t.evolutionOfAI}</button>
+                    <button type="button" onClick={() => forceTopic('History of Space Exploration')} className="bg-slate-950 border border-slate-800 hover:border-amber-500/50 px-3 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 hover:text-amber-400 transition">{t.spaceExploration}</button>
                   </div>
                 </div>
                 <div>

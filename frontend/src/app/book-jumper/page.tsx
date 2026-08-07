@@ -220,7 +220,7 @@ export default function BookJumperPage() {
       const apiUrl = apiUrlBase.endsWith('/api') ? `${apiUrlBase}/bookjumper/explain` : `${apiUrlBase}/api/bookjumper/explain`;
       const response = await fetch(apiUrl, {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ query, snippet: snippets[pageNumber] })
+        body: JSON.stringify({ query, snippet: snippets[pageNumber], language })
       });
       const data = await response.json();
       if (data.success) {
@@ -255,7 +255,7 @@ export default function BookJumperPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session?.access_token}`
         },
-        body: JSON.stringify({ fileId: selectedFileId, query: query.trim() })
+        body: JSON.stringify({ fileId: selectedFileId, query: query.trim(), language })
       });
 
       const data = await response.json();

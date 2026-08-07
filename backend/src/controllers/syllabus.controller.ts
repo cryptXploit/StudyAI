@@ -113,7 +113,7 @@ export async function deleteSyllabusHandler(req: Request, res: Response): Promis
 export async function extractPdfHandler(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user?.id; const userTier = (req as any).user?.tier || 'Free';
-    const { fileId } = req.body;
+    const { fileId, language } = req.body;
 
     // 🟢 1.5. TOKEN VERIFICATION & DEDUCTION (IDOR Protected)
     if (userTier.toLowerCase() !== 'pro') {
@@ -144,7 +144,15 @@ export async function extractPdfHandler(req: Request, res: Response): Promise<vo
     } else { res.status(400).json({ error: 'Missing PDF' }); return; }
 
     const cleanRawText = rawText.replace(/\s+/g, ' ').substring(0, 8000);
-    const systemPrompt = `You are an Elite Academic Data Extractor. Extract Syllabus. Format strictly as JSON: {"course_name": "Name", "chapters": ["Ch 1", "Ch 2"]}. Max 20 chapters.`;
+    
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    
+    const systemPrompt = `You are an Elite Academic Data Extractor. Extract Syllabus. Format strictly as JSON: {"course_name": "Name", "chapters": ["Ch 1", "Ch 2"]}. Max 20 chapters.` + strictLangInstruction;
     
     const router = new ModelRouter();
     const aiResponse = await router.generate([{ role: 'system', content: systemPrompt }, { role: 'user', content: cleanRawText }], userId, userTier, { temperature: 0.1 });

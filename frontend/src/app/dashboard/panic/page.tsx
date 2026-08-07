@@ -19,6 +19,59 @@ const FALLBACK_SURVIVAL_KIT = [
   { id: '8', topic: 'Quantum States', content: 'Superposition allows a quantum system to be in multiple states at the same time until it is measured.' },
 ];
 
+const translations = {
+  English: {
+    generatingLink: "Generating your unique emergency link. Please wait a second...",
+    shareText1: "🚨 I'm panicking for tomorrow's exam! I found this secret Do-or-Die Survival Kit. Click my link to get Rewarded (and unlock mine)! ",
+    retreat: "Retreat to Safety",
+    doOrDie: "Do-or-Die Survival Kit",
+    algorithmText1: "Our algorithm has extracted the ",
+    algorithmText2: " most critical concepts you MUST memorize to survive tomorrow's exam.",
+    timeRunningOut: "Time is Running Out!",
+    encryptedConcepts1: "",
+    encryptedConcepts2: " Critical survival concepts are encrypted. If you don't read these, you will fail.",
+    payToUnlock: "Pay 50tk to unlock",
+    orFreeMethod: "OR FREE METHOD",
+    inviteFriends: "Invite 3 Friends to Unlock",
+    joined: "Joined",
+    sendEmergencyLink: "Send the emergency link. As soon as 3 friends click, your kit unlocks automatically."
+  },
+  Bangla: {
+    generatingLink: "আপনার ইউনিক ইমারজেন্সি লিংক তৈরি করা হচ্ছে। দয়া করে একটু অপেক্ষা করুন...",
+    shareText1: "🚨 কালকের পরীক্ষা নিয়ে আমি অনেক ভয়ে আছি! আমি এই গোপন সারভাইভাল কিটটি পেয়েছি। রিওয়ার্ড পেতে এবং আমারটি আনলক করতে লিংকে ক্লিক করো! ",
+    retreat: "নিরাপদ স্থানে ফিরে যান",
+    doOrDie: "বাঁচা-মরার সারভাইভাল কিট",
+    algorithmText1: "আগামীকালকের পরীক্ষায় বাঁচার জন্য আমাদের অ্যালগরিদম ",
+    algorithmText2: "টি অত্যন্ত গুরুত্বপূর্ণ কনসেপ্ট বের করেছে যা আপনার মুখস্ত করতেই হবে।",
+    timeRunningOut: "সময় ফুরিয়ে যাচ্ছে!",
+    encryptedConcepts1: "",
+    encryptedConcepts2: "টি গুরুত্বপূর্ণ সারভাইভাল কনসেপ্ট এনক্রিপ্টেড আছে। এগুলো না পড়লে আপনি ফেল করবেন।",
+    payToUnlock: "আনলক করতে ৫০ টাকা পেমেন্ট করুন",
+    orFreeMethod: "অথবা ফ্রি পদ্ধতি",
+    inviteFriends: "আনলক করতে ৩ জন বন্ধুকে ইনভাইট করুন",
+    joined: "যুক্ত হয়েছে",
+    sendEmergencyLink: "ইমারজেন্সি লিংকটি পাঠান। ৩ জন বন্ধু ক্লিক করলেই আপনার কিটটি স্বয়ংক্রিয়ভাবে আনলক হয়ে যাবে।"
+  },
+  Hindi: {
+    generatingLink: "आपका अनोखा इमरजेंसी लिंक जनरेट किया जा रहा है। कृपया एक सेकंड प्रतीक्षा करें...",
+    shareText1: "🚨 मैं कल की परीक्षा को लेकर घबरा रहा हूँ! मुझे यह गुप्त सर्वाइवल किट मिली है। इनाम पाने (और मेरी किट अनलॉक करने) के लिए मेरे लिंक पर क्लिक करें! ",
+    retreat: "सुरक्षित स्थान पर वापस जाएं",
+    doOrDie: "करो या मरो सर्वाइवल किट",
+    algorithmText1: "हमारे एल्गोरिथम ने ",
+    algorithmText2: " सबसे महत्वपूर्ण कॉन्सेप्ट्स निकाले हैं जिन्हें आपको कल की परीक्षा में पास होने के लिए याद करना ही होगा।",
+    timeRunningOut: "समय खत्म हो रहा है!",
+    encryptedConcepts1: "",
+    encryptedConcepts2: " महत्वपूर्ण सर्वाइवल कॉन्सेप्ट्स एन्क्रिप्टेड हैं। अगर आप इन्हें नहीं पढ़ेंगे, तो आप फेल हो जाएंगे।",
+    payToUnlock: "अनलॉक करने के लिए 50tk का भुगतान करें",
+    orFreeMethod: "या मुफ़्त तरीका",
+    inviteFriends: "अनलॉक करने के लिए 3 दोस्तों को आमंत्रित करें",
+    joined: "जुड़े",
+    sendEmergencyLink: "इमरजेंसी लिंक भेजें। जैसे ही 3 दोस्त क्लिक करेंगे, आपकी किट अपने आप अनलॉक हो जाएगी।"
+  }
+};
+
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
+
 export default function PanicModePage() {
   const supabase = createClient();
   const [kit, setKit] = useState<any[]>([]);
@@ -29,12 +82,18 @@ export default function PanicModePage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [referralCode, setReferralCode] = useState<string>('');
   const [panicCount, setPanicCount] = useState<number>(0);
+  const [language, setLanguage] = useState<LanguageType>('English');
   const router = useRouter();
+
+  const t = translations[language];
 
   useEffect(() => {
     // Hide standard scrollbar and force dark theme on body
     document.body.style.backgroundColor = '#000';
     document.body.style.color = '#fff';
+    
+    const savedLang = localStorage.getItem('Prepia_language');
+    if (savedLang) setLanguage(savedLang as LanguageType);
     
     fetchSurvivalKit();
     fetchUserData(); // Fetch user info & current panic progress
@@ -113,13 +172,13 @@ export default function PanicModePage() {
   const handleViralShare = () => {
     // 🟢 Safety Check: কোড আসতে একটু লেট হলে ইউজারকে অ্যালার্ট দেবে
     if (!referralCode) {
-      alert("Generating your unique emergency link. Please wait a second...");
+      alert(t.generatingLink);
       return;
     }
 
     // ডাইনামিক রেফারেল লিংক জেনারেট
     const shareUrl = `${window.location.origin}/signup?ref=${referralCode}&context=panic_mode`;
-    const text = `🚨 I'm panicking for tomorrow's exam! I found this secret Do-or-Die Survival Kit. Click my link to get Rewarded (and unlock mine)! ${shareUrl}`;
+    const text = `${t.shareText1}${shareUrl}`;
     
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -168,7 +227,7 @@ export default function PanicModePage() {
         {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
           <Link href="/dashboard" className="flex items-center gap-2 text-rose-500 hover:text-rose-400 uppercase font-black text-xs tracking-widest bg-rose-500/10 px-4 py-2 rounded-lg border border-rose-500/20 transition-all active:scale-95">
-            <ArrowLeft size={16} /> Retreat to Safety
+            <ArrowLeft size={16} /> {t.retreat}
           </Link>
           <div className="flex items-center gap-2 text-rose-500 font-mono font-black text-xl bg-black px-4 py-2 rounded-lg border border-rose-500/30 shadow-[0_0_20px_rgba(225,29,72,0.4)]">
             <Clock size={20} className="animate-pulse" /> {formatTime(timeLeft)}
@@ -185,10 +244,10 @@ export default function PanicModePage() {
             <AlertTriangle size={40} className="text-white" />
           </motion.div>
           <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-4 drop-shadow-[0_0_10px_rgba(225,29,72,0.8)]">
-            Do-or-Die Survival Kit
+            {t.doOrDie}
           </h1>
           <p className="text-rose-200 font-medium text-sm md:text-base max-w-2xl mx-auto uppercase tracking-widest">
-            Our algorithm has extracted the {kit.length} most critical concepts you MUST memorize to survive tomorrow's exam.
+            {t.algorithmText1}{kit.length}{t.algorithmText2}
           </p>
         </div>
 
@@ -237,30 +296,30 @@ export default function PanicModePage() {
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-10"></div>
                 
                 <Lock size={48} className="text-rose-500 mx-auto mb-4" />
-                <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">Time is Running Out!</h2>
+                <h2 className="text-3xl font-black text-white mb-2 uppercase tracking-tight">{t.timeRunningOut}</h2>
                 <p className="text-rose-300 text-sm font-bold mb-8 uppercase tracking-widest leading-relaxed">
-                  {kit.length - 2} Critical survival concepts are encrypted. If you don't read these, you will fail.
+                  {t.encryptedConcepts1}{kit.length - 2}{t.encryptedConcepts2}
                 </p>
 
                 <div className="space-y-4 relative z-10">
                   {/* Option 1: Payment */}
                   <button onClick={handlePayTk} className="w-full py-4 bg-rose-600 hover:bg-rose-500 text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(225,29,72,0.5)] active:scale-95 flex items-center justify-center gap-2">
-                    <ShieldAlert size={18} /> Pay 50tk to unlock
+                    <ShieldAlert size={18} /> {t.payToUnlock}
                   </button>
                   
                   <div className="flex items-center gap-4 my-2">
                     <div className="h-px bg-slate-800 flex-1"></div>
-                    <span className="text-slate-500 font-black text-xs uppercase">OR FREE METHOD</span>
+                    <span className="text-slate-500 font-black text-xs uppercase">{t.orFreeMethod}</span>
                     <div className="h-px bg-slate-800 flex-1"></div>
                   </div>
 
                   {/* Option 2: Viral Loop */}
                   <button onClick={handleViralShare} className="w-full py-4 bg-green-600 hover:bg-green-500 text-white font-black uppercase tracking-widest rounded-xl transition-all shadow-[0_0_20px_rgba(34,197,94,0.3)] active:scale-95 flex items-center justify-center gap-2">
                     <Share2 size={18} /> 
-                    Invite 3 Friends to Unlock {panicCount > 0 ? `(${panicCount}/3 Joined)` : ''}
+                    {t.inviteFriends} {panicCount > 0 ? `(${panicCount}/3 ${t.joined})` : ''}
                   </button>
                   <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-4">
-                    Send the emergency link. As soon as 3 friends click, your kit unlocks automatically.
+                    {t.sendEmergencyLink}
                   </p>
                 </div>
               </div>

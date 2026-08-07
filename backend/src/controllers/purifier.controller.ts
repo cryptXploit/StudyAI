@@ -59,7 +59,7 @@ export async function purifyNotesHandler(req: Request, res: Response): Promise<v
     }
 
     // 🟢 2. Send cheap text-tokens to AI for formatting and purifying
-    const systemPrompt = `You are an Elite Academic Transcriber and Note Organizer.
+    let systemPrompt = `You are an Elite Academic Transcriber and Note Organizer.
 I will provide you with raw, messy text extracted from handwritten notes via OCR. It contains typos, broken lines, and misspellings.
 Your task is to PURIFY it into a beautifully formatted, highly readable study document.
 
@@ -69,6 +69,15 @@ RULES:
 3. Highlight key terms in **bold**.
 4. Generate a short, relevant "title" for this document on the very first line starting with "TITLE: ".
 5. Output fluently in ${language.toUpperCase()}.`;
+
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    
+    systemPrompt += strictLangInstruction;
 
     const userPrompt = `RAW OCR TEXT TO PURIFY:\n\n${rawText}`;
 

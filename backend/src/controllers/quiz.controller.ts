@@ -86,6 +86,14 @@ Do NOT use markdown blocks (\`\`\`latex). Output ONLY the raw LaTeX string.
 MANDATORY LANGUAGE: You MUST generate the questions, instructions, and text in ${language.toUpperCase()}. Use proper LaTeX packages (like 'polyglossia' or 'babel') if necessary to support the requested language characters.`;
     }
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    systemPrompt += strictLangInstruction;
+
     const messages = [
       { role: 'system' as const, content: systemPrompt },
       { role: 'user' as const, content: userPrompt }

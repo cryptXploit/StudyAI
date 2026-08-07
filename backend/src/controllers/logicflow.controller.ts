@@ -38,6 +38,13 @@ export async function generateGraphHandler(req: Request, res: Response): Promise
       
     }
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     let systemPrompt = "";
 
     if (mode === 'animator') {
@@ -77,6 +84,8 @@ Output ONLY valid JSON matching this schema. No markdown. Translate labels into 
   ]
 }`;
     }
+
+    systemPrompt += strictLangInstruction;
 
     const router = new ModelRouter();
     const responseText = await router.generate(

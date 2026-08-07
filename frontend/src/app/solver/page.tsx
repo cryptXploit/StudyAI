@@ -23,9 +23,9 @@ import { Line } from 'react-chartjs-2';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const translations = {
-  English: { proSolver: "Pro Solver", eliteAssist: "Elite Academic Assistance", yourLibrary: "Solved History", noHistory: "No solved problems yet.", placeholder: "Describe your complex problem, or attach an image...", solveProblem: "Solve Problem", solveAndPlot: "Solve & Visualize", solutionAwaits: "Awaiting Problem", awaitsDesc: "Submit a complex problem or image on the left to get a detailed Elite solution.", copySolution: "Copy Solution", copied: "Copied!", proBadge: "PRO TIER FEATURE", tools: "Visual Tools", knowledgeBase: "RAG Sources", syllabusConstraint: "Syllabus Boundary" },
-  Bangla: { proSolver: "প্রো সলভার", eliteAssist: "এলিট অ্যাকাডেমিক সহায়তা", yourLibrary: "সমাধানের হিস্ট্রি", noHistory: "কোনো সমস্যা সমাধান করা হয়নি।", placeholder: "আপনার জটিল সমস্যা বিস্তারিত লিখুন বা ছবি যুক্ত করুন...", solveProblem: "সমস্যা সমাধান করুন", solveAndPlot: "সমাধান ও ভিজ্যুয়ালাইজ", solutionAwaits: "সমস্যার অপেক্ষায়", awaitsDesc: "বিস্তারিত সমাধানের জন্য বাম পাশে আপনার সমস্যা বা ছবি সাবমিট করুন।", copySolution: "সমাধান কপি করুন", copied: "কপি হয়েছে!", proBadge: "প্রো-টিয়ার ফিচার", tools: "ভিজ্যুয়াল টুলস", knowledgeBase: "RAG সোর্সসমূহ", syllabusConstraint: "সিলেবাস বাউন্ডারি" },
-  Hindi: { proSolver: "प्रो सॉल्वर", eliteAssist: "एलीट अकादमिक सहायता", yourLibrary: "समाधान इतिहास", noHistory: "अभी तक कोई समस्या हल नहीं हुई।", placeholder: "अपनी जटिल समस्या का वर्णन करें या चित्र संलग्न करें...", solveProblem: "समस्या हल करें", solveAndPlot: "हल करें और विज़ुअलाइज़ करें", solutionAwaits: "समस्या की प्रतीक्षा में", awaitsDesc: "विस्तृत समाधान प्राप्त करने के लिए बाईं ओर एक समस्या या चित्र सबमिट करें।", copySolution: "समाधान कॉपी करें", copied: "कॉपी हो गया!", proBadge: "प्रो टियर फ़ीचर", tools: "विज़ुअल टूल्स", knowledgeBase: "RAG स्रोत", syllabusConstraint: "सिलेबस सीमा" }
+  English: { proSolver: "Pro Solver", eliteAssist: "Elite Academic Assistance", yourLibrary: "Solved History", noHistory: "No solved problems yet.", placeholder: "Describe your complex problem, or attach an image...", solveProblem: "Solve Problem", solveAndPlot: "Solve & Visualize", solutionAwaits: "Awaiting Problem", awaitsDesc: "Submit a complex problem or image on the left to get a detailed Elite solution.", copySolution: "Copy Solution", copied: "Copied!", proBadge: "PRO TIER FEATURE", tools: "Visual Tools", knowledgeBase: "RAG Sources", syllabusConstraint: "Syllabus Boundary", selectCourse: "-- Select Course/Subject --", selectChapter: "Select Chapter (Max 1)", selectTopics: "Select Topics (Optional)", imageSource: "Image Source", aiTyping: "AI is analyzing & typing...", interactiveConcept: "Interactive Concept:", syllabusDrawer: "Syllabus", filesDrawer: "Files", libraryDrawer: "Library", untitledFile: "Untitled File" },
+  Bangla: { proSolver: "প্রো সলভার", eliteAssist: "এলিট অ্যাকাডেমিক সহায়তা", yourLibrary: "সমাধানের হিস্ট্রি", noHistory: "কোনো সমস্যা সমাধান করা হয়নি।", placeholder: "আপনার জটিল সমস্যা বিস্তারিত লিখুন বা ছবি যুক্ত করুন...", solveProblem: "সমস্যা সমাধান করুন", solveAndPlot: "সমাধান ও ভিজ্যুয়ালাইজ", solutionAwaits: "সমস্যার অপেক্ষায়", awaitsDesc: "বিস্তারিত সমাধানের জন্য বাম পাশে আপনার সমস্যা বা ছবি সাবমিট করুন।", copySolution: "সমাধান কপি করুন", copied: "কপি হয়েছে!", proBadge: "প্রো-টিয়ার ফিচার", tools: "ভিজ্যুয়াল টুলস", knowledgeBase: "RAG সোর্সসমূহ", syllabusConstraint: "সিলেবাস বাউন্ডারি", selectCourse: "-- কোর্স/সাবজেক্ট নির্বাচন করুন --", selectChapter: "চ্যাপ্টার নির্বাচন করুন (সর্বোচ্চ ১)", selectTopics: "টপিকস নির্বাচন করুন (ঐচ্ছিক)", imageSource: "ছবির সোর্স", aiTyping: "AI বিশ্লেষণ এবং টাইপ করছে...", interactiveConcept: "ইন্টারেক্টিভ কনসেপ্ট:", syllabusDrawer: "সিলেবাস", filesDrawer: "ফাইলসমূহ", libraryDrawer: "লাইব্রেরি", untitledFile: "নামবিহীন ফাইল" },
+  Hindi: { proSolver: "प्रो सॉल्वर", eliteAssist: "एलीट अकादमिक सहायता", yourLibrary: "समाधान इतिहास", noHistory: "अभी तक कोई समस्या हल नहीं हुई।", placeholder: "अपनी जटिल समस्या का वर्णन करें या चित्र संलग्न करें...", solveProblem: "समस्या हल करें", solveAndPlot: "हल करें और विज़ुअलाइज़ करें", solutionAwaits: "समस्या की प्रतीक्षा में", awaitsDesc: "विस्तृत समाधान प्राप्त करने के लिए बाईं ओर एक समस्या या चित्र सबमिट करें।", copySolution: "समाधान कॉपी करें", copied: "कॉपी हो गया!", proBadge: "प्रो टियर फ़ीचर", tools: "विज़ुअल टूल्स", knowledgeBase: "RAG स्रोत", syllabusConstraint: "सिलेबस सीमा", selectCourse: "-- कोर्स/विषय चुनें --", selectChapter: "अध्याय चुनें (अधिकतम 1)", selectTopics: "विषय चुनें (वैकल्पिक)", imageSource: "छवि स्रोत", aiTyping: "AI विश्लेषण और टाइप कर रहा है...", interactiveConcept: "इंटरएक्टिव कॉन्सेप्ट:", syllabusDrawer: "सिलेबस", filesDrawer: "फ़ाइलें", libraryDrawer: "लाइब्रेरी", untitledFile: "बिना नाम की फ़ाइल" }
 };
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
@@ -371,7 +371,7 @@ export default function SolverPage() {
                   {files.map(f => (
                     <div key={f.id} onClick={() => toggleSourceFile(f.id)} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-xs font-bold transition-all ${selectedFileIds.includes(f.id) ? 'bg-indigo-500/20 text-indigo-300' : 'text-slate-400 hover:bg-slate-800'}`}>
                       <CheckSquare size={14} className={selectedFileIds.includes(f.id) ? 'text-indigo-400' : 'text-slate-600'} />
-                      <span className="truncate">{f.name || f.original_name || f.file_name || 'Untitled File'}</span>
+                      <span className="truncate">{f.name || f.original_name || f.file_name || t.untitledFile}</span>
                     </div>
                   ))}
                 </div>
@@ -383,13 +383,13 @@ export default function SolverPage() {
                 <label className="text-[11px] font-black tracking-widest text-amber-400 uppercase mb-2 flex items-center gap-1.5"><ListTree size={14}/> {t.syllabusConstraint}</label>
                 
                 <select value={selectedSyllabusId} onChange={handleSyllabusSelect} className="w-full bg-slate-950 border border-slate-700 p-2 rounded-xl text-xs font-bold focus:border-amber-500 outline-none text-slate-300 mb-2">
-                  <option value="">-- Select Course/Subject --</option>
+                  <option value="">{t.selectCourse}</option>
                   {syllabuses.map(s => <option key={s.id} value={s.id}>{s.course_name}</option>)}
                 </select>
 
                 {selectedSyllabusId && activeCourse?.chapters && activeCourse.chapters.length > 0 && (
                   <div className="mt-3">
-                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Select Chapter (Max 1)</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">{t.selectChapter}</p>
                     <div className="flex flex-col gap-1.5 max-h-28 overflow-y-auto custom-scrollbar">
                       {activeCourse.chapters.map((chap: any) => (
                         <div key={chap.id} onClick={() => selectChapter(chap.id)} className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer text-xs font-bold transition-all border ${selectedChapterId === chap.id ? 'bg-amber-500/10 border-amber-500/50 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-600'}`}>
@@ -403,7 +403,7 @@ export default function SolverPage() {
 
                 {selectedChapterId && activeChapter?.topics && activeChapter.topics.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-slate-800">
-                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1"><Target size={10}/> Select Topics (Optional)</p>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1"><Target size={10}/> {t.selectTopics}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {activeChapter.topics.map((topic: string, i: number) => (
                         <button key={i} type="button" onClick={() => toggleTopic(topic)} className={`text-[10px] font-black tracking-wide px-2 py-1 rounded-md border transition-all ${selectedTopics.includes(topic) ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300' : 'bg-slate-950 border-slate-700 text-slate-500 hover:border-slate-500'}`}>
@@ -490,14 +490,14 @@ export default function SolverPage() {
               
               {processingImage && (
                 <div className="mb-6 rounded-2xl overflow-hidden border border-slate-200 shadow-sm max-w-sm">
-                   <div className="bg-slate-100 text-[10px] font-bold text-slate-500 px-3 py-1.5 border-b border-slate-200 uppercase tracking-widest">Image Source</div>
+                   <div className="bg-slate-100 text-[10px] font-bold text-slate-500 px-3 py-1.5 border-b border-slate-200 uppercase tracking-widest">{t.imageSource}</div>
                    <img src={processingImage} alt="Processing source" className="w-full object-contain max-h-48" />
                 </div>
               )}
 
               {isLoading && solution.length < 5 && (
                 <div className="flex items-center gap-3 text-indigo-500 font-black tracking-widest uppercase text-sm mb-6 animate-pulse">
-                  <Loader2 size={18} className="animate-spin" /> AI is analyzing & typing...
+                  <Loader2 size={18} className="animate-spin" /> {t.aiTyping}
                 </div>
               )}
 
@@ -509,7 +509,7 @@ export default function SolverPage() {
                 <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl my-8 animate-in fade-in zoom-in duration-500">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 text-cyan-400 font-black uppercase tracking-widest text-xs">
-                      <MonitorPlay size={16} /> Interactive Concept: {activeSimulation.title}
+                      <MonitorPlay size={16} /> {t.interactiveConcept} {activeSimulation.title}
                     </div>
                   </div>
                   <div className="w-full rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 aspect-video relative">
@@ -533,13 +533,13 @@ export default function SolverPage() {
             
             <div className="flex gap-2 overflow-x-auto mb-3 pointer-events-auto custom-scrollbar-hide px-1 pb-1">
               <button onClick={() => setIsMobileDrawerOpen('syllabus')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${selectedSyllabusId ? (uiTheme === 'dark' ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-amber-50 border-amber-200 text-amber-600') : (uiTheme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-600')}`}>
-                <ListTree size={12}/> Syllabus {selectedChapterId && `(1)`}
+                <ListTree size={12}/> {t.syllabusDrawer} {selectedChapterId && `(1)`}
               </button>
               <button onClick={() => setIsMobileDrawerOpen('files')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${selectedFileIds.length > 0 ? (uiTheme === 'dark' ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-300' : 'bg-indigo-50 border-indigo-200 text-indigo-600') : (uiTheme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-600')}`}>
-                <BookOpen size={12}/> Files {selectedFileIds.length > 0 && `(${selectedFileIds.length})`}
+                <BookOpen size={12}/> {t.filesDrawer} {selectedFileIds.length > 0 && `(${selectedFileIds.length})`}
               </button>
               <button onClick={() => setIsMobileDrawerOpen('history')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${uiTheme === 'dark' ? 'bg-slate-800/80 border-slate-700 text-indigo-400' : 'bg-white border-slate-200 text-indigo-600'}`}>
-                <History size={12}/> Library
+                <History size={12}/> {t.libraryDrawer}
               </button>
             </div>
 
@@ -592,13 +592,13 @@ export default function SolverPage() {
           {isMobileDrawerOpen === 'syllabus' && (
             <div className="pb-10 space-y-4">
               <select value={selectedSyllabusId} onChange={handleSyllabusSelect} className={`w-full border p-3 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-amber-500/50 ${uiTheme === 'dark' ? 'bg-slate-950 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-300 text-slate-800'}`}>
-                <option value="">-- Select Course/Subject --</option>
+                <option value="">{t.selectCourse}</option>
                 {syllabuses.map(s => <option key={s.id} value={s.id}>{s.course_name}</option>)}
               </select>
 
               {selectedSyllabusId && activeCourse?.chapters && (
                 <div className="mt-4">
-                  <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>Select Chapter (Max 1)</p>
+                  <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>{t.selectChapter}</p>
                   <div className="flex flex-col gap-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
                     {activeCourse.chapters.map((chap: any) => (
                       <div key={chap.id} onClick={() => selectChapter(chap.id)} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer text-xs font-bold transition-all border-2 active:scale-95 ${selectedChapterId === chap.id ? 'bg-amber-500/10 border-amber-500/50 text-amber-500' : (uiTheme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700')}`}>
@@ -612,7 +612,7 @@ export default function SolverPage() {
 
               {selectedChapterId && activeChapter?.topics && (
                 <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-                  <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}><Target size={12}/> Select Topics (Optional)</p>
+                  <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-1 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}><Target size={12}/> {t.selectTopics}</p>
                   <div className="flex flex-wrap gap-2">
                     {activeChapter.topics.map((topic: string, i: number) => (
                       <button key={i} type="button" onClick={() => toggleTopic(topic)} className={`text-[11px] font-black tracking-wide px-3 py-2 rounded-lg border-2 transition-all active:scale-95 ${selectedTopics.includes(topic) ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-500' : (uiTheme === 'dark' ? 'bg-slate-950 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-600')}`}>

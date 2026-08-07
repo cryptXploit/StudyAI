@@ -13,7 +13,7 @@ const supabaseAdmin = createClient(
 export async function saveBionicTextHandler(req: Request, res: Response): Promise<void> {
   try {
     const userId = (req as any).user?.id;
-    const { text } = req.body;
+    const { text, language } = req.body;
 
     if (!userId || !text) {
       res.status(400).json({ error: 'Missing text content' });

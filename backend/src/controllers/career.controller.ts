@@ -94,10 +94,17 @@ LANGUAGE REQUIREMENT: Generate the 'email_draft' in fluent, professional English
 
     const userPrompt = `TARGET COMPANY/PROFESSOR DESCRIPTION:\n"${safeTargetDesc}"\n\nSTUDENT BACKGROUND/CV:\n"${finalCvContext || 'No specific background provided. Provide general best practices based on the target.'}"`;
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+
     // 4. AI Generation
     const router = new ModelRouter();
     const aiResponse = await router.generate(
-      [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+      [{ role: 'system', content: systemPrompt + strictLangInstruction }, { role: 'user', content: userPrompt }],
       userId, tier, { temperature: 0.3 }
     );
 

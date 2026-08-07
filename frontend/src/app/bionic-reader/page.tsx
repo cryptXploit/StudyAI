@@ -22,7 +22,9 @@ const translations = {
     normalToggle: "Plain Text",
     themeLabel: "Reader Theme",
     fontSize: "Font Size",
-    proBadge: "PRO TIER FEATURE"
+    proBadge: "PRO TIER FEATURE",
+    awaitsTitle: "Focus Board Awaits",
+    timeoutErr: "🚨 Timeout: Server took too long to save the document. Try pasting a slightly shorter text."
   },
   Bangla: {
     title: "বায়োনিক ফোকাস রিডার",
@@ -38,7 +40,9 @@ const translations = {
     normalToggle: "সাধারণ টেক্সট",
     themeLabel: "রিডার থিম",
     fontSize: "ফন্ট সাইজ",
-    proBadge: "প্রো-টিয়ার ফিচার"
+    proBadge: "প্রো-টিয়ার ফিচার",
+    awaitsTitle: "ফোকাস বোর্ড প্রস্তুত",
+    timeoutErr: "🚨 টাইমআউট: সার্ভার ডকুমেন্ট সেভ করতে অনেক সময় নিচ্ছে। একটু ছোট টেক্সট পেস্ট করার চেষ্টা করুন।"
   },
   Hindi: {
     title: "बायोनिक फोकस रीडर",
@@ -54,7 +58,9 @@ const translations = {
     normalToggle: "साधारण टेक्स्ट",
     themeLabel: "रीडर थीम",
     fontSize: "फ़ॉन्ट आकार",
-    proBadge: "प्रो टियर फ़ीचर"
+    proBadge: "प्रो टियर फ़ीचर",
+    awaitsTitle: "फोकस बोर्ड तैयार है",
+    timeoutErr: "🚨 टाइमआउट: सर्वर को दस्तावेज़ सहेजने में बहुत अधिक समय लगा। कृपया थोड़ा छोटा टेक्स्ट पेस्ट करने का प्रयास करें।"
   }
 };
 
@@ -165,7 +171,7 @@ export default function BionicReaderPage() {
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify({ text: inputText, language: language }),
         signal: controller.signal // 🟢 Added Safety Signal
       });
       
@@ -192,7 +198,7 @@ export default function BionicReaderPage() {
       }
     } catch (err: any) {
       if (err.name === 'AbortError') {
-        alert("🚨 Timeout: Server took too long to save the document. Try pasting a slightly shorter text.");
+        alert(t.timeoutErr);
       } else {
         console.error("Failed to save to library:", err);
       }
@@ -298,7 +304,7 @@ export default function BionicReaderPage() {
           {!activeContent ? (
             <div className="h-full flex flex-col items-center justify-center text-center opacity-60 p-10">
               <Type size={80} className="text-slate-300 mb-6" />
-              <h3 className="text-3xl font-black text-slate-400">Focus Board Awaits</h3>
+              <h3 className="text-3xl font-black text-slate-400">{t.awaitsTitle}</h3>
               <p className="text-slate-500 mt-2 max-w-sm">{t.awaitsDesc}</p>
             </div>
           ) : (

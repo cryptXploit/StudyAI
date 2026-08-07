@@ -116,6 +116,14 @@ export async function chatHandler(req: Request, res: Response): Promise<void> {
     
     if (isRepeatQuestion) systemPrompt += `\n\n[URGENT INSTRUCTION: The user asked this exact question again. They might be unsatisfied with the previous answer. Please explain it in a completely different, more detailed, and simpler way.]`;
 
+    let strictLangInstruction = "";
+    if (language === 'Bangla') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Bengali language. Do not use English and do not hallucinate.";
+    } else if (language === 'Hindi') {
+      strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
+    }
+    systemPrompt += strictLangInstruction;
+
     const userPrompt = buildUserPrompt(safeQuery, contextChunks, tier, isSummaryRequest);
     // Limit history memory to last 2 turns to prevent Token limit explosion
     const safeMemory = memory.slice(-2).map(m => ({ ...m, content: m.content.length > 300 ? m.content.substring(0, 300) + '...' : m.content }));

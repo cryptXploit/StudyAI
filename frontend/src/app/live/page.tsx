@@ -10,13 +10,69 @@ import SecureLayout from '@/components/layout/SecureLayout';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import { Settings2, CheckCircle2, Mic, StopCircle, Send } from 'lucide-react';
 
+const translations = {
+  English: {
+    micPermissionDenied: "Permission Denied: Please allow microphone access in your browser settings to use the Live Podcast feature.",
+    micError: "Microphone Error: No microphone was found, or it is being used by another application.",
+    livePodcastTitle: "Live AI Podcast",
+    livePodcastDesc: "Have a real-time, hands-free conversation with AI. Perfect for interview prep, debate practice, or casual talks.",
+    ready: "Ready",
+    listening: "Listening...",
+    thinking: "Thinking...",
+    speaking: "Speaking...",
+    tapToSpeak: "Tap to Speak",
+    sendNow: "Send now",
+    cancel: "Cancel",
+    interrupt: "Interrupt",
+    settings: "Settings",
+    spokenLanguage: "Spoken Language",
+    done: "Done",
+  },
+  Bangla: {
+    micPermissionDenied: "অনুমতি অস্বীকার করা হয়েছে: লাইভ পডকাস্ট বৈশিষ্ট্য ব্যবহার করতে অনুগ্রহ করে আপনার ব্রাউজার সেটিংসে মাইক্রোফোন অ্যাক্সেসের অনুমতি দিন।",
+    micError: "মাইক্রোফোন ত্রুটি: কোনও মাইক্রোফোন পাওয়া যায়নি, অথবা এটি অন্য কোনও অ্যাপ্লিকেশন দ্বারা ব্যবহৃত হচ্ছে।",
+    livePodcastTitle: "লাইভ এআই পডকাস্ট",
+    livePodcastDesc: "এআই-এর সাথে একটি রিয়েল-টাইম, হ্যান্ডস-ফ্রি কথোপকথন করুন। ইন্টারভিউ প্রস্তুতি, বিতর্ক অনুশীলন বা সাধারণ কথোপকথনের জন্য উপযুক্ত।",
+    ready: "প্রস্তুত",
+    listening: "শুনছে...",
+    thinking: "ভাবছে...",
+    speaking: "বলছে...",
+    tapToSpeak: "কথা বলতে ট্যাপ করুন",
+    sendNow: "এখনই পাঠান",
+    cancel: "বাতিল করুন",
+    interrupt: "বাধা দিন",
+    settings: "সেটিংস",
+    spokenLanguage: "কথ্য ভাষা",
+    done: "সম্পন্ন",
+  },
+  Hindi: {
+    micPermissionDenied: "अनुमति अस्वीकृत: लाइव पॉडकास्ट सुविधा का उपयोग करने के लिए कृपया अपनी ब्राउज़र सेटिंग में माइक्रोफ़ोन एक्सेस की अनुमति दें।",
+    micError: "माइक्रोफ़ोन त्रुटि: कोई माइक्रोफ़ोन नहीं मिला, या इसका उपयोग किसी अन्य एप्लिकेशन द्वारा किया जा रहा है।",
+    livePodcastTitle: "लाइव एआई पॉडकास्ट",
+    livePodcastDesc: "एआई के साथ रीयल-टाइम, हैंड्स-फ्री बातचीत करें। साक्षात्कार की तैयारी, वाद-विवाद अभ्यास या सामान्य बातचीत के लिए बिल्कुल सही।",
+    ready: "तैयार",
+    listening: "सुन रहा है...",
+    thinking: "सोच रहा है...",
+    speaking: "बोल रहा है...",
+    tapToSpeak: "बोलने के लिए टैप करें",
+    sendNow: "अभी भेजें",
+    cancel: "रद्द करें",
+    interrupt: "बाधित करें",
+    settings: "सेटिंग्स",
+    spokenLanguage: "बोली जाने वाली भाषा",
+    done: "संपन्न",
+  }
+};
+
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
+
 export default function LivePodcastPage() {
   const router = useRouter();
   const supabase = createClient();
   const { tokens, tier, refreshTokens } = useTokens();
 
   const [state, setState] = useState<'idle' | 'listening' | 'thinking' | 'speaking'>('idle');
-  const [language, setLanguage] = useState<'English' | 'Bengali' | 'Hindi'>('English');
+  const [language, setLanguage] = useState<LanguageType>('English');
   const [transcript, setTranscript] = useState('');
   const [textInput, setTextInput] = useState('');
   const [aiText, setAiText] = useState('');
@@ -31,6 +87,12 @@ export default function LivePodcastPage() {
   const requestInFlightRef = useRef(false);
 
   useEffect(() => {
+    const loadSettings = () => {
+      const savedLang = localStorage.getItem('Prepia_language');
+      if (savedLang) setLanguage(savedLang as LanguageType);
+    };
+    loadSettings();
+
     return () => {
       endLiveConversation();
     };
@@ -71,9 +133,9 @@ export default function LivePodcastPage() {
     } catch (err: any) {
       console.error("Microphone access denied:", err);
       if (err.name === 'NotAllowedError') {
-        alert("Permission Denied: Please allow microphone access in your browser settings to use the Live Podcast feature.");
+        alert(translations[language].micPermissionDenied);
       } else {
-        alert("Microphone Error: No microphone was found, or it is being used by another application.");
+        alert(translations[language].micError);
       }
       setState('idle');
     }
@@ -226,6 +288,8 @@ export default function LivePodcastPage() {
     }
   };
 
+  const t = translations[language];
+
   return (
     <SecureLayout>
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden pt-16">
@@ -238,15 +302,15 @@ export default function LivePodcastPage() {
         <div className="relative z-10 flex flex-col items-center max-w-4xl w-full px-6">
 
           <h1 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-emerald-400 mb-4 text-center">
-            Live AI Podcast
+            {t.livePodcastTitle}
           </h1>
           <p className="text-slate-400 text-center mb-12 max-w-lg">
-            Have a real-time, hands-free conversation with AI. Perfect for interview prep, debate practice, or casual talks.
+            {t.livePodcastDesc}
           </p>
 
           {/* Language Selector (Desktop) */}
           <div className="hidden lg:flex bg-slate-900/50 backdrop-blur-md p-1 rounded-full border border-slate-800 mb-12">
-            {['English', 'Bengali', 'Hindi'].map(lang => (
+            {['English', 'Bangla', 'Hindi'].map(lang => (
               <button
                 key={lang}
                 onClick={() => setLanguage(lang as any)}
@@ -266,7 +330,7 @@ export default function LivePodcastPage() {
             />
             <div className="relative z-10 w-32 h-32 md:w-40 md:h-40 rounded-full bg-slate-900 border border-slate-700/50 shadow-2xl flex items-center justify-center">
               <span className="text-slate-400 font-medium text-sm">
-                {state === 'idle' ? 'Ready' : state === 'listening' ? 'Listening...' : state === 'thinking' ? 'Thinking...' : 'Speaking...'}
+                {state === 'idle' ? t.ready : state === 'listening' ? t.listening : state === 'thinking' ? t.thinking : t.speaking}
               </span>
             </div>
           </div>
@@ -294,22 +358,22 @@ export default function LivePodcastPage() {
               {state === 'idle' ? (
                 <button onClick={startListening} className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold shadow-[0_0_20px_rgba(79,70,229,0.3)] transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2">
                   <Mic className="w-5 h-5" />
-                  Tap to Speak
+                  {t.tapToSpeak}
                 </button>
               ) : state === 'listening' ? (
                 <div className="flex items-center gap-3">
                   <button onClick={stopListening} className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2">
                     <Send className="w-5 h-5" />
-                    Send now
+                    {t.sendNow}
                   </button>
                   <button onClick={endLiveConversation} className="px-5 py-4 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-full font-bold transition-all flex items-center gap-2">
-                    <StopCircle className="w-5 h-5" /> Cancel
+                    <StopCircle className="w-5 h-5" /> {t.cancel}
                   </button>
                 </div>
               ) : (
                 <button onClick={cancelSpeech} className="px-8 py-4 bg-rose-600 hover:bg-rose-500 text-white rounded-full font-bold shadow-[0_0_20px_rgba(225,29,72,0.3)] transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2">
                   <StopCircle className="w-5 h-5" />
-                  Interrupt
+                  {t.interrupt}
                 </button>
               )}
             </div>
@@ -357,15 +421,15 @@ export default function LivePodcastPage() {
 
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-black tracking-tight flex items-center gap-2 text-white">
-              <Settings2 size={18} className="text-indigo-400"/> Settings
+              <Settings2 size={18} className="text-indigo-400"/> {t.settings}
             </h3>
           </div>
 
           <div className="space-y-6 pb-20">
              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Spoken Language</label>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">{t.spokenLanguage}</label>
                 <div className="grid grid-cols-1 gap-2">
-                  {['English', 'Bengali', 'Hindi'].map(lang => (
+                  {['English', 'Bangla', 'Hindi'].map(lang => (
                     <button
                       key={lang}
                       onClick={() => { setLanguage(lang as any); setIsMobileDrawerOpen('none'); }}
@@ -382,7 +446,7 @@ export default function LivePodcastPage() {
           {/* Sticky Done Button */}
           <div className="sticky bottom-0 left-0 w-full pt-4 pb-2 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent">
             <button onClick={() => setIsMobileDrawerOpen('none')} className="w-full py-3 rounded-xl font-black tracking-wide shadow-md transition-all active:scale-95 flex justify-center items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">
-              <CheckCircle2 size={16}/> Done
+              <CheckCircle2 size={16}/> {t.done}
             </button>
           </div>
         </div>
