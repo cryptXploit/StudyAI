@@ -600,7 +600,11 @@ export default function BookJumperPage() {
                       <>
                         <iframe 
                           key={`${selectedFileUrl}-${pageNumber}-${query}`} 
-                          src={`${selectedFileUrl}#search=${encodeURIComponent(snippets[pageNumber] ? snippets[pageNumber].substring(0, 40) : query.trim())}&page=${pageNumber}`} 
+                          src={
+                            typeof window !== 'undefined' && window.innerWidth < 768 && rawSignedUrl 
+                              ? `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(rawSignedUrl)}#page=${pageNumber}&search=${encodeURIComponent(snippets[pageNumber] ? snippets[pageNumber].substring(0, 40) : query.trim())}`
+                              : `${selectedFileUrl}#search=${encodeURIComponent(snippets[pageNumber] ? snippets[pageNumber].substring(0, 40) : query.trim())}&page=${pageNumber}`
+                          }
                           className="absolute inset-0 w-full h-full border-none bg-slate-100"
                           title="PDF Document"
                         />
