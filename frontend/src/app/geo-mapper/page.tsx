@@ -4,13 +4,21 @@ import { showPublicError } from '@/lib/errors/publicError';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
-import { Map as MapIcon, Loader2, History, Globe, Download, Sparkles, Info, Search } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Map as MapIcon, Loader2, History, Globe, Download, Sparkles, Info, Search, FileDown, Lightbulb, TrendingUp, BarChart2 } from 'lucide-react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup, Sphere, Graticule } from "react-simple-maps";
 import html2canvas from 'html2canvas';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 
 // Lightweight TopoJSON for the world map
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+
+const QUICK_PROMPTS = [
+  "Global GDP 2023",
+  "WWII Alliances",
+  "Top Tech Exporters",
+  "Climate Change Index"
+];
 
 const translations = {
   English: {
@@ -57,7 +65,7 @@ export default function GeoMapperPage() {
   const [selectedCountryId, setSelectedCountryId] = useState<string | null>(null);
 
   // 🟢 MOBILE UI STATES
-  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'search'|'history'>('none');
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'search'|'history'|'stats'>('none');
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const lastScrollY = React.useRef(0);
 
@@ -127,6 +135,23 @@ export default function GeoMapperPage() {
     setSelectedCountryId(null);
   };
 
+  // 🟢 Data Export (CSV)
+  const exportAsCSV = () => {
+    if (!mapData || !mapData.countries) return;
+    const csvRows = [["Country", "Value"]];
+    mapData.countries.forEach((c: any) => {
+      csvRows.push([`"${c.name || ""}"`, `"${(c.value || "").replace(/"/g, '""')}"`]);
+    });
+    const csvContent = "data:text/csv;charset=utf-8," + csvRows.map(e => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `StudyAI_Data_${topic.replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // 🟢 Growth Hacking: Export Map as PNG
   const exportAsImage = async () => {
     if (!mapContainerRef.current) return;
@@ -155,6 +180,11 @@ export default function GeoMapperPage() {
       <div>
         <label className="block text-xs font-black tracking-widest text-slate-400 uppercase mb-2 flex items-center gap-1.5"><Search size={14}/> Query Topic</label>
         <textarea value={topic} onChange={e => setTopic(e.target.value)} placeholder={t.placeholder} className="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-sm font-bold focus:border-cyan-500 outline-none text-white placeholder:text-slate-600 transition-colors resize-none" rows={3} required/>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {QUICK_PROMPTS.map(p => (
+          <button key={p} type="button" onClick={() => setTopic(p)} className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-1.5 px-3 rounded-lg border border-slate-700 transition-colors active:scale-95">{p}</button>
+        ))}
       </div>
       <button type="submit" disabled={isLoading || !topic.trim()} className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black rounded-xl shadow-lg flex justify-center items-center gap-2 transition-transform active:scale-95 disabled:opacity-50">
         {isLoading ? <Loader2 className="animate-spin" size={18}/> : <Sparkles size={18}/>} {t.generateMap}
@@ -225,7 +255,7 @@ export default function GeoMapperPage() {
               {/* Map Header Overlay */}
               <div className="absolute top-4 left-4 md:top-8 md:left-8 z-20 max-w-[65%] md:max-w-sm pointer-events-none">
                 <h1 className="text-lg md:text-3xl font-black text-white mb-1 md:mb-2 drop-shadow-lg leading-tight">{mapData.title}</h1>
-                <p className="text-[10px] md:text-sm font-medium text-slate-300 drop-shadow-md line-clamp-3 md:line-clamp-none">{mapData.description}</p>
+                <p className="text-[10px] md:text-sm font-medium text-slate-300 drop-shadow-md line-clamp-3 xl:hidden">{mapData.description}</p>
                 <div className="hidden md:flex mt-4 items-center gap-2 text-[10px] uppercase font-black tracking-widest text-cyan-400 bg-slate-900/50 px-3 py-1.5 rounded-full border border-cyan-500/30 backdrop-blur-md w-fit">
                   <Info size={12}/> {t.hoverInfo}
                 </div>
@@ -246,11 +276,17 @@ export default function GeoMapperPage() {
                 </div>
               )}
 
-              {/* 🟢 Export Button (Intelligently Hidden on Mobile) */}
-              <button onClick={exportAsImage} className="absolute top-4 right-4 md:top-8 md:right-8 z-20 flex items-center gap-2 bg-slate-800/80 md:bg-cyan-600/90 hover:bg-cyan-500 backdrop-blur-md border border-slate-600 md:border-cyan-400/50 text-white p-2.5 md:px-4 md:py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 group">
-                <Download size={16} className="text-slate-300 md:text-white group-hover:text-white" />
-                <span className="hidden md:inline">{t.exportMap}</span>
-              </button>
+              {/* 🟢 Export Buttons */}
+              <div className="absolute top-4 right-4 md:top-8 md:right-8 z-20 flex flex-col md:flex-row items-end md:items-center gap-2">
+                <button onClick={exportAsCSV} className="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-700 backdrop-blur-md border border-slate-600 text-white p-2 md:px-4 md:py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 group">
+                  <FileDown size={16} className="text-cyan-400 group-hover:text-white" />
+                  <span className="hidden md:inline">Data CSV</span>
+                </button>
+                <button onClick={exportAsImage} className="flex items-center gap-2 bg-slate-800/80 md:bg-cyan-600/90 hover:bg-cyan-500 backdrop-blur-md border border-slate-600 md:border-cyan-400/50 text-white p-2 md:px-4 md:py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 group">
+                  <Download size={16} className="text-slate-300 md:text-white group-hover:text-white" />
+                  <span className="hidden md:inline">{t.exportMap}</span>
+                </button>
+              </div>
 
               {/* WATERMARK FOR EXPORT */}
               <div className="absolute bottom-24 md:bottom-6 right-4 md:right-8 z-20 opacity-40 pointer-events-none">
@@ -340,6 +376,34 @@ export default function GeoMapperPage() {
           )}
         </div>
 
+        {/* 🟢 Right Sidebar (Stats & Insights) - Desktop Only */}
+        {mapData && (
+          <div className="hidden lg:flex lg:w-72 xl:w-80 bg-slate-900 border-l border-slate-800 p-4 lg:p-6 flex-col z-10 shrink-0 h-full overflow-y-auto custom-scrollbar">
+            <h3 className="text-xs font-black tracking-widest text-cyan-400 uppercase mb-3 flex items-center gap-2"><Lightbulb size={14}/> AI Insights</h3>
+            <div className="bg-cyan-950/30 border border-cyan-500/20 rounded-xl p-4 mb-6 shadow-inner shrink-0">
+              <p className="text-sm font-medium text-cyan-50 leading-relaxed">{mapData.description}</p>
+            </div>
+
+            <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2"><TrendingUp size={14}/> Top Countries</h3>
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar pb-6">
+              {mapData.countries && mapData.countries.map((c: any, idx: number) => {
+                const cId = c.id ? c.id.toLowerCase() : (c.name ? c.name.toLowerCase() : null);
+                return (
+                <div key={idx} onClick={() => setSelectedCountryId(cId)} className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCountryId === cId ? 'bg-slate-800 border-cyan-500 shadow-md' : 'bg-slate-950 border-slate-800 hover:border-slate-600 hover:bg-slate-900'}`}>
+                   <div className="flex justify-between items-start gap-2 mb-1.5">
+                     <span className="text-xs font-bold text-white flex items-center gap-2">
+                       <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: c.color || '#0ea5e9' }}></div>
+                       {c.name}
+                     </span>
+                     <span className="text-[9px] font-black tracking-wider text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded-md border border-slate-700">#{idx + 1}</span>
+                   </div>
+                   <p className="text-[11px] font-bold text-cyan-400 pl-4">{c.value}</p>
+                </div>
+              )})}
+            </div>
+          </div>
+        )}
+
         {/* Mobile Floating Input Dock */}
         <div className={`lg:hidden fixed bottom-0 left-0 w-full p-4 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-[#020617] via-[#020617]/90 to-transparent flex flex-col items-center pb-6 ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
           <div className="w-full max-w-md flex gap-2 pointer-events-auto shadow-2xl">
@@ -355,6 +419,14 @@ export default function GeoMapperPage() {
             >
               <Search size={18} /> Query
             </button>
+            {mapData && (
+              <button
+                onClick={() => setIsMobileDrawerOpen('stats')}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-slate-900 text-cyan-400 font-black tracking-wide rounded-2xl shadow-lg transition-all active:scale-95 border border-cyan-500/50"
+              >
+                <BarChart2 size={18} /> Stats
+              </button>
+            )}
           </div>
         </div>
 
@@ -373,6 +445,34 @@ export default function GeoMapperPage() {
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
             {renderHistorySection()}
           </div>
+
+          {/* Stats Drawer (Mobile Only) */}
+          {mapData && (
+            <div className={`absolute bottom-0 left-0 w-full h-auto max-h-[85vh] rounded-t-[2rem] shadow-2xl p-5 overflow-y-auto transform transition-transform duration-500 custom-scrollbar flex flex-col border-t bg-slate-900 border-slate-700 ${isMobileDrawerOpen === 'stats' ? 'translate-y-0' : 'translate-y-full'}`}>
+              <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 cursor-pointer" onClick={() => setIsMobileDrawerOpen('none')} />
+              <h3 className="text-xs font-black tracking-widest text-cyan-400 uppercase mb-3 flex items-center gap-2"><Lightbulb size={14}/> AI Insights</h3>
+              <div className="bg-cyan-950/30 border border-cyan-500/20 rounded-xl p-4 mb-6 shadow-inner shrink-0">
+                <p className="text-sm font-medium text-cyan-50 leading-relaxed">{mapData.description}</p>
+              </div>
+              <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase mb-3 flex items-center gap-2"><TrendingUp size={14}/> Top Countries</h3>
+              <div className="flex-1 space-y-2 pb-6">
+                {mapData.countries && mapData.countries.map((c: any, idx: number) => {
+                  const cId = c.id ? c.id.toLowerCase() : (c.name ? c.name.toLowerCase() : null);
+                  return (
+                  <div key={idx} onClick={() => { setSelectedCountryId(cId); setIsMobileDrawerOpen('none'); }} className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCountryId === cId ? 'bg-slate-800 border-cyan-500 shadow-md' : 'bg-slate-950 border-slate-800 hover:border-slate-600 hover:bg-slate-900'}`}>
+                     <div className="flex justify-between items-start gap-2 mb-1.5">
+                       <span className="text-xs font-bold text-white flex items-center gap-2">
+                         <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: c.color || '#0ea5e9' }}></div>
+                         {c.name}
+                       </span>
+                       <span className="text-[9px] font-black tracking-wider text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded-md border border-slate-700">#{idx + 1}</span>
+                     </div>
+                     <p className="text-[11px] font-bold text-cyan-400 pl-4">{c.value}</p>
+                  </div>
+                )})}
+              </div>
+            </div>
+          )}
         </div>
 
       </div>
