@@ -47,7 +47,7 @@ async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: s
   // Use Gemini to extract text directly from Image or PDF buffer (as fallback for Scanned PDFs or failed Tesseract)
   const { GoogleGenerativeAI } = require('@google/generative-ai');
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '');
-  const model = genAI.getGenerativeModel({ model: process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash' });
+  const model = genAI.getGenerativeModel({ model: process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash' });
 
   try {
     logger.info("Running Gemini OCR/Extraction (Free Tier Limits Apply)...");
