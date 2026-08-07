@@ -272,7 +272,6 @@ function FocusIslandContent() {
              config={{
                youtube: {
                  playerVars: {
-                   autoplay: 1,
                    controls: 0,
                    rel: 0,
                    origin: typeof window !== 'undefined' ? window.location.origin : 'https://www.prepia.app'
