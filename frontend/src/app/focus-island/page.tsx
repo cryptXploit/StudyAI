@@ -264,8 +264,8 @@ function FocusIslandContent() {
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
          {/* Background Audio Engine - 100% HTML5 Audio to bypass all YouTube/Browser restrictions */}
-         <audio ref={ambientAudioRef} loop className="hidden" crossOrigin="anonymous" />
-         <audio ref={lofiAudioRef} loop className="hidden" crossOrigin="anonymous" />
+         <audio ref={ambientAudioRef} loop preload="auto" className="hidden" crossOrigin="anonymous" />
+         <audio ref={lofiAudioRef} loop preload="auto" className="hidden" crossOrigin="anonymous" />
 
          {/* 🟢 Mobile Smart Header */}
          <div className={`lg:hidden fixed left-3 right-3 rounded-2xl flex items-center justify-between px-4 z-40 backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] h-[60px]`}>
