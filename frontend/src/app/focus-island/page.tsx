@@ -178,15 +178,19 @@ function FocusIslandContent() {
     audio.volume = ambientVolume / 100;
 
     if (isRunning && ambientVolume > 0) {
-      const promise = audio.play();
-      if (promise !== undefined) {
-        promise.catch((error: any) => {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+           // Playback started successfully
+        }).catch((error: any) => {
           // Ignore AbortError caused by rapid play/pause toggling
-          if (error.name !== 'AbortError') console.log("Audio play error:", error);
         });
       }
     } else {
-      audio.pause();
+      // Small timeout to prevent immediate pause interrupting a pending play request
+      setTimeout(() => {
+         if (ambientAudioRef.current) ambientAudioRef.current.pause();
+      }, 50);
     }
   }, [isRunning, ambientVolume, selectedAmbient]);
 
@@ -254,8 +258,8 @@ function FocusIslandContent() {
 
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
-         {/* Hidden players */}
-         <div className="fixed top-[-2000px] left-[-2000px] w-[50px] h-[50px] pointer-events-none opacity-0">
+         {/* Background Audio Engine */}
+         <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.01]">
            <ReactPlayer 
              url={selectedLofi} 
              playing={isRunning && lofiVolume > 0} 
