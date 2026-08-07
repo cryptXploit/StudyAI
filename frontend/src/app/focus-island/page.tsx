@@ -5,6 +5,8 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useSearchParams, useRouter } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
+import { createClient } from '@/lib/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Volume2, Pin, CheckCircle2, History, ShieldCheck, Music, CloudRain, Users, Share2, AlertTriangle } from 'lucide-react';
 import io from 'socket.io-client';
 
@@ -93,7 +95,6 @@ function FocusIslandContent() {
   const [selectedLofi, setSelectedLofi] = useState(LOFI_STREAMS[0].url);
   const [selectedAmbient, setSelectedAmbient] = useState(AMBIENT_SOUNDS[0].url);
 
-  const ambientAudioRef = useRef<HTMLAudioElement | null>(null);
   // Multiplayer States
   const [roomCode, setRoomCode] = useState<string | null>(searchParams.get('room'));
   const [roomUsers, setRoomUsers] = useState<any[]>([]);
