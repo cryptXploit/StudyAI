@@ -5,10 +5,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { useSearchParams, useRouter } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
-import { createClient } from '@/lib/supabase/client';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, RotateCcw, Volume2, Pin, CheckCircle2, History, ShieldCheck, Music, CloudRain, Users, Share2, AlertTriangle } from 'lucide-react';
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 import io from 'socket.io-client';
 
 const translations = {
@@ -47,16 +44,16 @@ const translations = {
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 const LOFI_STREAMS = [
-  { name: "Lofi Girl (Chill Beats)", url: "https://www.youtube.com/watch?v=jfKfPfyJRdk" },
-  { name: "Chillhop Radio", url: "https://www.youtube.com/watch?v=5yx6BWlEVcY" },
-  { name: "Synthwave Radio", url: "https://www.youtube.com/watch?v=4xDzrMQvE0s" },
-  { name: "Space Lofi", url: "https://www.youtube.com/watch?v=1fueZCTYkpA" },
-  { name: "Coffee Shop Lofi", url: "https://www.youtube.com/watch?v=e3L1PIY1lN8" },
-  { name: "Japanese Lofi", url: "https://www.youtube.com/watch?v=-9gEgshJUuY" },
-  { name: "Dark Academia Lofi", url: "https://www.youtube.com/watch?v=B11X7kR8E4Y" },
-  { name: "Jazz Hop", url: "https://www.youtube.com/watch?v=kgx4WGK0oNU" },
-  { name: "Gaming Lofi", url: "https://www.youtube.com/watch?v=GVC5dzZKqM8" },
-  { name: "Rainy Night Lofi", url: "https://www.youtube.com/watch?v=7NOSDKb0HlU" }
+  { name: "Lofi Radio (24/7)", url: "https://play.streamafrica.net/lofi" },
+  { name: "Nightwave Plaza (Synthwave)", url: "https://radio.plaza.one/mp3" },
+  { name: "Lofi Hip Hop (Chilled)", url: "https://stream.zeno.fm/0r0xa792kwzuv" },
+  { name: "Chillhop Music", url: "https://stream.zeno.fm/f3wvbbqmdg8uv" },
+  { name: "Anime Lofi", url: "https://stream.zeno.fm/81jvwg7x08quv" },
+  { name: "Jazz Lofi", url: "https://stream.zeno.fm/f77435gpx8quv" },
+  { name: "Study Lofi", url: "https://stream.zeno.fm/7wtqkx40x8quv" },
+  { name: "Chill Lofi", url: "https://stream.zeno.fm/v3v0z5v2x8quv" },
+  { name: "Sleep Lofi", url: "https://stream.zeno.fm/6k37g1w2x8quv" },
+  { name: "Aesthetic Lofi", url: "https://stream.zeno.fm/9r97g1w2x8quv" }
 ];
 const AMBIENT_SOUNDS = [
   { name: "Heavy Rain", url: "https://assets.mixkit.co/active_storage/sfx/1230/1230-preview.mp3" },
@@ -101,7 +98,8 @@ function FocusIslandContent() {
   const [roomCode, setRoomCode] = useState<string | null>(searchParams.get('room'));
   const [roomUsers, setRoomUsers] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
-  const lofiPlayerRef = useRef<any>(null);
+  const ambientAudioRef = useRef<HTMLAudioElement>(null);
+  const lofiAudioRef = useRef<HTMLAudioElement>(null);
   // 🟢 MOBILE UI STATES
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState<'none'|'history'|'config'>('none');
@@ -173,27 +171,32 @@ function FocusIslandContent() {
 
   // Audio Sync
   useEffect(() => {
-    const audio = ambientAudioRef.current;
-    if (!audio) return;
+    const ambientAudio = ambientAudioRef.current;
+    const lofiAudio = lofiAudioRef.current;
+    if (!ambientAudio || !lofiAudio) return;
 
-    audio.volume = ambientVolume / 100;
+    ambientAudio.volume = ambientVolume / 100;
+    lofiAudio.volume = lofiVolume / 100;
     
     // Manage src imperatively to prevent uncatchable AbortErrors during React render
-    if (!audio.src || !audio.src.includes(selectedAmbient)) {
-      audio.src = selectedAmbient;
+    if (!ambientAudio.src || !ambientAudio.src.includes(selectedAmbient)) {
+      ambientAudio.src = selectedAmbient;
+    }
+    if (!lofiAudio.src || !lofiAudio.src.includes(selectedLofi)) {
+      lofiAudio.src = selectedLofi;
     }
 
-    if (isRunning && ambientVolume > 0) {
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((error: any) => {
-          // Safely catch any AbortErrors
-        });
-      }
+    if (isRunning) {
+      if (ambientVolume > 0) ambientAudio.play().catch(() => {});
+      else ambientAudio.pause();
+
+      if (lofiVolume > 0) lofiAudio.play().catch(() => {});
+      else lofiAudio.pause();
     } else {
-      audio.pause();
+      ambientAudio.pause();
+      lofiAudio.pause();
     }
-  }, [isRunning, ambientVolume, selectedAmbient]);
+  }, [isRunning, ambientVolume, selectedAmbient, lofiVolume, selectedLofi]);
 
   // Timer Tick
   useEffect(() => {
@@ -259,37 +262,9 @@ function FocusIslandContent() {
 
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
-         {/* Background Audio Engine - Rendered full size to bypass YouTube tiny-iframe blocking */}
-         <div className="absolute inset-0 z-0 pointer-events-none">
-           <ReactPlayer 
-             ref={lofiPlayerRef}
-             url={selectedLofi} 
-             playing={isRunning && lofiVolume > 0} 
-             volume={lofiVolume / 100} 
-             width="100%" 
-             height="100%"
-             config={{
-               youtube: {
-                 playerVars: {
-                   controls: 0,
-                   rel: 0,
-                   playsinline: 1,
-                   origin: typeof window !== 'undefined' ? window.location.origin : 'https://www.prepia.app'
-                 }
-               }
-             }}
-             onReady={() => {
-                // If it mounts while running, ensure it plays
-                if (isRunning && lofiVolume > 0 && lofiPlayerRef.current) {
-                   const player = lofiPlayerRef.current.getInternalPlayer();
-                   if (player && player.playVideo) player.playVideo();
-                }
-             }}
-           />
-         </div>
-         {/* Solid cover to completely hide the YouTube video visually */}
-         <div className="absolute inset-0 z-[1] bg-slate-950 pointer-events-none"></div>
+         {/* Background Audio Engine - 100% HTML5 Audio to bypass all YouTube/Browser restrictions */}
          <audio ref={ambientAudioRef} loop className="hidden" />
+         <audio ref={lofiAudioRef} className="hidden" />
 
          {/* 🟢 Mobile Smart Header */}
          <div className={`lg:hidden fixed left-3 right-3 rounded-2xl flex items-center justify-between px-4 z-40 backdrop-blur-2xl shadow-lg transition-all duration-300 border ${isHeaderVisible ? 'top-3 opacity-100 translate-y-0' : '-top-20 opacity-0 -translate-y-full'} bg-slate-900/90 border-slate-700/50 shadow-[0_0_15px_rgba(0,0,0,0.2)] h-[60px]`}>
@@ -358,15 +333,11 @@ function FocusIslandContent() {
                        
                        // Synchronous play to bypass strict browser autoplay policies
                        if (willRun) {
-                          if (lofiPlayerRef.current) {
-                             const player = lofiPlayerRef.current.getInternalPlayer();
-                             if (player && player.playVideo) player.playVideo();
-                          }
+                          if (lofiAudioRef.current && lofiVolume > 0) lofiAudioRef.current.play().catch(()=>{});
+                          if (ambientAudioRef.current && ambientVolume > 0) ambientAudioRef.current.play().catch(()=>{});
                        } else {
-                          if (lofiPlayerRef.current) {
-                             const player = lofiPlayerRef.current.getInternalPlayer();
-                             if (player && player.pauseVideo) player.pauseVideo();
-                          }
+                          if (lofiAudioRef.current) lofiAudioRef.current.pause();
+                          if (ambientAudioRef.current) ambientAudioRef.current.pause();
                        }
                     }} 
                     className="px-12 py-5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black rounded-3xl flex items-center gap-3 shadow-[0_10px_40px_rgba(79,70,229,0.4)] border border-indigo-400/50 uppercase tracking-widest text-sm"
