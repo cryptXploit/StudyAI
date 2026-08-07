@@ -13,6 +13,13 @@ interface Note {
   tags: string[];
   updated_at: string;
 }
+const translations = {
+  English: { workspace: "Workspace", newNote: "New Note", searchNotes: "Search notes...", noNotesFound: "No notes found", untitledNote: "Untitled Note", aiWorkspaceTitle: "Your AI Workspace", aiWorkspaceDesc: "Create smart notes using Markdown and LaTeX. Your notes are automatically embedded for RAG, meaning you can ask AI questions about them later!", createFirstNote: "Create First Note" },
+  Bangla: { workspace: "ওয়ার্কস্পেস", newNote: "নতুন নোট", searchNotes: "নোট খুঁজুন...", noNotesFound: "কোনো নোট পাওয়া যায়নি", untitledNote: "নামবিহীন নোট", aiWorkspaceTitle: "আপনার এআই ওয়ার্কস্পেস", aiWorkspaceDesc: "মার্কডাউন এবং ল্যাটেক ব্যবহার করে স্মার্ট নোট তৈরি করুন। আপনার নোটগুলো স্বয়ংক্রিয়ভাবে RAG এর জন্য এমবেড করা হয়, যার মানে আপনি পরে এআইকে এগুলোর ওপর প্রশ্ন করতে পারবেন!", createFirstNote: "প্রথম নোট তৈরি করুন" },
+  Hindi: { workspace: "कार्यक्षेत्र", newNote: "नया नोट", searchNotes: "नोट खोजें...", noNotesFound: "कोई नोट नहीं मिला", untitledNote: "अनाम नोट", aiWorkspaceTitle: "आपका एआई कार्यक्षेत्र", aiWorkspaceDesc: "मार्कडाउन और लेटेक्स का उपयोग करके स्मार्ट नोट्स बनाएं। आपके नोट्स स्वचालित रूप से RAG के लिए एम्बेड किए जाते हैं, जिसका अर्थ है कि आप बाद में एआई से उनके बारे में प्रश्न पूछ सकते हैं!", createFirstNote: "पहला नोट बनाएं" }
+};
+
+type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 export default function NotesWorkspace() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -23,6 +30,7 @@ export default function NotesWorkspace() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [uiTheme, setUiTheme] = useState<'dark' | 'light'>('dark');
+  const [language, setLanguage] = useState<LanguageType>('English');
   
   const supabase = createClient();
 
@@ -45,6 +53,8 @@ export default function NotesWorkspace() {
     const loadSettings = () => {
       const savedTheme = localStorage.getItem('Prepia_theme'); 
       if (savedTheme) setUiTheme(savedTheme as 'dark'|'light');
+      const savedLang = localStorage.getItem('Prepia_language');
+      if (savedLang) setLanguage(savedLang as LanguageType);
     };
     loadSettings();
     window.addEventListener('settingsChanged', loadSettings);
@@ -102,7 +112,7 @@ export default function NotesWorkspace() {
       const res = await fetch(getApiUrl('/notes'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${session?.access_token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'Untitled Note', content_md: '', tags: [] })
+        body: JSON.stringify({ title: translations[language].untitledNote, content_md: '', tags: [] })
       });
       const json = await res.json();
       if (json.success) {
@@ -164,6 +174,8 @@ export default function NotesWorkspace() {
     inputBg: uiTheme === 'dark' ? 'bg-slate-800/50' : 'bg-white',
   };
 
+  const t = translations[language];
+
   return (
     <SecureLayout>
       <div className="flex flex-col h-[calc(100vh-80px)] max-w-7xl mx-auto md:p-4">
@@ -174,7 +186,7 @@ export default function NotesWorkspace() {
             <button onClick={() => setSidebarOpen(!sidebarOpen)} className={`p-2 rounded-lg ${themeClasses.hover}`}>
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <h1 className={`font-black text-lg ${themeClasses.text}`}>Workspace</h1>
+            <h1 className={`font-black text-lg ${themeClasses.text}`}>{t.workspace}</h1>
           </div>
           <button onClick={createNote} className="p-2 bg-indigo-600 text-white rounded-lg shadow-md active:scale-95">
             <Plus size={18} />
@@ -188,14 +200,14 @@ export default function NotesWorkspace() {
             
             <div className="p-4 flex flex-col gap-4">
               <button onClick={createNote} className="hidden md:flex w-full items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black rounded-xl shadow-[0_0_15px_rgba(79,70,229,0.3)] transition-all active:scale-95">
-                <Plus size={18} /> New Note
+                <Plus size={18} /> {t.newNote}
               </button>
 
               <div className="relative">
                 <Search size={16} className={`absolute left-3 top-1/2 -translate-y-1/2 ${themeClasses.muted}`} />
                 <input 
                   type="text" 
-                  placeholder="Search notes..." 
+                  placeholder={t.searchNotes} 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`w-full pl-9 pr-4 py-2.5 rounded-xl text-sm border outline-none transition-all ${themeClasses.inputBg} ${themeClasses.border} focus:border-indigo-500 ${themeClasses.text}`}
@@ -209,7 +221,7 @@ export default function NotesWorkspace() {
               ) : filteredNotes.length === 0 ? (
                 <div className="text-center p-8">
                   <FileText className={`mx-auto mb-2 opacity-20 ${themeClasses.text}`} size={32} />
-                  <p className={`text-sm font-bold ${themeClasses.muted}`}>No notes found</p>
+                  <p className={`text-sm font-bold ${themeClasses.muted}`}>{t.noNotesFound}</p>
                 </div>
               ) : (
                 filteredNotes.map(note => (
@@ -219,7 +231,7 @@ export default function NotesWorkspace() {
                     className={`group p-3 rounded-xl cursor-pointer border transition-all flex flex-col gap-1 ${activeNoteId === note.id ? themeClasses.activeNode : `border-transparent ${themeClasses.hover}`}`}
                   >
                     <div className="flex justify-between items-start">
-                      <h3 className={`font-bold text-sm truncate ${themeClasses.text}`}>{note.title || 'Untitled Note'}</h3>
+                      <h3 className={`font-bold text-sm truncate ${themeClasses.text}`}>{note.title || t.untitledNote}</h3>
                       <button onClick={(e) => deleteNote(note.id, e)} className={`opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-rose-500/20 text-rose-500 transition-opacity`}>
                         <Trash2 size={14} />
                       </button>
@@ -253,12 +265,12 @@ export default function NotesWorkspace() {
                 <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 shadow-2xl ${uiTheme === 'dark' ? 'bg-slate-800 text-indigo-400' : 'bg-white text-indigo-600'}`}>
                   <FileText size={40} />
                 </div>
-                <h2 className={`text-2xl font-black mb-2 ${themeClasses.text}`}>Your AI Workspace</h2>
+                <h2 className={`text-2xl font-black mb-2 ${themeClasses.text}`}>{t.aiWorkspaceTitle}</h2>
                 <p className={`max-w-md mx-auto font-medium ${themeClasses.muted}`}>
-                  Create smart notes using Markdown and LaTeX. Your notes are automatically embedded for RAG, meaning you can ask AI questions about them later!
+                  {t.aiWorkspaceDesc}
                 </p>
                 <button onClick={createNote} className="mt-8 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 flex items-center gap-2">
-                  <Plus size={18} /> Create First Note
+                  <Plus size={18} /> {t.createFirstNote}
                 </button>
               </div>
             )}
