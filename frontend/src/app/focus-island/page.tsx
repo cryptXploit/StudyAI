@@ -254,8 +254,8 @@ function FocusIslandContent() {
 
   return (
     <div className="flex flex-col lg:flex-row h-auto lg:h-[calc(100vh-80px)] max-w-7xl mx-auto bg-slate-950 lg:bg-slate-50 lg:border lg:border-slate-200 lg:rounded-3xl overflow-hidden mt-0 lg:mt-4 shadow-sm relative min-h-screen lg:min-h-0">
-         <div className="hidden">
-           <ReactPlayer {...({ url: selectedLofi, playing: isRunning && lofiVolume > 0, volume: lofiVolume / 100, loop: true, width: "0", height: "0" } as any)} />
+         <div className="absolute opacity-0 pointer-events-none w-0 h-0 overflow-hidden">
+           <ReactPlayer {...({ url: selectedLofi, playing: isRunning && lofiVolume > 0, volume: lofiVolume / 100, loop: true, width: "10px", height: "10px" } as any)} />
            <audio ref={ambientAudioRef} src={selectedAmbient} loop />
          </div>
 
