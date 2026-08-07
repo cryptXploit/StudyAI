@@ -17,9 +17,9 @@ import DreamVarsityWidget from '@/components/dashboard/DreamVarsityWidget';
 import RewardedAdCard from '@/components/rewards/RewardedAdCard';
 
 const translations = {
-  English: { welcome: "Welcome back!", signedInAs: "Signed in as", welcomeSubtitle: "Manage your documents and start learning.", totalDocs: "Total Documents", indexed: "Indexed", storage: "Storage Used", available: "Available on Free Tier", materials: "Study Materials", learning: "Learning contexts created", uploadTitle: "Knowledge Builder", uploadDesc: "Upload PDFs or Forge your Syllabus manually.", recentFiles: "Knowledge Base (Sources)", syllabusFiles: "Syllabus Vault", packsTitle: "Context Packs", packsDesc: "Your generated study materials and notes.", uploadType: "Select Input Type", typeSource: "Upload Source (PDF)", typeSyllabus: "Forge Syllabus (Text)", courseName: "Course/Subject Name", chapters: "Chapters (One per line)", createSyllabus: "Forge Syllabus", noSyllabus: "No syllabuses forged yet." },
-  Bangla: { welcome: "স্বাগতম!", signedInAs: "লগ ইন আছেন:", welcomeSubtitle: "আপনার ডকুমেন্টস ম্যানেজ করুন এবং শেখা শুরু করুন।", totalDocs: "মোট ডকুমেন্টস", indexed: "ইনডেক্সড", storage: "স্টোরেজ ব্যবহৃত", available: "ফ্রি টিয়ারে উপলব্ধ", materials: "স্টাডি ম্যাটেরিয়ালস", learning: "লার্নিং কনটেক্সট তৈরি হয়েছে", uploadTitle: "নলেজ বিল্ডার", uploadDesc: "সোর্স পিডিএফ আপলোড করুন বা সিলেবাস টাইপ করুন।", recentFiles: "নলেজ বেজ (সোর্স)", syllabusFiles: "সিলেবাস ভল্ট", packsTitle: "কনটেক্সট প্যাকস", packsDesc: "আপনার তৈরি করা স্টাডি ম্যাটেরিয়ালস এবং নোটস।", uploadType: "ইনपुट টাইপ সিলেক্ট করুন", typeSource: "সোর্স আপলোড (PDF)", typeSyllabus: "সিলেবাস তৈরি (Text)", courseName: "কোর্সের নাম", chapters: "চ্যাপ্টার (প্রতি লাইনে একটি)", createSyllabus: "সিলেবাস তৈরি করুন", noSyllabus: "কোনো সিলেবাস তৈরি করা হয়নি।" },
-  Hindi: { welcome: "वापसी पर स्वागत है!", signedInAs: "लॉग इन हैं:", welcomeSubtitle: "अपने दस्तावेज़ प्रबंधित करें और सीखना शुरू करें।", totalDocs: "कुल दस्तावेज़", indexed: "अनुक्रमित", storage: "संग्रहण उपयोग", available: "फ्री टियर पर उपलब्ध", materials: "अध्ययन सामग्री", learning: "सीखने के संदर्भ बनाए गए", uploadTitle: "नॉलेज बिल्डर", uploadDesc: "पीडीएफ अपलोड करें या अपना सिलेबस टाइप करें।", recentFiles: "ज्ञान का आधार (स्रोत)", syllabusFiles: "सिलेबस तिजोरी", packsTitle: "संदर्भ पैक", packsDesc: "आपकी उत्पन्न अध्ययन सामग्री और नोट्स।", uploadType: "इनपुट प्रकार चुनें", typeSource: "स्रोत अपलोड (PDF)", typeSyllabus: "सिलेबस बनाएं (Text)", courseName: "कोर्स का नाम", chapters: "अध्याय (प्रति पंक्ति एक)", createSyllabus: "सिलेबस बनाएं", noSyllabus: "कोई सिलेबस नहीं बनाया गया।" }
+  English: { welcome: "Welcome back!", signedInAs: "Signed in as", welcomeSubtitle: "Manage your documents and start learning.", totalDocs: "Total Documents", indexed: "Indexed", storage: "Storage Used", available: "Available on Free Tier", materials: "Study Materials", learning: "Learning contexts created", uploadTitle: "Knowledge Builder", uploadDesc: "Upload PDFs or Forge your Syllabus manually.", recentFiles: "Knowledge Base (Sources)", syllabusFiles: "Syllabus Vault", packsTitle: "Context Packs", packsDesc: "Your generated study materials and notes.", uploadType: "Select Input Type", typeSource: "Upload Source (PDF)", typeSyllabus: "Forge Syllabus (Text)", courseName: "Course/Subject Name", chapters: "Chapters (One per line)", createSyllabus: "Forge Syllabus", noSyllabus: "No syllabuses forged yet.", neuralFeed: "Neural Feed", aiNotes: "AI Notes", predictExam: "Predict Exam", continueLearning: "Continue Learning", activeQuest: "Active Quest", nodesIndexed: "nodes indexed and ready for deep learning.", resumeBattle: "Resume Battle", viewNodes: "View Nodes", readyStart: "Ready to start your journey?", noActiveSyllabus: "You don't have any active syllabuses yet. Create one in your workspace below to unlock AI features.", createSyllabusBtn: "Create Syllabus", suggestedForYou: "Suggested For You", nightBefore: "Night Before Exam", nightBeforeDesc: "Panic mode. 5-minute cheat sheet.", aiTutor: "AI Tutor Chat", aiTutorDesc: "Ask questions directly to your notes.", flashcards: "Flashcards", flashcardsDesc: "Spaced repetition for memorization.", tabCreate: "Create", tabVault: "Vault", tabSources: "Sources", pdf: "PDF", text: "Text", freeTierCaution: "Free Tier Caution", freeTierDesc: "Max 3 files per week. Files auto-delete after 7 days.", step1: "Step 1: Course Name", coursePlaceholder: "e.g., Advanced Quantum Mechanics", step2: "Step 2: Build Syllabus Nodes", chapterPlaceholder: "Chapter Title (e.g., Wave Functions)", topicsPlaceholder: "Topics (One per line)", updateNode: "Update Node", addNode: "Add to Syllabus", ch: "CH", updateSyllabusVault: "Update Syllabus in Vault", commitSyllabusVault: "Commit Syllabus to Vault", vaultTitle: "Syllabus Vault", questReady: "Quest Ready", nodes: "Nodes", sourceDocs: "Source Documents", docs: "Docs" },
+  Bangla: { welcome: "স্বাগতম!", signedInAs: "লগ ইন আছেন:", welcomeSubtitle: "আপনার ডকুমেন্টস ম্যানেজ করুন এবং শেখা শুরু করুন।", totalDocs: "মোট ডকুমেন্টস", indexed: "ইনডেক্সড", storage: "স্টোরেজ ব্যবহৃত", available: "ফ্রি টিয়ারে উপলব্ধ", materials: "স্টাডি ম্যাটেরিয়ালস", learning: "লার্নিং কনটেক্সট তৈরি হয়েছে", uploadTitle: "নলেজ বিল্ডার", uploadDesc: "সোর্স পিডিএফ আপলোড করুন বা সিলেবাস টাইপ করুন।", recentFiles: "নলেজ বেজ (সোর্স)", syllabusFiles: "সিলেবাস ভল্ট", packsTitle: "কনটেক্সট প্যাকস", packsDesc: "আপনার তৈরি করা স্টাডি ম্যাটেরিয়ালস এবং নোটস।", uploadType: "ইনपुट টাইপ সিলেক্ট করুন", typeSource: "সোর্স আপলোড (PDF)", typeSyllabus: "সিলেবাস তৈরি (Text)", courseName: "কোর্সের নাম", chapters: "চ্যাপ্টার (প্রতি লাইনে একটি)", createSyllabus: "সিলেবাস তৈরি করুন", noSyllabus: "কোনো সিলেবাস তৈরি করা হয়নি।", neuralFeed: "নিউরাল ফিড", aiNotes: "এআই নোটস", predictExam: "পরীক্ষা প্রেডিক্ট করুন", continueLearning: "শেখা চালিয়ে যান", activeQuest: "অ্যাক্টিভ কোয়েস্ট", nodesIndexed: "টি নোড ইনডেক্স করা হয়েছে এবং রেডি।", resumeBattle: "পড়া শুরু করুন", viewNodes: "নোডগুলো দেখুন", readyStart: "আপনার জার্নি শুরু করতে প্রস্তুত?", noActiveSyllabus: "আপনার কোনো অ্যাক্টিভ সিলেবাস নেই। এআই ফিচার আনলক করতে নিচে একটি সিলেবাস তৈরি করুন।", createSyllabusBtn: "সিলেবাস তৈরি করুন", suggestedForYou: "আপনার জন্য সাজেস্টেড", nightBefore: "পরীক্ষার আগের রাত", nightBeforeDesc: "প্যানিক মোড! ৫ মিনিটের চিট শিট।", aiTutor: "এআই টিউটর চ্যাট", aiTutorDesc: "নোটস থেকে সরাসরি প্রশ্ন করুন।", flashcards: "ফ্ল্যাশকার্ডস", flashcardsDesc: "মুখস্থ করার জন্য স্পেসড রিপিটেশন।", tabCreate: "তৈরি করুন", tabVault: "ভল্ট", tabSources: "সোর্সসমূহ", pdf: "পিডিএফ", text: "টেক্সট", freeTierCaution: "ফ্রি টিয়ার সতর্কতা", freeTierDesc: "সপ্তাহে সর্বোচ্চ ৩টি ফাইল। ৭ দিন পর ফাইল অটো-ডিলিট হবে।", step1: "ধাপ ১: কোর্সের নাম", coursePlaceholder: "যেমন, Advanced Quantum Mechanics", step2: "ধাপ ২: সিলেবাস নোড তৈরি করুন", chapterPlaceholder: "চ্যাপ্টারের নাম (যেমন, Wave Functions)", topicsPlaceholder: "টপিকসমূহ (প্রতি লাইনে একটি)", updateNode: "নোড আপডেট করুন", addNode: "সিলেবাসে যুক্ত করুন", ch: "চ্যাপ্টার", updateSyllabusVault: "ভল্টে সিলেবাস আপডেট করুন", commitSyllabusVault: "ভল্টে সিলেবাস সেভ করুন", vaultTitle: "সিলেবাস ভল্ট", questReady: "কোয়েস্ট রেডি", nodes: "টি নোড", sourceDocs: "সোর্স ডকুমেন্টস", docs: "ডকুমেন্টস" },
+  Hindi: { welcome: "वापसी पर स्वागत है!", signedInAs: "लॉग इन हैं:", welcomeSubtitle: "अपने दस्तावेज़ प्रबंधित करें और सीखना शुरू करें।", totalDocs: "कुल दस्तावेज़", indexed: "अनुक्रमित", storage: "संग्रहण उपयोग", available: "फ्री टियर पर उपलब्ध", materials: "अध्ययन सामग्री", learning: "सीखने के संदर्भ बनाए गए", uploadTitle: "नॉलेज बिल्डर", uploadDesc: "पीडीएफ अपलोड करें या अपना सिलेबस टाइप करें।", recentFiles: "ज्ञान का आधार (स्रोत)", syllabusFiles: "सिलेबस तिजोरी", packsTitle: "संदर्भ पैक", packsDesc: "आपकी उत्पन्न अध्ययन सामग्री और नोट्स।", uploadType: "इनपुट प्रकार चुनें", typeSource: "स्रोत अपलोड (PDF)", typeSyllabus: "सिलेबस बनाएं (Text)", courseName: "कोर्स का नाम", chapters: "अध्याय (प्रति पंक्ति एक)", createSyllabus: "सिलेबस बनाएं", noSyllabus: "कोई सिलेबस नहीं बनाया गया।", neuralFeed: "न्यूरल फ़ीड", aiNotes: "एआई नोट्स", predictExam: "परीक्षा की भविष्यवाणी करें", continueLearning: "सीखना जारी रखें", activeQuest: "सक्रिय क्वेस्ट", nodesIndexed: "नोड्स अनुक्रमित और डीप लर्निंग के लिए तैयार हैं।", resumeBattle: "फिर से शुरू करें", viewNodes: "नोड्स देखें", readyStart: "क्या आप अपनी यात्रा शुरू करने के लिए तैयार हैं?", noActiveSyllabus: "आपके पास कोई सक्रिय सिलेबस नहीं है। एआई सुविधाओं को अनलॉक करने के लिए नीचे एक बनाएं।", createSyllabusBtn: "सिलेबस बनाएं", suggestedForYou: "आपके लिए सुझाव", nightBefore: "परीक्षा से एक रात पहले", nightBeforeDesc: "पैनिक मोड। 5 मिनट की चीट शीट।", aiTutor: "एआई ट्यूटर चैट", aiTutorDesc: "अपने नोट्स से सीधे प्रश्न पूछें।", flashcards: "फ्लैशकार्ड", flashcardsDesc: "याद रखने के लिए स्पेसड रिपीटीशन।", tabCreate: "बनाएं", tabVault: "तिजोरी", tabSources: "स्रोत", pdf: "पीडीएफ", text: "टेक्स्ट", freeTierCaution: "फ्री टियर चेतावनी", freeTierDesc: "प्रति सप्ताह अधिकतम 3 फ़ाइलें। 7 दिनों के बाद स्वतः हटा दी जाएंगी।", step1: "चरण 1: कोर्स का नाम", coursePlaceholder: "उदा., Advanced Quantum Mechanics", step2: "चरण 2: सिलेबस नोड्स बनाएं", chapterPlaceholder: "अध्याय का शीर्षक (उदा., Wave Functions)", topicsPlaceholder: "विषय (प्रति पंक्ति एक)", updateNode: "नोड अपडेट करें", addNode: "सिलेबस में जोड़ें", ch: "अध्याय", updateSyllabusVault: "तिजोरी में सिलेबस अपडेट करें", commitSyllabusVault: "तिजोरी में सिलेबस सेव करें", vaultTitle: "सिलेबस तिजोरी", questReady: "क्वेस्ट तैयार है", nodes: "नोड्स", sourceDocs: "स्रोत दस्तावेज़", docs: "दस्तावेज़" }
 };
 
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
@@ -237,15 +237,15 @@ export default function DashboardPage() {
               <div className="flex gap-3">
                 <button onClick={() => setIsNeuralFeedOpen(true)} className={`group relative overflow-hidden px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg transition-all active:scale-95 ${uiTheme === 'dark' ? 'bg-slate-800 text-white border border-slate-700 hover:border-slate-500' : 'bg-white text-slate-800 border border-slate-200 hover:border-slate-300'}`}>
                   <Play size={16} className="text-emerald-500" />
-                  Neural Feed
+                  {t.neuralFeed}
                 </button>
                   <Link href="/notes" className="hidden md:flex group relative overflow-hidden bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-5 py-2.5 rounded-full font-bold text-sm items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all active:scale-95">
                     <FileText size={16} className="group-hover:scale-110 transition-transform" />
-                    AI Notes
+                    {t.aiNotes}
                   </Link>
                   <Link href="/dashboard/oracle" className="group relative overflow-hidden bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white px-5 py-2.5 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg shadow-fuchsia-500/20 transition-all active:scale-95">
                     <Radar size={16} className="group-hover:animate-spin" />
-                    Predict Exam
+                    {t.predictExam}
                   </Link>
                 </div>
             </div>
@@ -256,7 +256,7 @@ export default function DashboardPage() {
             {/* 🟢 CONTEXT-AWARE: Continue Learning */}
             <section>
               <h2 className={`text-lg font-black mb-4 flex items-center gap-2 ${uiTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
-                Continue Learning
+                {t.continueLearning}
               </h2>
               {latestSyllabus ? (
                 <div className={`relative overflow-hidden rounded-[2rem] p-8 border shadow-2xl flex flex-col md:flex-row justify-between items-center gap-8 ${uiTheme === 'dark' ? 'bg-gradient-to-br from-slate-900 to-indigo-950 border-indigo-900/50' : 'bg-gradient-to-br from-white to-indigo-50 border-indigo-100'}`}>
@@ -264,18 +264,18 @@ export default function DashboardPage() {
 
                   <div className="flex-1 relative z-10">
                     <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-indigo-500/20 text-indigo-400 mb-4">
-                      Active Quest
+                      {t.activeQuest}
                     </span>
                     <h3 className={`text-3xl font-black mb-2 tracking-tight ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{latestSyllabus.course_name}</h3>
                     <p className={`font-medium mb-6 ${uiTheme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
-                      {latestSyllabus.chapters?.length || 0} nodes indexed and ready for deep learning. Jump back into the concept battle.
+                      {latestSyllabus.chapters?.length || 0} {t.nodesIndexed}
                     </p>
                     <div className="flex gap-4">
                       <Link href="/concept-battle" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)] active:scale-95">
-                        Resume Battle
+                        {t.resumeBattle}
                       </Link>
                       <button onClick={() => setActiveWorkspaceTab('vault')} className={`px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95 ${uiTheme === 'dark' ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-white border text-slate-700 hover:bg-slate-50'}`}>
-                        View Nodes
+                        {t.viewNodes}
                       </button>
                     </div>
                   </div>
@@ -289,10 +289,10 @@ export default function DashboardPage() {
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${uiTheme === 'dark' ? 'bg-slate-800 text-slate-600' : 'bg-slate-100 text-slate-400'}`}>
                     <BookOpen size={24}/>
                   </div>
-                  <h3 className={`font-black text-lg mb-2 ${uiTheme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>Ready to start your journey?</h3>
-                  <p className={`text-sm mb-6 max-w-md ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>You don't have any active syllabuses yet. Create one in your workspace below to unlock AI features.</p>
+                  <h3 className={`font-black text-lg mb-2 ${uiTheme === 'dark' ? 'text-slate-300' : 'text-slate-700'}`}>{t.readyStart}</h3>
+                  <p className={`text-sm mb-6 max-w-md ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>{t.noActiveSyllabus}</p>
                   <button onClick={() => setActiveWorkspaceTab('upload')} className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
-                    Create Syllabus
+                    {t.createSyllabusBtn}
                   </button>
                 </div>
               )}
@@ -301,21 +301,21 @@ export default function DashboardPage() {
             {/* 🟢 CONTEXT-AWARE: Suggested for You */}
             <section>
               <h2 className={`text-lg font-black mb-4 flex items-center gap-2 ${uiTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}>
-                Suggested For You
+                {t.suggestedForYou}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <SuggestedCard title="Night Before Exam" desc="Panic mode. 5-minute cheat sheet." icon={<Zap/>} color="text-rose-500" bg="bg-rose-500/10" link="/night-before" uiTheme={uiTheme}/>
-                <SuggestedCard title="AI Tutor Chat" desc="Ask questions directly to your notes." icon={<MessageSquare/>} color="text-blue-500" bg="bg-blue-500/10" link="/chat" uiTheme={uiTheme}/>
-                <SuggestedCard title="Flashcards" desc="Spaced repetition for memorization." icon={<Layers/>} color="text-amber-500" bg="bg-amber-500/10" link="/flashcards" uiTheme={uiTheme}/>
+                <SuggestedCard title={t.nightBefore} desc={t.nightBeforeDesc} icon={<Zap/>} color="text-rose-500" bg="bg-rose-500/10" link="/night-before" uiTheme={uiTheme}/>
+                <SuggestedCard title={t.aiTutor} desc={t.aiTutorDesc} icon={<MessageSquare/>} color="text-blue-500" bg="bg-blue-500/10" link="/chat" uiTheme={uiTheme}/>
+                <SuggestedCard title={t.flashcards} desc={t.flashcardsDesc} icon={<Layers/>} color="text-amber-500" bg="bg-amber-500/10" link="/flashcards" uiTheme={uiTheme}/>
               </div>
             </section>
 
             {/* 🟢 WORKSPACE TABS (Knowledge Builder, Vault, Files) - Replaces the huge layout */}
             <section className="mt-8">
               <div className={`flex items-center gap-2 p-1.5 rounded-2xl w-max mb-6 ${uiTheme === 'dark' ? 'bg-slate-900 border border-slate-800' : 'bg-slate-200/50'}`}>
-                <WorkspaceTabButton active={activeWorkspaceTab === 'upload'} onClick={() => setActiveWorkspaceTab('upload')} icon={<Plus size={16}/>} label="Create" uiTheme={uiTheme} />
-                <WorkspaceTabButton active={activeWorkspaceTab === 'vault'} onClick={() => setActiveWorkspaceTab('vault')} icon={<ListTree size={16}/>} label="Vault" uiTheme={uiTheme} />
-                <WorkspaceTabButton active={activeWorkspaceTab === 'files'} onClick={() => setActiveWorkspaceTab('files')} icon={<BookOpen size={16}/>} label="Sources" uiTheme={uiTheme} />
+                <WorkspaceTabButton active={activeWorkspaceTab === 'upload'} onClick={() => setActiveWorkspaceTab('upload')} icon={<Plus size={16}/>} label={t.tabCreate} uiTheme={uiTheme} />
+                <WorkspaceTabButton active={activeWorkspaceTab === 'vault'} onClick={() => setActiveWorkspaceTab('vault')} icon={<ListTree size={16}/>} label={t.tabVault} uiTheme={uiTheme} />
+                <WorkspaceTabButton active={activeWorkspaceTab === 'files'} onClick={() => setActiveWorkspaceTab('files')} icon={<BookOpen size={16}/>} label={t.tabSources} uiTheme={uiTheme} />
               </div>
 
               <AnimatePresence mode="wait">
@@ -329,8 +329,8 @@ export default function DashboardPage() {
                       </div>
 
                       <div className={`flex p-1 rounded-xl ${uiTheme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'}`}>
-                        <button onClick={() => setUploadCategory('source')} className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${uploadCategory === 'source' ? (uiTheme === 'dark' ? 'bg-slate-700 text-white' : 'bg-white text-slate-800 shadow-sm') : 'text-slate-400'}`}>PDF</button>
-                        <button onClick={() => setUploadCategory('syllabus')} className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${uploadCategory === 'syllabus' ? (uiTheme === 'dark' ? 'bg-slate-700 text-white' : 'bg-white text-slate-800 shadow-sm') : 'text-slate-400'}`}>Text</button>
+                        <button onClick={() => setUploadCategory('source')} className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${uploadCategory === 'source' ? (uiTheme === 'dark' ? 'bg-slate-700 text-white' : 'bg-white text-slate-800 shadow-sm') : 'text-slate-400'}`}>{t.pdf}</button>
+                        <button onClick={() => setUploadCategory('syllabus')} className={`px-4 py-2 rounded-lg font-bold text-xs transition-all ${uploadCategory === 'syllabus' ? (uiTheme === 'dark' ? 'bg-slate-700 text-white' : 'bg-white text-slate-800 shadow-sm') : 'text-slate-400'}`}>{t.text}</button>
                       </div>
                     </div>
 
@@ -341,8 +341,8 @@ export default function DashboardPage() {
                           <div className={`mt-4 p-3 rounded-xl border flex gap-3 text-left shadow-sm ${uiTheme === 'dark' ? 'bg-rose-500/10 border-rose-500/20 text-rose-300' : 'bg-rose-50 border-rose-200 text-rose-600'}`}>
                             <AlertTriangle size={18} className="shrink-0 mt-0.5" />
                             <div>
-                              <h4 className="text-[10px] font-black uppercase tracking-widest mb-1">Free Tier Caution</h4>
-                              <p className="text-xs font-medium leading-relaxed">Max 3 files per week. Files auto-delete after 7 days.</p>
+                              <h4 className="text-[10px] font-black uppercase tracking-widest mb-1">{t.freeTierCaution}</h4>
+                              <p className="text-xs font-medium leading-relaxed">{t.freeTierDesc}</p>
                             </div>
                           </div>
                         )}
@@ -358,13 +358,13 @@ export default function DashboardPage() {
                             <AnimatePresence>
                               {courseName.length >= 2 && (
                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className={`pt-6 border-t ${uiTheme === 'dark' ? 'border-slate-800' : 'border-slate-200/60'}`}>
-                                  <label className={`block text-[10px] font-black uppercase tracking-widest mb-4 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>Step 2: Build Syllabus Nodes</label>
+                                  <label className={`block text-[10px] font-black uppercase tracking-widest mb-4 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-400'}`}>{t.step2}</label>
 
                                   <div className={`p-5 md:p-6 rounded-2xl border shadow-sm space-y-4 mb-8 ${uiTheme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-                                    <input value={tempChapterName} onChange={e => setTempChapterName(e.target.value)} placeholder="Chapter Title (e.g., Wave Functions)" className={`w-full border p-3.5 rounded-xl text-sm font-bold focus:ring-4 outline-none transition-all ${uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-200 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-indigo-500'}`} />
-                                    <textarea value={tempTopicsText} onChange={e => setTempTopicsText(e.target.value)} placeholder="Topics (One per line)" rows={3} className={`w-full border p-3.5 rounded-xl text-sm font-medium focus:ring-4 outline-none resize-none transition-all custom-scrollbar ${uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-indigo-500'}`} />
+                                    <input value={tempChapterName} onChange={e => setTempChapterName(e.target.value)} placeholder={t.chapterPlaceholder} className={`w-full border p-3.5 rounded-xl text-sm font-bold focus:ring-4 outline-none transition-all ${uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-200 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-indigo-500'}`} />
+                                    <textarea value={tempTopicsText} onChange={e => setTempTopicsText(e.target.value)} placeholder={t.topicsPlaceholder} rows={3} className={`w-full border p-3.5 rounded-xl text-sm font-medium focus:ring-4 outline-none resize-none transition-all custom-scrollbar ${uiTheme === 'dark' ? 'bg-slate-800 border-slate-700 text-slate-300 focus:border-indigo-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-indigo-500'}`} />
                                     <button type="button" onClick={handleAddOrUpdateChapter} disabled={!tempChapterName.trim()} className={`w-full py-4 font-black tracking-widest uppercase text-xs rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 active:scale-95 ${editingChapterId ? 'bg-amber-500 text-white' : 'bg-slate-900 text-white'}`}>
-                                      {editingChapterId ? <Edit2 size={16}/> : <Plus size={16}/>} {editingChapterId ? "Update Node" : "Add to Syllabus"}
+                                      {editingChapterId ? <Edit2 size={16}/> : <Plus size={16}/>} {editingChapterId ? t.updateNode : t.addNode}
                                     </button>
                                   </div>
 
@@ -373,7 +373,7 @@ export default function DashboardPage() {
                                       {chapterList.map((chap, idx) => (
                                         <div key={chap.id} className={`p-4 border rounded-xl flex items-center justify-between gap-4 ${uiTheme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                                           <div>
-                                            <h4 className={`font-black text-sm flex items-center gap-2 ${uiTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}><span className={`px-2 py-0.5 rounded text-[10px] ${uiTheme === 'dark' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>CH {idx + 1}</span> {chap.chapterName}</h4>
+                                            <h4 className={`font-black text-sm flex items-center gap-2 ${uiTheme === 'dark' ? 'text-slate-200' : 'text-slate-800'}`}><span className={`px-2 py-0.5 rounded text-[10px] ${uiTheme === 'dark' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-indigo-100 text-indigo-600'}`}>{t.ch} {idx + 1}</span> {chap.chapterName}</h4>
                                           </div>
                                           <div className="flex gap-2">
                                             <button onClick={() => handleEditChapter(chap.id)} className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg"><Edit2 size={16}/></button>
@@ -385,7 +385,7 @@ export default function DashboardPage() {
                                   )}
 
                                   <button onClick={editingSyllabusId ? handleUpdateSyllabus : handleCreateSyllabus} disabled={isSubmittingSyllabus || chapterList.length === 0} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black tracking-widest uppercase text-xs rounded-2xl flex justify-center items-center gap-2 transition-transform active:scale-95 disabled:opacity-50">
-                                    {isSubmittingSyllabus ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18}/>} {editingSyllabusId ? "Update Syllabus in Vault" : "Commit Syllabus to Vault"}
+                                    {isSubmittingSyllabus ? <Loader2 className="animate-spin" size={18}/> : <CheckCircle2 size={18}/>} {editingSyllabusId ? t.updateSyllabusVault : t.commitSyllabusVault}
                                   </button>
                                 </motion.div>
                               )}
@@ -399,7 +399,7 @@ export default function DashboardPage() {
                 {/* TAB: VAULT */}
                 {activeWorkspaceTab === 'vault' && (
                   <motion.div key="vault" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}} className={`rounded-[2rem] border p-6 md:p-8 min-h-[400px] ${uiTheme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
-                    <h3 className={`text-xl font-black mb-6 flex items-center gap-2 ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}><ListTree size={20}/> Syllabus Vault</h3>
+                    <h3 className={`text-xl font-black mb-6 flex items-center gap-2 ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}><ListTree size={20}/> {t.vaultTitle}</h3>
 
                     {syllabuses.length === 0 ? (
                       <div className="h-48 flex flex-col items-center justify-center text-center">
@@ -418,8 +418,8 @@ export default function DashboardPage() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <span className={`text-xs font-bold px-3 py-1 rounded-full ${uiTheme === 'dark' ? 'bg-slate-800 text-slate-300' : 'bg-white border text-slate-600'}`}>{syl.chapters?.length || 0} Nodes</span>
-                              <span className={`text-[10px] uppercase font-black px-3 py-1.5 rounded-full flex items-center gap-1 ${uiTheme === 'dark' ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-100 text-amber-700'}`}><Swords size={12}/> Quest Ready</span>
+                              <span className={`text-xs font-bold px-3 py-1 rounded-full ${uiTheme === 'dark' ? 'bg-slate-800 text-slate-300' : 'bg-white border text-slate-600'}`}>{syl.chapters?.length || 0} {t.nodes}</span>
+                              <span className={`text-[10px] uppercase font-black px-3 py-1.5 rounded-full flex items-center gap-1 ${uiTheme === 'dark' ? 'bg-amber-500/10 text-amber-400' : 'bg-amber-100 text-amber-700'}`}><Swords size={12}/> {t.questReady}</span>
                             </div>
                           </div>
                         ))}
@@ -432,9 +432,9 @@ export default function DashboardPage() {
                 {activeWorkspaceTab === 'files' && (
                   <motion.div key="files" initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0, y:-10}} className={`rounded-[2rem] border p-6 md:p-8 min-h-[400px] ${uiTheme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
                     <div className="flex justify-between items-center mb-6">
-                      <h3 className={`text-xl font-black flex items-center gap-2 ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}><BookOpen size={20}/> Source Documents</h3>
+                      <h3 className={`text-xl font-black flex items-center gap-2 ${uiTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}><BookOpen size={20}/> {t.sourceDocs}</h3>
                       <div className={`text-xs font-bold px-3 py-1 rounded-full ${uiTheme === 'dark' ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
-                        {stats.totalFiles} Docs ({formatBytes(stats.totalSize)})
+                        {stats.totalFiles} {t.docs} ({formatBytes(stats.totalSize)})
                       </div>
                     </div>
                     <FileList files={files} isLoading={isLoadingFiles} onDelete={handleDeleteFile} uiTheme={uiTheme} />
