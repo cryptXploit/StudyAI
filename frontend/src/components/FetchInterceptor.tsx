@@ -15,9 +15,18 @@ export default function FetchInterceptor() {
       // Skip interceptor for GET requests or any request without a POST method
       const isPost = config?.method && config.method.toUpperCase() === 'POST';
       
+      let isBackground = false;
+      if (config?.headers) {
+        if (config.headers instanceof Headers) {
+          isBackground = config.headers.get('X-Background-Request') === 'true';
+        } else if (typeof config.headers === 'object') {
+          isBackground = (config.headers as Record<string, string>)['X-Background-Request'] === 'true';
+        }
+      }
+      
       const response = await originalFetch(...args);
       
-      if (!isPost) return response;
+      if (!isPost || isBackground) return response;
       
       // Clone response to read body without consuming the original
       const clonedResponse = response.clone();
