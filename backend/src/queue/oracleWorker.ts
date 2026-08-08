@@ -45,8 +45,24 @@ async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: s
   }
 
   // Use Gemini to extract text directly from Image or PDF buffer (as fallback for Scanned PDFs or failed Tesseract)
+  let geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+  if (!geminiKey) {
+    try {
+      const { supabase } = require('../config/supabase.client');
+      const { data } = await supabase
+        .from('api_configurations')
+        .select('api_key')
+        .eq('provider_name', 'gemini')
+        .limit(1)
+        .single();
+      if (data?.api_key) geminiKey = data.api_key;
+    } catch (e) {
+      logger.error('Failed to fetch Gemini fallback key from DB', e);
+    }
+  }
+
   const { GoogleGenerativeAI } = require('@google/generative-ai');
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '');
+  const genAI = new GoogleGenerativeAI(geminiKey);
   let modelName = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
   if (modelName.includes('1.5')) modelName = 'gemini-3.5-flash';
   const model = genAI.getGenerativeModel({ model: modelName });
