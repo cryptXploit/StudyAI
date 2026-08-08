@@ -11,7 +11,10 @@ export async function uploadDocumentToR2(file: File, supabaseAccessToken: string
     body: JSON.stringify({ filename: file.name, contentType: file.type })
   });
   
-  if (!urlRes.ok) throw new Error('Failed to get upload URL');
+  if (!urlRes.ok) {
+    const errorData = await urlRes.json().catch(() => null);
+    throw new Error(errorData?.message || errorData?.error || 'Failed to get upload URL');
+  }
   const { uploadUrl, r2Key } = await urlRes.json();
 
   // 2. PUT file directly to Cloudflare R2 (Bypassing our backend bandwidth)
@@ -39,6 +42,9 @@ export async function uploadDocumentToR2(file: File, supabaseAccessToken: string
     })
   });
 
-  if (!confirmRes.ok) throw new Error('Failed to confirm upload');
+  if (!confirmRes.ok) {
+    const errorData = await confirmRes.json().catch(() => null);
+    throw new Error(errorData?.message || errorData?.error || 'Failed to confirm upload');
+  }
   return confirmRes.json(); // { message, fileId }
 }
