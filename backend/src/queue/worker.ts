@@ -7,6 +7,8 @@ import logger from '../core/logger';
 import { runWithTraceId } from '../core/tracing';
 import { createClient } from '@supabase/supabase-js';
 import { modelRouter } from '../services/modelRouter';
+import { ModelRouter as AILangRouter } from '../ai/ModelRouter';
+import { RetrievalService } from '../services/retrieval.service';
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
@@ -150,15 +152,7 @@ async function processDocument(job: Job) {
   }
   const pageChunks = await extractContent(fileBuffer, safeMimetype, storagePath);
 
-  const fileName = storagePath.split('/').pop() || 'Untitled Document';
-  const fullTextPreview = pageChunks.map(c => c.content).join(' ').substring(0, 500);
-  
-  await supabase.from('context_packs').insert({
-    file_id: fileId,
-    user_id: userId,
-    name: `${fileName} - Summary`,
-    description: fullTextPreview + '... (Auto-generated context)',
-  });
+  // Remove legacy context_packs insert, we will do intelligent insertion after bulk insert
 
   // 🟢 MAGICAL FIX: Bulk Insert Preparation (Saves Database from Crashing)
   const chunksToInsert = [];
@@ -190,6 +184,47 @@ async function processDocument(job: Job) {
       throw new Error(`Failed to save chunks: ${insertError.message}`);
     }
   }
+
+  // 🟢 INTELLIGENT COST-EFFECTIVE SUMMARIZATION
+  const fileName = storagePath.split('/').pop() || 'Untitled Document';
+  let generatedSummary = 'Summary not available.';
+  try {
+    const retrievalOptions = {
+      userId,
+      fileId,
+      query: "Summary, conclusion, main objectives, key findings, core concepts",
+      limit: 10,
+      vectorWeight: 0.7,
+      keywordWeight: 0.3
+    };
+    
+    const topChunks = await RetrievalService.hybridSearch(retrievalOptions);
+    
+    // 🟢 Inject [Page X] tags explicitly based on DB results so AI knows the page
+    let summaryContext = topChunks.map(c => `[Page ${(c as any).page_number || 1}]\n${c.content}`).join('\n\n==========\n\n');
+    
+    // Fallback if search fails or returns nothing
+    if (!summaryContext || summaryContext.trim().length === 0) {
+       summaryContext = pageChunks.map(c => `[Page ${c.pageNumber}]\n${c.content}`).join('\n\n==========\n\n').substring(0, 15000);
+    }
+    
+    const aiRouter = new AILangRouter();
+    const summaryPrompt = [
+      { role: 'system', content: 'You are an elite AI document summarizer. Summarize the provided document chunks comprehensively, focusing on key themes, concepts, and takeaways.\n\nCRITICAL: You MUST explicitly cite the source pages using the [Page X] tags provided in the context. Put the citation at the end of the relevant sentence. Format beautifully with Markdown headings and bullet points.' },
+      { role: 'user', content: `Summarize these key parts of the document:\n\n${summaryContext}` }
+    ];
+    generatedSummary = await aiRouter.generate(summaryPrompt as any, userId, 'Free');
+  } catch (err) {
+    logger.error('AI Summarization Error', err);
+    generatedSummary = pageChunks.map(c => c.content).join(' ').substring(0, 500) + '... (Auto-generated context)';
+  }
+
+  await supabase.from('context_packs').insert({
+    file_id: fileId,
+    user_id: userId,
+    name: `${fileName} - Summary`,
+    description: generatedSummary,
+  });
 
   const { error: updateError } = await supabase
     .from('files')
