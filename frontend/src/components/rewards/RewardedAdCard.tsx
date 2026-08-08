@@ -193,9 +193,9 @@ export default function RewardedAdCard() {
   // VISIBILITY LOGIC:
   // - If max ads reached -> Hide
   // - If started watching today (claims > 0) -> Show until max ads reached
-  // - If tokens < 100 -> Show warning/ad prompt
+  // - If tokens < 400 -> Show warning/ad prompt
   if (status.claimsToday >= status.maxAds) return null;
-  if (status.claimsToday === 0 && status.currentTokens >= 100) return null;
+  if (status.claimsToday === 0 && status.currentTokens >= 400) return null;
 
   const progressPercentage = (status.claimsToday / status.maxAds) * 100;
 
