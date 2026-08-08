@@ -53,7 +53,7 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
           const miniPdfBytes = await miniPdf.save();
           const miniBuffer = Buffer.from(miniPdfBytes);
           
-          const ocrText = await performVisionAnalysis(miniBuffer);
+          const ocrText = await performVisionAnalysis(miniBuffer, 'application/pdf');
           extractedChunks.push({ content: `[Page ${pageNum}]\n${ocrText.trim()}`, pageNumber: pageNum });
         } else {
           // Free Fast Lane: Normal digital text
@@ -67,7 +67,7 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
       throw new Error(`PDF parse failed: ${error.message}`);
     }
   } else if (mimetype.startsWith('image/')) {
-    const text = await performVisionAnalysis(buffer);
+    const text = await performVisionAnalysis(buffer, mimetype);
     return [{ content: text, pageNumber: 1 }];
   }
   return [];
@@ -94,8 +94,8 @@ async function downloadFromR2(storagePath: string) {
   return await getStreamAsBuffer(r2Response.Body);
 }
 
-async function performVisionAnalysis(buffer: Buffer): Promise<string> {
-  return await modelRouter.extractDocument(buffer);
+async function performVisionAnalysis(buffer: Buffer, mimetype: string): Promise<string> {
+  return await modelRouter.extractDocument(buffer, mimetype);
 }
 
 function splitTextIntoChunks(text: string, size: number): string[] {
