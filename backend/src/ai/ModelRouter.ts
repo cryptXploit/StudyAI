@@ -314,7 +314,34 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
     }
 
     if (!success) {
-      throw new Error('All fallback providers are currently unreachable or have exceeded their quota.');
+      if (this.fallbackAdapter.generateStream) {
+        console.warn(`[Router] All DB routes failed in generateStream. Using ultimate Gemini fallback.`);
+        const stream = this.fallbackAdapter.generateStream(securedMessages, 'fallback', options);
+        const iterator = stream[Symbol.asyncIterator]();
+        
+        const firstResult = await iterator.next();
+        if (!firstResult.done) {
+           yield firstResult.value;
+           fullResponse += firstResult.value;
+           
+           while (true) {
+              const result = await iterator.next();
+              if (result.done) break;
+              yield result.value;
+              fullResponse += result.value;
+           }
+        }
+        
+        await CostTracker.logUsage(
+          userId, tier, 'gemini', 'fallback',
+          Math.ceil(fullResponse.length / 4), Math.ceil(fullResponse.length / 4)
+        );
+        success = true;
+      }
+      
+      if (!success) {
+        throw new Error('All fallback providers are currently unreachable or have exceeded their quota.');
+      }
     }
   }
 
@@ -342,7 +369,7 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
 
     // Default fallback
     if (this.geminiAdapter.generateEmbedding) {
-      return await this.geminiAdapter.generateEmbedding(text, 'gemini-embedding-2');
+      return await this.geminiAdapter.generateEmbedding(text, 'text-embedding-004');
     }
     
     throw new Error('No embedding provider available.');
