@@ -25,8 +25,24 @@ async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: s
     }
   }
 
-  // Tesseract was producing garbage for complex exams, so we use Gemini directly for OCR.
-  // Gemini 3.5 Flash is incredibly fast and accurate for OCR.
+  // If it's a direct image, use Local Tesseract OCR (100% Free & No Limits)
+  if (mimetype.startsWith('image/')) {
+    try {
+      logger.info("Image detected, running local Tesseract OCR...");
+      const Tesseract = require('tesseract.js');
+      
+      const tesseractPromise = Tesseract.recognize(buffer, 'eng');
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Tesseract timeout exceeded")), 15000);
+      });
+      
+      const { data: { text } } = await Promise.race([tesseractPromise, timeoutPromise]) as any;
+      return text;
+    } catch (err: any) {
+      logger.error("Tesseract Error/Timeout:", err.message);
+      // Fallback to Gemini if Tesseract fails or times out
+    }
+  }
 
   // Use Gemini to extract text directly from Image or PDF buffer (as fallback for Scanned PDFs or failed Tesseract)
   const { GoogleGenerativeAI } = require('@google/generative-ai');
