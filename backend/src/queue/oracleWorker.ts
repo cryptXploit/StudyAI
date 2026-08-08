@@ -47,7 +47,9 @@ async function extractTextFromBuffer(buffer: Buffer, mimetype: string, userId: s
   // Use Gemini to extract text directly from Image or PDF buffer (as fallback for Scanned PDFs or failed Tesseract)
   const { GoogleGenerativeAI } = require('@google/generative-ai');
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '');
-  const model = genAI.getGenerativeModel({ model: process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash' });
+  let modelName = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
+  if (modelName.includes('1.5')) modelName = 'gemini-3.5-flash';
+  const model = genAI.getGenerativeModel({ model: modelName });
 
   try {
     logger.info("Running Gemini OCR/Extraction (Free Tier Limits Apply)...");
@@ -99,7 +101,7 @@ export const oracleWorker = new Worker(
 
     const chunkingPrompt = `Extract all distinct questions or exam problems from the following text. Return them as a STRICT JSON array of strings. Do not include answers, only the question text. If a question has subparts, keep them together as one string.
 Text:
-${extractedText.substring(0, 50000)}
+${extractedText.substring(0, 25000)}
 
 Output ONLY a valid JSON array of strings, e.g. ["What is Newton's First Law?", "Explain Quantum Entanglement"]. No markdown backticks.${strictLangInstruction}`;
 
