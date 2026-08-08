@@ -5,7 +5,7 @@ import SecureLayout from '@/components/layout/SecureLayout';
 import { useAuth } from '@/components/providers/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Radar, Target, UploadCloud, Lock, ShieldAlert, BrainCircuit, History, Calendar, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Radar, Target, UploadCloud, Lock, ShieldAlert, BrainCircuit, History, Calendar, ChevronRight, CheckCircle2, Check } from 'lucide-react';
 import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import { useRouter } from 'next/navigation';
@@ -578,7 +578,7 @@ export default function ExamOraclePage() {
           <div className={`lg:hidden fixed bottom-0 left-0 w-full p-3 z-30 pointer-events-none transition-all duration-500 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent ${isHeaderVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
             {/* Mobile Action Pills */}
             <div className="flex gap-2 overflow-x-auto mb-3 pointer-events-auto custom-scrollbar-hide px-1 pb-1">
-              <button onClick={() => setIsMobileDrawerOpen('config')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${(selectedSyllabusId || pastPapers.length > 0) ? 'bg-fuchsia-500/20 border-fuchsia-500/50 text-fuchsia-300' : 'bg-slate-800/80 border-slate-700 text-slate-400'}`}>
+              <button onClick={() => setIsMobileDrawerOpen('config')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${(selectedSyllabusId || selectedFileIds.length > 0) ? 'bg-fuchsia-500/20 border-fuchsia-500/50 text-fuchsia-300' : 'bg-slate-800/80 border-slate-700 text-slate-400'}`}>
                 <Target size={12}/> {t.config}
               </button>
               <button onClick={() => { setActiveTab('history'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black tracking-wide shadow-sm border backdrop-blur-md transition-all active:scale-95 ${activeTab === 'history' ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300' : 'bg-slate-800/80 border-slate-700 text-slate-400'}`}>
@@ -591,10 +591,10 @@ export default function ExamOraclePage() {
               <div className="relative flex shadow-xl rounded-[2rem] border transition-all backdrop-blur-xl overflow-hidden p-1 bg-slate-900/90 border-slate-700/50">
                 <button 
                   onClick={handleRunOracle} 
-                  disabled={!selectedSyllabusId || pastPapers.length === 0 || isScanning || isCooking || extractedQuestions.length === 0}
+                  disabled={!selectedSyllabusId || selectedFileIds.length === 0 || isScanning}
                   className="w-full py-4 bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 text-white font-black tracking-widest uppercase text-xs rounded-2xl shadow-sm flex justify-center items-center gap-2 transition-transform active:scale-95 disabled:opacity-50"
                 >
-                  {isCooking ? t.aiIsCooking : isScanning ? t.initiatingMobileScan : t.predictTopics}
+                  {isScanning ? t.initiatingMobileScan : t.predictTopics}
                 </button>
               </div>
             </div>
@@ -646,62 +646,35 @@ export default function ExamOraclePage() {
 
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{t.feedPastPapers}</label>
-                  <label className="w-full h-32 border-2 border-dashed border-slate-700 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-fuchsia-500/50 hover:bg-fuchsia-500/5 transition-colors group relative overflow-hidden">
-                    {isCooking && <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-10">
-                      <div className="flex flex-col items-center">
-                        <Radar className="text-fuchsia-500 animate-spin mb-2" size={24} />
-                        <span className="text-[10px] font-black text-fuchsia-400 tracking-widest uppercase">{t.aiIsCooking}</span>
+                  <div className="w-full max-h-48 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-950 custom-scrollbar space-y-1">
+                    {userFiles.length === 0 ? (
+                      <div className="p-4 text-center text-xs font-bold text-slate-500">
+                        No sources found in Dashboard
                       </div>
-                    </div>}
-                    <input type="file" multiple accept=".pdf, .jpg, .jpeg, .png" className="hidden" onChange={async (e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        const files = Array.from(e.target.files);
-                        setPastPapers(files);
-                        setIsCooking(true);
-                        setExtractedQuestions([]);
-                        
-                        try {
-                          const formData = new FormData();
-                          files.forEach(f => formData.append('pastPapers', f));
-                          formData.append('language', language);
-                          const { data: { session } } = await supabase.auth.getSession();
-                          const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
-                          const fetchUrl = apiUrl.endsWith('/api') ? `${apiUrl}/oracle/extract` : `${apiUrl}/api/oracle/extract`;
-                          const res = await fetch(fetchUrl, {
-                            method: 'POST',
-                            headers: { 'Authorization': `Bearer ${session?.access_token}` },
-                            body: formData,
-                          });
-
-                          if (res.status === 429) {
-                            showPublicError();
-                            setIsCooking(false);
-                            return;
-                          }
-
-                          let data;
-                          try {
-                            const text = await res.text();
-                            data = JSON.parse(text);
-                          } catch (e) {
-                            console.error("Invalid JSON during extraction start:", e);
-                            showPublicError();
-                            setIsCooking(false);
-                            return;
-                          }
-
-                          if (data.jobId) setExtractingJobId(data.jobId);
-                        } catch (err) {
-                          console.error("Extraction start failed", err);
-                          setIsCooking(false);
-                        }
-                      }
-                    }} />
-                    <UploadCloud size={32} className="text-slate-500 group-hover:text-fuchsia-500 mb-2 transition-colors" />
-                    <span className="text-xs font-bold text-slate-400">
-                      {pastPapers.length > 0 ? `${pastPapers.length} ${t.papersSelected}` : t.clickOrTap}
-                    </span>
-                  </label>
+                    ) : (
+                      userFiles.map(file => {
+                        const isSelected = selectedFileIds.includes(file.id);
+                        return (
+                          <div 
+                            key={file.id} 
+                            onClick={() => {
+                              setSelectedFileIds(prev => 
+                                isSelected ? prev.filter(id => id !== file.id) : [...prev, file.id]
+                              );
+                            }}
+                            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${isSelected ? 'bg-fuchsia-500/10 border-fuchsia-500/30 shadow-sm' : 'bg-slate-900 border-transparent hover:border-slate-800'}`}
+                          >
+                            <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-fuchsia-500 border-fuchsia-500 text-white' : 'border-slate-700 bg-slate-800'}`}>
+                              {isSelected && <Check size={12} />}
+                            </div>
+                            <span className={`text-sm font-bold truncate flex-1 ${isSelected ? 'text-fuchsia-400' : 'text-slate-300'}`}>
+                              {file.name || 'Untitled Source'}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
             </div>
           )}

@@ -203,7 +203,7 @@ export default function PurifierPage() {
 
   const submitPurification = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedFiles.length === 0 || isLoading) return;
+    if (selectedFileIds.length === 0 || isLoading) return;
 
     if (tier !== 'PRO' && tokens < 15) {
       setRequiredTokensForModal(15);
@@ -379,7 +379,7 @@ export default function PurifierPage() {
                     onClick={() => {
                       setActiveNoteId(item.id);
                       setPurifiedContent({ title: item.title, content: item.purified_text });
-                      setSelectedFiles([]); setPreviewUrls([]);
+                      setSelectedFileIds([]); setPreviewUrls([]);
                       setSessionImages([]); // Hide compare button for history notes since images are not stored in DB
                     }}
                     className={`group p-3 rounded-xl cursor-pointer transition-all border flex justify-between items-center ${activeNoteId === item.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}`}
@@ -503,7 +503,7 @@ export default function PurifierPage() {
                           onClick={() => {
                             setActiveNoteId(item.id);
                             setPurifiedContent({ title: item.title, content: item.purified_text });
-                            setSelectedFiles([]); setPreviewUrls([]);
+                            setSelectedFileIds([]); setPreviewUrls([]);
                             setSessionImages([]);
                             setIsMobileDrawerOpen('none');
                           }}
