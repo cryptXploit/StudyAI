@@ -146,7 +146,7 @@ export const modelRouter = {
 
   async analyzeImage(buffer: Buffer) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const imagePart = { inlineData: { data: buffer.toString("base64"), mimeType: "image/jpeg" } };
     const result = await model.generateContent(["Describe this diagram or image in detail:", imagePart]);
     return { description: result.response.text() };
@@ -176,8 +176,8 @@ export const modelRouter = {
     const prompt = "Extract all text, readable content, diagrams, and handwriting from this document perfectly. Return ONLY the raw extracted text in clean markdown format without any intro or outro.";
     
     // Try multiple models in case the user's API key doesn't support the latest one
-    // 🟢 2026 UPDATE: Added gemini-2.5-flash, gemini-2.0-flash, gemini-3.5-flash
-    const modelsToTry = ["gemini-3.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
+    // 🟢 2026 UPDATE: Added gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash
+    const modelsToTry = ["gemini-1.5-flash", "gemini-2.5-flash", "gemini-2.0-flash"];
     let lastError = null;
 
     for (const modelName of modelsToTry) {

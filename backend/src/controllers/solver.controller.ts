@@ -111,7 +111,7 @@ CRITICAL RULES:
     if (image) {
         // ইমেজ থাকলে ডাইরেক্ট ফেচ (Admin Configured Model)
         let apiKey = process.env.GEMINI_API_KEY;
-        let targetModel = 'gemini-3.5-flash';
+        let targetModel = 'gemini-1.5-flash';
         
         try {
            const { data } = await supabase.from('api_configurations')

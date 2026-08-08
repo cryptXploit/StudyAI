@@ -11,7 +11,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-const model = genAI.getGenerativeModel({ model: process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash' });
+const model = genAI.getGenerativeModel({ model: process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash' });
 
 
 

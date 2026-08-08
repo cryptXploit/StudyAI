@@ -137,8 +137,8 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
     }
     if (provider === 'gemini' || provider === 'google') {
       return tier === 'Pro'
-        ? (process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-3.1-pro-preview')
-        : (process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash');
+        ? (process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-1.5-pro')
+        : (process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash');
     }
     if (provider === 'deepseek') return 'deepseek-chat';
     if (provider === 'atomesus') return 'atomesus-latest'; // 🟢 NEW: Default model for Atomesus

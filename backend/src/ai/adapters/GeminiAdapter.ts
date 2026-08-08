@@ -31,27 +31,27 @@ export class GeminiAdapter implements ProviderAdapter {
     const lower = model.toLowerCase();
     
     // Explicit 2.0 Mappings
-    if (lower.includes('flash-2.0') || lower.includes('2.0-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
-    if (lower.includes('pro-2.0') || lower.includes('2.0-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-3.1-pro-preview';
+    if (lower.includes('flash-2.0') || lower.includes('2.0-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
+    if (lower.includes('pro-2.0') || lower.includes('2.0-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-1.5-pro';
     
     // Explicit 1.5 Mappings (Auto-upgrade to 3.5 since 1.5 is deprecated)
-    if (lower.includes('1.5-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
-    if (lower.includes('1.5-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-3.1-pro-preview';
+    if (lower.includes('1.5-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
+    if (lower.includes('1.5-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-1.5-pro';
     
-    let resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
+    let resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
 
     // Generic Fallbacks
     if (lower === 'gemini' || lower === 'flash') {
-        resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
+        resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
     } else if (lower === 'pro') {
-        resultModel = process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-3.1-pro-preview';
+        resultModel = process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-1.5-pro';
     } else if (lower.startsWith('gemini-')) {
         resultModel = model;
     }
 
     // Absolute Safety Net: If the PM2 environment variable or the result model is the deprecated 1.5, FORCE 3.5
-    if (resultModel.includes('1.5-flash')) resultModel = 'gemini-3.5-flash';
-    if (resultModel.includes('1.5-pro')) resultModel = 'gemini-3.1-pro-preview';
+    if (resultModel.includes('1.5-flash')) resultModel = 'gemini-1.5-flash';
+    if (resultModel.includes('1.5-pro')) resultModel = 'gemini-1.5-pro';
 
     return resultModel;
   }
