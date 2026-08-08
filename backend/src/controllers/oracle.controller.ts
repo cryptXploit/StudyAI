@@ -13,66 +13,16 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const model = genAI.getGenerativeModel({ model: process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash' });
 
-import { oracleQueue } from '../queue/connection';
-import { Job } from 'bullmq';
 
-export const runOracleExtraction = async (req: Request, res: Response) => {
-  try {
-    const userId = (req as any).user?.id || 'anonymous';
-    const userTier = (req as any).user?.tier || 'Free';
-    const files = req.files as Express.Multer.File[];
-    const language = req.body.language || 'English';
-
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: 'Past papers are required for extraction.' });
-    }
-
-    const filesData = files.map(f => ({
-      mimetype: f.mimetype,
-      bufferBase64: f.buffer.toString('base64')
-    }));
-
-    const job = await oracleQueue.add('oracle-extraction', {
-      filesData,
-      userId,
-      userTier,
-      language
-    });
-
-    return res.status(200).json({ jobId: job.id });
-  } catch (error: any) {
-    console.error("[Oracle Extraction Error]:", error);
-    return res.status(500).json({ error: 'Failed to start extraction.', details: error.message });
-  }
-};
-
-export const getOracleExtractionStatus = async (req: Request, res: Response) => {
-  try {
-    const { jobId } = req.params;
-    const job = await Job.fromId(oracleQueue, jobId);
-    
-    if (!job) {
-      return res.status(404).json({ error: 'Job not found' });
-    }
-
-    const state = await job.getState();
-    const result = job.returnvalue;
-    const failedReason = job.failedReason;
-
-    return res.status(200).json({ state, result, failedReason });
-  } catch (error: any) {
-    return res.status(500).json({ error: 'Failed to check status.' });
-  }
-};
 
 export const runOraclePrediction = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id || 'anonymous';
     const userTier = (req as any).user?.tier || 'Free';
-    const { syllabusId, chapterId, questions, language } = req.body;
+    const { syllabusId, chapterId, fileIds, language } = req.body;
 
-    if (!syllabusId || !questions || !Array.isArray(questions)) {
-      return res.status(400).json({ error: 'Syllabus ID and extracted questions are required.' });
+    if (!syllabusId || !fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+      return res.status(400).json({ error: 'Syllabus ID and selected source files are required.' });
     }
 
     // 🟢 Token Cost Check & Deduction (OWASP Safe)
@@ -114,9 +64,19 @@ export const runOraclePrediction = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'No topics found in the selected syllabus/chapter.' });
     }
 
+    // 2. Fetch File Chunks (The "Questions")
+    const { data: chunks, error: chunkErr } = await supabase
+      .from('file_chunks')
+      .select('content, embedding')
+      .in('file_id', fileIds);
+
+    if (chunkErr || !chunks || chunks.length === 0) {
+      return res.status(400).json({ error: 'No processed content found for the selected files.' });
+    }
+
     const router = new ModelRouter();
 
-    // 2. Step 2 of RAG: Embedding Generation
+    // 3. Step 2 of RAG: Embedding Generation for Topics
     const { cosineSimilarity } = await import('../utils/vectorMath');
     
     // Embed Topics
@@ -124,12 +84,33 @@ export const runOraclePrediction = async (req: Request, res: Response) => {
        return { topic: t, vector: await router.embed(t) };
     }));
 
-    // Embed Questions
-    const questionVectors = await Promise.all(questions.map(async (q) => {
-       return { text: q, vector: await router.embed(q) };
-    }));
+    // Parse the file chunks (the backend already embedded them, wait! We can use the existing embeddings!)
+    // Wait, the embedding format might be pgvector string format (e.g., "[0.1, 0.2, ...]"). We need to parse it to number[]
+    // Or, if we can't parse it easily, we can just use the chunk text and re-embed. But let's try to parse it to save costs.
+    // A pgvector string looks like: "[0.1,0.2,...]"
+    const questionVectors = chunks.map(chunk => {
+      let vec: number[] = [];
+      if (typeof chunk.embedding === 'string') {
+        try {
+          vec = JSON.parse(chunk.embedding);
+        } catch (e) {
+          // fallback
+        }
+      } else if (Array.isArray(chunk.embedding)) {
+        vec = chunk.embedding;
+      }
+      return { text: chunk.content, vector: vec };
+    }).filter(qv => qv.vector.length > 0);
 
-    // 5. Step 3 & 4 of RAG: Cosine Similarity Math & Statistical Probability
+    // If for some reason we couldn't parse the embeddings, re-embed them (fallback)
+    if (questionVectors.length === 0) {
+      await Promise.all(chunks.map(async (chunk) => {
+         const vec = await router.embed(chunk.content);
+         questionVectors.push({ text: chunk.content, vector: vec });
+      }));
+    }
+
+    // 4. Step 3 & 4 of RAG: Cosine Similarity Math & Statistical Probability
     const groupedQuestions: Record<string, { count: number, totalSimilarity: number, bestQuestion: string }> = {};
 
     for (const qv of questionVectors) {

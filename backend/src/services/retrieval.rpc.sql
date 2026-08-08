@@ -9,6 +9,9 @@
 -- 1. HYBRID SEARCH (Keyword + Vector combined with weighted scoring)
 -- ============================================================================
 
+-- PostgreSQL requires dropping the function first when changing the return table signature
+DROP FUNCTION IF EXISTS hybrid_search_chunks(uuid, uuid, text, vector, float, float, int);
+
 CREATE OR REPLACE FUNCTION hybrid_search_chunks(
   p_user_id UUID,
   p_file_id UUID,
@@ -22,6 +25,7 @@ RETURNS TABLE (
   id UUID,
   file_id UUID,
   chunk_index INT,
+  page_number INT,
   content TEXT,
   similarity_score FLOAT,
   search_type VARCHAR
@@ -32,6 +36,7 @@ WITH vector_results AS (
     fc.id,
     fc.file_id,
     fc.chunk_index,
+    fc.page_number,
     fc.content,
     1 - (fc.embedding <=> p_query_embedding) AS vector_score,
     'vector' AS search_type
@@ -48,6 +53,7 @@ keyword_results AS (
     fc.id,
     fc.file_id,
     fc.chunk_index,
+    fc.page_number,
     fc.content,
     ts_rank(
       to_tsvector('english', fc.content),
@@ -70,6 +76,7 @@ merged_results AS (
     COALESCE(v.id, k.id) AS id,
     COALESCE(v.file_id, k.file_id) AS file_id,
     COALESCE(v.chunk_index, k.chunk_index) AS chunk_index,
+    COALESCE(v.page_number, k.page_number) AS page_number,
     COALESCE(v.content, k.content) AS content,
     -- Normalize and combine scores
     (
@@ -88,6 +95,7 @@ SELECT
   id,
   file_id,
   chunk_index,
+  page_number,
   content,
   combined_score AS similarity_score,
   search_type
@@ -110,6 +118,7 @@ RETURNS TABLE (
   id UUID,
   file_id UUID,
   chunk_index INT,
+  page_number INT,
   content TEXT,
   similarity_score FLOAT,
   search_type VARCHAR
@@ -118,7 +127,8 @@ SELECT
   fc.id,
   fc.file_id,
   fc.chunk_index,
-  fc.content,
+    fc.page_number,
+    fc.content,
   1 - (fc.embedding <=> p_query_embedding) AS similarity_score,
   'vector'::VARCHAR AS search_type
 FROM file_chunks fc
@@ -143,6 +153,7 @@ RETURNS TABLE (
   id UUID,
   file_id UUID,
   chunk_index INT,
+  page_number INT,
   content TEXT,
   similarity_score FLOAT,
   search_type VARCHAR
@@ -151,7 +162,8 @@ SELECT
   fc.id,
   fc.file_id,
   fc.chunk_index,
-  fc.content,
+    fc.page_number,
+    fc.content,
   ts_rank(
     to_tsvector('english', fc.content),
     plainto_tsquery('english', p_query)
@@ -198,3 +210,5 @@ GRANT EXECUTE ON FUNCTION keyword_search_chunks TO authenticated;
 GRANT EXECUTE ON FUNCTION hybrid_search_chunks TO service_role;
 GRANT EXECUTE ON FUNCTION vector_search_chunks TO service_role;
 GRANT EXECUTE ON FUNCTION keyword_search_chunks TO service_role;
+
+

@@ -7,11 +7,7 @@ import multer from 'multer';
 import { TOKEN_COSTS } from '../config/tokenCosts';
 import { applyCreditMutation } from '../services/creditLedger.service';
 
-// Multer config for receiving images directly in memory
-const upload = multer({ 
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 } // 20MB limit for multiple images
-});
+// Removed local multer config as we now use centralized Dashboard sources
 
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
@@ -23,10 +19,10 @@ export async function purifyNotesHandler(req: Request, res: Response): Promise<v
     const userId = (req as any).user?.id;
     const tier = (req as any).user?.tier || 'Free';
     const language = req.body.language || 'English';
-    const files = req.files as Express.Multer.File[];
+    const { fileIds } = req.body;
 
-    if (!userId || !files || files.length === 0) {
-      res.status(400).json({ error: 'Missing images for processing' });
+    if (!userId || !fileIds || !Array.isArray(fileIds) || fileIds.length === 0) {
+      res.status(400).json({ error: 'Missing source files for processing' });
       return;
     }
 
@@ -43,19 +39,24 @@ export async function purifyNotesHandler(req: Request, res: Response): Promise<v
 
     let rawText = "";
     try {
-      // 🟢 MAGICAL FIX: Changed Promise.all to Sequential 'for...of' loop
-      for (const file of files) {
-        const extractedChunk = await aiServiceRouter.extractDocument(file.buffer, file.mimetype);
-        rawText += extractedChunk + '\n\n';
-        file.buffer = Buffer.alloc(0); 
+      // Fetch text chunks from centralized sources
+      const { data: chunks, error } = await supabase
+        .from('file_chunks')
+        .select('content')
+        .in('file_id', fileIds);
+
+      if (error) throw error;
+      if (chunks) {
+        rawText = chunks.map(c => c.content).join('\n\n');
       }
-    } catch (ocrError) {
-      files.forEach(f => f.buffer = Buffer.alloc(0));
-      throw new Error("Failed to extract text from images. Ensure images are clear.");
+    } catch (dbErr) {
+      res.status(500).json({ error: "Failed to fetch source content from database." });
+      return;
     }
 
     if (!rawText.trim()) {
-      throw new Error("Could not detect any readable text in the images.");
+      res.status(400).json({ error: "Could not detect any readable text in the selected sources." });
+      return;
     }
 
     // 🟢 2. Send cheap text-tokens to AI for formatting and purifying
@@ -113,19 +114,14 @@ RULES:
     }
     
     res.json({ valid: true, title, content: finalContent, savedId });
-
   } catch (error: any) {
-    // 🟢 গ্লোবাল ফলব্যাকেও যেন RAM রিলিজ হয়ে যায়
-    if (req.files) {
-      (req.files as Express.Multer.File[]).forEach(f => f.buffer = Buffer.alloc(0));
-    }
     res.status(500).json({ error: error.message });
   }
 }
 
 export function registerPurifierRoutes(app: any): void {
   const router = Router();
-  // Using multer middleware on this specific route
-  router.post('/purify', requireAuth, upload.array('images', 5), async (req: Request, res: Response) => { await purifyNotesHandler(req, res); });
+  // Using a standard POST endpoint now
+  router.post('/purify', requireAuth, async (req: Request, res: Response) => { await purifyNotesHandler(req, res); });
   app.use('/api/purifier', router);
 }

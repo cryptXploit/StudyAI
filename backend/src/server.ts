@@ -41,7 +41,7 @@ import { registerChatRoutes } from './controllers/chat.controller';
 import { requireAuth } from './middlewares/auth.middleware';
 import { featureGuardGlobal } from './middlewares/featureGuardGlobal';
 import { documentQueue } from './queue/connection';
-import './queue/oracleWorker'; // 🟢 Start the Oracle background worker
+
 import './workers/subscriptionWorker'; // 🟢 Start the Subscription Expiration Checker
 
 import { registerFocusRoutes } from './controllers/focus.controller';

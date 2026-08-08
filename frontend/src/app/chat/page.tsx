@@ -56,6 +56,9 @@ const translations = {
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
 const MemoizedMarkdown = React.memo(({ content }: { content: string }) => {
+  // Pre-process citations: [Page 12] -> [Page 12](#page-12)
+  const processedContent = content.replace(/\[Page\s+(\d+)\]/gi, '[Page $1](#page-$1)');
+
   return (
     <ReactMarkdown 
       remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} rehypePlugins={[rehypeKatex]}
@@ -80,10 +83,28 @@ const MemoizedMarkdown = React.memo(({ content }: { content: string }) => {
             <code className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono text-[13px] border border-indigo-500/20" {...props}>{children}</code>
           );
         },
-        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 bg-indigo-500/10 py-3 px-5 rounded-r-2xl my-6 text-slate-300 italic shadow-inner font-medium" {...props}/>
+        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 bg-indigo-500/10 py-3 px-5 rounded-r-2xl my-6 text-slate-300 italic shadow-inner font-medium" {...props}/>,
+        a: ({node, href, children, ...props}: any) => {
+          if (href?.startsWith('#page-')) {
+            const pageNum = href.split('-')[1];
+            return (
+              <span 
+                className="inline-flex items-center justify-center px-1.5 py-0.5 mx-1 text-[10px] font-black uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 rounded cursor-pointer hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all hover:-translate-y-0.5 shadow-sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toast.success(`Citations Viewer: Page ${pageNum}`, { icon: '📖', style: { borderRadius: '10px', background: '#1e293b', color: '#10b981', border: '1px solid #059669', fontSize: '12px', fontWeight: 'bold' }});
+                }}
+                title={`Source: Page ${pageNum}`}
+              >
+                📄 P{pageNum}
+              </span>
+            );
+          }
+          return <a href={href} target="_blank" rel="noopener noreferrer" className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2 font-medium" {...props}>{children}</a>;
+        }
       }}
     >
-      {content}
+      {processedContent}
     </ReactMarkdown>
   );
 }, (prevProps, nextProps) => prevProps.content === nextProps.content);

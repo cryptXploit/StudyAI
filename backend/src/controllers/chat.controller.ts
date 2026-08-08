@@ -90,7 +90,10 @@ export async function chatHandler(req: Request, res: Response): Promise<void> {
           const retrievalPromises = fileIdArray.map(fId => RetrievalService.hybridSearch({ userId, fileId: fId, query: safeQuery, limit: searchLimit, vectorWeight: 0.6, keywordWeight: 0.4 }));
           const results = await Promise.all(retrievalPromises);
           chunks = results.flat().slice(0, isSummaryRequest ? 6 : 4); 
-          const ragContext = chunks.map((c: any) => c.text_content || c.content || c.text || '').join('\n\n');
+          const ragContext = chunks.map((c: any) => {
+            const pageTag = c.page_number ? `[Page ${c.page_number}] ` : '';
+            return `${pageTag}${c.text_content || c.content || c.text || ''}`;
+          }).join('\n\n');
           contextChunks = contextChunks ? `${contextChunks}\n\n--- Additional Extracted Context ---\n${ragContext}` : ragContext;
           const maxChars = isSummaryRequest ? 300000 : 150000;
           if (contextChunks.length > maxChars) contextChunks = contextChunks.substring(0, maxChars) + '\n... [Context truncated to fit AI memory]';
@@ -262,7 +265,8 @@ CRITICAL FORMATTING RULES:
 1. SPACING IS MANDATORY: You MUST put a space after every punctuation mark.
 2. PARAGRAPHS: You MUST hit 'Enter' twice to create empty lines between paragraphs.
 3. MATH: Use proper LaTeX ($ for inline, $$ for block).
-4. MANDATORY LANGUAGE: You MUST generate your ENTIRE response fluently and accurately in ${language.toUpperCase()}.`;
+4. CITATIONS: When using information from the provided context, you MUST cite the source page using the exact format: [Page X] (where X is the page number provided in the context tag). Put the citation at the end of the sentence.
+5. MANDATORY LANGUAGE: You MUST generate your ENTIRE response fluently and accurately in ${language.toUpperCase()}.`;
   
   if (tier === 'Free') return basePrompt + `\n\nTier: Free\n- Keep explanations concise.`;
   if (tier === 'Student') return basePrompt + `\n\nTier: Student\n- Provide highly detailed, formatted explanations with examples.`;

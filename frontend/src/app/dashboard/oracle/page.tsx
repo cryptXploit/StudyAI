@@ -10,6 +10,7 @@ import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
 import { useRouter } from 'next/navigation';
 import { showPublicError } from '@/lib/errors/publicError';
+import { fetchUserFiles, File as DBFile } from '@/services/dashboard.service';
 
 const translations = {
   English: {
@@ -21,10 +22,10 @@ const translations = {
     selectActiveCourse: "Select an active course...",
     specificChapter: "2. Specific Chapter (Optional)",
     fullCourse: "Full Course (All Chapters)",
-    feedPastPapers: "3. Feed Past Papers (PDF/JPG/PNG)",
+    feedPastPapers: "3. Select from Sources",
     aiIsCooking: "AI is Cooking... 🍳",
-    papersSelected: "Papers Selected",
-    clickOrDrag: "Click or drag past papers here",
+    papersSelected: "Sources Selected",
+    clickOrDrag: "Select one or more source files",
     initiatingScan: "Initiating Matrix Scan...",
     predictExamTopics: "Predict Exam Topics",
     initiatingMobileScan: "Initiating Scan...",
@@ -62,10 +63,10 @@ const translations = {
     selectActiveCourse: "একটি সক্রিয় কোর্স নির্বাচন করুন...",
     specificChapter: "২. নির্দিষ্ট অধ্যায় (ঐচ্ছিক)",
     fullCourse: "সম্পূর্ণ কোর্স (সব অধ্যায়)",
-    feedPastPapers: "৩. বিগত বছরের প্রশ্ন (PDF/JPG/PNG)",
+    feedPastPapers: "৩. সোর্স থেকে সিলেক্ট করুন",
     aiIsCooking: "এআই প্রসেস করছে... 🍳",
-    papersSelected: "টি প্রশ্নপত্র নির্বাচিত",
-    clickOrDrag: "এখানে প্রশ্নপত্র ক্লিক বা ড্র্যাগ করুন",
+    papersSelected: "টি সোর্স নির্বাচিত",
+    clickOrDrag: "একাধিক সোর্স ফাইল সিলেক্ট করুন",
     initiatingScan: "ম্যাট্রিক্স স্ক্যান শুরু হচ্ছে...",
     predictExamTopics: "পরীক্ষার টপিক প্রেডিক্ট করুন",
     initiatingMobileScan: "স্ক্যান শুরু হচ্ছে...",
@@ -103,10 +104,10 @@ const translations = {
     selectActiveCourse: "एक सक्रिय कोर्स चुनें...",
     specificChapter: "2. विशिष्ट अध्याय (वैकल्पिक)",
     fullCourse: "पूरा कोर्स (सभी अध्याय)",
-    feedPastPapers: "3. पिछले पेपर डालें (PDF/JPG/PNG)",
+    feedPastPapers: "3. स्रोत से चुनें",
     aiIsCooking: "एआई प्रोसेस कर रहा है... 🍳",
-    papersSelected: "पेपर चुने गए",
-    clickOrDrag: "यहाँ पिछले पेपर क्लिक या ड्रैग करें",
+    papersSelected: "स्रोत चुने गए",
+    clickOrDrag: "एक या अधिक स्रोत फ़ाइलें चुनें",
     initiatingScan: "मैट्रिक्स स्कैन शुरू हो रहा है...",
     predictExamTopics: "परीक्षा के विषयों की भविष्यवाणी करें",
     initiatingMobileScan: "स्कैन शुरू हो रहा है...",
@@ -151,15 +152,11 @@ export default function ExamOraclePage() {
   const [selectedSyllabusId, setSelectedSyllabusId] = useState('');
   const [selectedChapterId, setSelectedChapterId] = useState('');
 
-  const [pastPapers, setPastPapers] = useState<File[]>([]);
+  const [userFiles, setUserFiles] = useState<DBFile[]>([]);
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [predictions, setPredictions] = useState<any[] | null>(null);
   const isProUser = tier === 'PRO'; // Verify with backend tier
-  
-  // 🟢 NEW: Async Background States
-  const [extractingJobId, setExtractingJobId] = useState<string | null>(null);
-  const [extractedQuestions, setExtractedQuestions] = useState<string[]>([]);
-  const [isCooking, setIsCooking] = useState(false);
   
   // 🟢 NEW: History States
   const [activeTab, setActiveTab] = useState<'scanner' | 'history'>('scanner');
@@ -190,66 +187,26 @@ export default function ExamOraclePage() {
     if (savedLang) setLanguage(savedLang as LanguageType);
   }, []);
 
-  // 🟢 Fetch History & Syllabuses on Load
+  // 🟢 Fetch User Files for Selection
+  const loadFiles = async () => {
+    if (user?.id) {
+      try {
+        const files = await fetchUserFiles(user.id);
+        // Only allow selecting files that are completely chunked and ready
+        setUserFiles(files.filter(f => f.status === 'chunking_complete' || f.status === 'indexed'));
+      } catch (err) {
+        console.error("Failed to load user files for Oracle", err);
+      }
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchHistory();
       fetchSyllabuses();
+      loadFiles();
     }
   }, [user]);
-
-  // 🟢 Background Polling for Extraction Job
-  useEffect(() => {
-    if (!extractingJobId) return;
-    const interval = setInterval(async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
-        const fetchUrl = apiUrl.endsWith('/api') ? `${apiUrl}/oracle/extract-status/${extractingJobId}` : `${apiUrl}/api/oracle/extract-status/${extractingJobId}`;
-        const res = await fetch(fetchUrl, {
-          headers: { 'Authorization': `Bearer ${session?.access_token}` },
-        });
-        
-        if (res.status === 429) {
-          console.warn("Rate limited. Waiting for next polling interval.");
-          return;
-        }
-        
-        if (res.status === 404) {
-          console.error("Job not found on server.");
-          setIsCooking(false);
-          setExtractingJobId(null);
-          clearInterval(interval);
-          showPublicError();
-          return;
-        }
-
-        const text = await res.text();
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch (e) {
-          console.error("Invalid JSON during polling:", text);
-          return;
-        }
-
-        if (data.state === 'completed') {
-          setExtractedQuestions(data.result?.questions || []);
-          setIsCooking(false);
-          setExtractingJobId(null);
-          clearInterval(interval);
-        } else if (data.state === 'failed') {
-          setIsCooking(false);
-          setExtractingJobId(null);
-          clearInterval(interval);
-          showPublicError(data);
-        }
-      } catch (err) {
-        console.error("Polling error", err);
-      }
-    }, 10000); // 10s interval to prevent rate limit
-    return () => clearInterval(interval);
-  }, [extractingJobId]);
 
   const fetchSyllabuses = async () => {
     const { data } = await supabase.from('syllabuses').select('*, chapters:syllabus_chapters(*)').eq('user_id', user?.id).order('created_at', { ascending: false });
@@ -270,7 +227,7 @@ export default function ExamOraclePage() {
 
   // 🟢 Enhanced Prediction & Save Logic
   const handleRunOracle = async () => {
-    if (!selectedSyllabusId || pastPapers.length === 0 || !user) return;
+    if (!selectedSyllabusId || selectedFileIds.length === 0 || !user) return;
 
     if (tier !== 'PRO' && tokens < 20) {
       setRequiredTokensForModal(20);
@@ -297,7 +254,7 @@ export default function ExamOraclePage() {
         body: JSON.stringify({
           syllabusId: selectedSyllabusId,
           chapterId: selectedChapterId,
-          questions: extractedQuestions,
+          fileIds: selectedFileIds,
           language: language
         }),
       });
@@ -426,70 +383,43 @@ export default function ExamOraclePage() {
 
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">{t.feedPastPapers}</label>
-                  <label className="w-full h-32 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-fuchsia-400 hover:bg-fuchsia-50/50 transition-colors group relative overflow-hidden">
-                    {isCooking && <div className="absolute inset-0 bg-fuchsia-50/80 backdrop-blur-sm flex items-center justify-center z-10">
-                      <div className="flex flex-col items-center">
-                        <Radar className="text-fuchsia-500 animate-spin mb-2" size={24} />
-                        <span className="text-[10px] font-black text-fuchsia-600 tracking-widest uppercase">{t.aiIsCooking}</span>
+                  <div className="w-full max-h-48 overflow-y-auto border border-slate-200 rounded-2xl p-2 bg-slate-50 custom-scrollbar space-y-1">
+                    {userFiles.length === 0 ? (
+                      <div className="p-4 text-center text-xs font-bold text-slate-400">
+                        {t.clickOrDrag} (No sources found in Dashboard)
                       </div>
-                    </div>}
-                    <input type="file" multiple accept=".pdf, .jpg, .jpeg, .png" className="hidden" onChange={async (e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        const files = Array.from(e.target.files);
-                        setPastPapers(files);
-                        setIsCooking(true);
-                        setExtractedQuestions([]);
-                        
-                        try {
-                          const formData = new FormData();
-                          files.forEach(f => formData.append('pastPapers', f));
-                          formData.append('language', language);
-                          const { data: { session } } = await supabase.auth.getSession();
-                          const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
-                          const fetchUrl = apiUrl.endsWith('/api') ? `${apiUrl}/oracle/extract` : `${apiUrl}/api/oracle/extract`;
-                          const res = await fetch(fetchUrl, {
-                            method: 'POST',
-                            headers: { 'Authorization': `Bearer ${session?.access_token}` },
-                            body: formData,
-                          });
-
-                          if (res.status === 429) {
-                            showPublicError();
-                            setIsCooking(false);
-                            return;
-                          }
-
-                          let data;
-                          try {
-                            const text = await res.text();
-                            data = JSON.parse(text);
-                          } catch (e) {
-                            console.error("Invalid JSON during extraction start:", e);
-                            showPublicError();
-                            setIsCooking(false);
-                            return;
-                          }
-
-                          if (data.jobId) setExtractingJobId(data.jobId);
-                        } catch (err) {
-                          console.error("Extraction start failed", err);
-                          setIsCooking(false);
-                        }
-                      }
-                    }} />
-                    <UploadCloud size={32} className="text-slate-400 group-hover:text-fuchsia-500 mb-2 transition-colors" />
-                    <span className="text-xs font-bold text-slate-500">
-                      {pastPapers.length > 0 ? `${pastPapers.length} ${t.papersSelected}` : t.clickOrDrag}
-                    </span>
-                  </label>
+                    ) : (
+                      userFiles.map(file => {
+                        const isSelected = selectedFileIds.includes(file.id);
+                        return (
+                          <div 
+                            key={file.id} 
+                            onClick={() => {
+                              setSelectedFileIds(prev => 
+                                isSelected ? prev.filter(id => id !== file.id) : [...prev, file.id]
+                              );
+                            }}
+                            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${isSelected ? 'bg-fuchsia-50 border-fuchsia-200 shadow-sm' : 'bg-white border-transparent hover:border-slate-200 hover:bg-slate-100'}`}
+                          >
+                            <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-fuchsia-500 border-fuchsia-500 text-white' : 'border-slate-300 bg-white'}`}>
+                              {isSelected && <CheckCircle2 size={12} />}
+                            </div>
+                            <span className={`text-sm font-bold truncate flex-1 ${isSelected ? 'text-fuchsia-700' : 'text-slate-600'}`}>
+                              {file.name || 'Untitled Source'}
+                            </span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
 
                 <button 
                   onClick={handleRunOracle} 
-                  disabled={!selectedSyllabusId || pastPapers.length === 0 || isScanning || isCooking || extractedQuestions.length === 0}
+                  disabled={!selectedSyllabusId || selectedFileIds.length === 0 || isScanning}
                   className="w-full py-4 bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 text-white font-black tracking-widest uppercase text-xs rounded-2xl shadow-[0_10px_30px_rgba(217,70,239,0.3)] flex justify-center items-center gap-2 transition-transform active:scale-95 disabled:opacity-50"
                 >
-                  {isCooking ? t.aiIsCooking : isScanning ? t.initiatingScan : t.predictExamTopics}
+                  {isScanning ? t.initiatingScan : t.predictExamTopics}
                 </button>
               </div>
             </div>

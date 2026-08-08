@@ -23,14 +23,14 @@ import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { PDFDocument } from 'pdf-lib';
 
 // 🟢 FIX: Page-Level Hybrid AI Architecture
-async function extractContent(buffer: Buffer, mimetype: string, path: string): Promise<string> {
+async function extractContent(buffer: Buffer, mimetype: string, path: string): Promise<Array<{content: string, pageNumber: number}>> {
   if (mimetype === 'application/pdf') {
     try {
       const blob = new Blob([buffer as any], { type: 'application/pdf' });
       const loader = new PDFLoader(blob, { splitPages: true }); // Splitting pages
       const docs = await loader.load();
       
-      let finalExtractedText = "";
+      let extractedChunks: Array<{content: string, pageNumber: number}> = [];
       let pdfDocRef: PDFDocument | null = null; // Lazy load only if needed
 
       for (let i = 0; i < docs.length; i++) {
@@ -39,7 +39,7 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
         
         // 🟢 Smart Decision Gate: If text is < 100 chars, it's likely an image/graph page
         if (pageText.trim().length < 100) {
-          logger.info(`[Page ${pageNum}] Suspiciously low text. Routing to Gemini Flash OCR...`);
+          logger.info(`[Page ${pageNum}] Suspiciously low text. Routing to OCR...`);
           
           if (!pdfDocRef) {
             pdfDocRef = await PDFDocument.load(buffer);
@@ -53,23 +53,24 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
           const miniPdfBytes = await miniPdf.save();
           const miniBuffer = Buffer.from(miniPdfBytes);
           
-          const geminiText = await modelRouter.extractDocument(miniBuffer);
-          finalExtractedText += `\n\n[Page ${pageNum}]\n${geminiText.trim()}`;
+          const ocrText = await performVisionAnalysis(miniBuffer);
+          extractedChunks.push({ content: `[Page ${pageNum}]\n${ocrText.trim()}`, pageNumber: pageNum });
         } else {
           // Free Fast Lane: Normal digital text
-          finalExtractedText += `\n\n[Page ${pageNum}]\n${pageText.trim()}`;
+          extractedChunks.push({ content: `[Page ${pageNum}]\n${pageText.trim()}`, pageNumber: pageNum });
         }
       }
 
-      return finalExtractedText;
+      return extractedChunks;
     } catch (error: any) {
       logger.error('LangChain PDF extraction error', { error: error.message });
       throw new Error(`PDF parse failed: ${error.message}`);
     }
   } else if (mimetype.startsWith('image/')) {
-    return await performVisionAnalysis(buffer);
+    const text = await performVisionAnalysis(buffer);
+    return [{ content: text, pageNumber: 1 }];
   }
-  return "";
+  return [];
 }
 
 async function getStreamAsBuffer(stream: any): Promise<Buffer> {
@@ -147,31 +148,38 @@ async function processDocument(job: Job) {
   } else {
     fileBuffer = await downloadFromSupabase(storagePath);
   }
-  const text = await extractContent(fileBuffer, safeMimetype, storagePath);
-  const chunks = splitTextIntoChunks(text, 1000);
+  const pageChunks = await extractContent(fileBuffer, safeMimetype, storagePath);
 
   const fileName = storagePath.split('/').pop() || 'Untitled Document';
+  const fullTextPreview = pageChunks.map(c => c.content).join(' ').substring(0, 500);
+  
   await supabase.from('context_packs').insert({
     file_id: fileId,
     user_id: userId,
     name: `${fileName} - Summary`,
-    description: text.substring(0, 500) + '... (Auto-generated context)',
+    description: fullTextPreview + '... (Auto-generated context)',
   });
 
   // 🟢 MAGICAL FIX: Bulk Insert Preparation (Saves Database from Crashing)
   const chunksToInsert = [];
   let index = 0;
 
-  for (const chunk of chunks) {
-    const vector = await generateEmbedding(chunk, 1536);
-    chunksToInsert.push({
-      file_id: fileId,
-      user_id: userId,
-      content: chunk,
-      embedding: vector,
-      chunk_index: index 
-    });
-    index++;
+  for (const pageChunk of pageChunks) {
+    // If a page is huge, we should still split it to avoid embedding size limits.
+    const subChunks = splitTextIntoChunks(pageChunk.content, 1000);
+    for (const chunk of subChunks) {
+      if (chunk.trim().length < 10) continue;
+      const vector = await generateEmbedding(chunk, 1536);
+      chunksToInsert.push({
+        file_id: fileId,
+        user_id: userId,
+        content: chunk,
+        embedding: vector,
+        chunk_index: index,
+        page_number: pageChunk.pageNumber
+      });
+      index++;
+    }
   }
 
   // 🟢 EXECUTE BULK INSERT: 500 Database call convert into 1 Single Call!

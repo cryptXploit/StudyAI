@@ -13,6 +13,7 @@ import remarkBreaks from 'remark-breaks';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
+import { fetchUserFiles, File as DBFile } from '@/services/dashboard.service';
 
 const translations = {
   English: {
@@ -109,9 +110,9 @@ const MemoizedMarkdown = React.memo(({ content }: { content: string }) => {
 
 export default function PurifierPage() {
   const supabase = createClient();
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [userFiles, setUserFiles] = useState<DBFile[]>([]);
+  const [selectedFileIds, setSelectedFileIds] = useState<string[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]); // Optional if we still want to preview images from DB, but we'll disable it for now since they are PDFs/Docs mostly.
 
   const [isLoading, setIsLoading] = useState(false);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
@@ -182,27 +183,23 @@ export default function PurifierPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const filesArray = Array.from(e.target.files).slice(0, 5);
-      setSelectedFiles(filesArray);
-
-      previewUrls.forEach(url => URL.revokeObjectURL(url));
-      const newPreviews = filesArray.map(file => URL.createObjectURL(file));
-      setPreviewUrls(newPreviews);
+  const loadFiles = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.id) {
+      try {
+        const files = await fetchUserFiles(user.id);
+        setUserFiles(files.filter(f => f.status === 'chunking_complete' || f.status === 'indexed'));
+      } catch (err) {
+        console.error("Failed to load user files for Purifier", err);
+      }
     }
   };
 
-  const removeFile = (index: number) => {
-    const newFiles = [...selectedFiles];
-    newFiles.splice(index, 1);
-    setSelectedFiles(newFiles);
+  useEffect(() => {
+    loadFiles();
+  }, []);
 
-    const newPreviews = [...previewUrls];
-    URL.revokeObjectURL(newPreviews[index]);
-    newPreviews.splice(index, 1);
-    setPreviewUrls(newPreviews);
-  };
+
 
   const submitPurification = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,11 +215,6 @@ export default function PurifierPage() {
     setPurifiedContent(null);
     setCompareMode(false);
 
-    const formData = new FormData();
-    selectedFiles.forEach(file => formData.append('images', file));
-    formData.append('language', language);
-
-    // 🟢 CONNECTION KEEPALIVE PROTECTOR: Long-polling support for Sequential Backend Execution
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 Minutes Timeout Limit
 
@@ -233,8 +225,11 @@ export default function PurifierPage() {
 
       const response = await fetch(fetchUrl, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${session?.access_token}` },
-        body: formData,
+        headers: { 
+          'Authorization': `Bearer ${session?.access_token}`,
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ fileIds: selectedFileIds, language }),
         signal: controller.signal // 🟢 Added Safety Signal
       });
 
@@ -263,9 +258,8 @@ export default function PurifierPage() {
       fetchHistory();
 
       // 🟢 Memory cleanup for UI preview URLs
-      previewUrls.forEach(url => URL.revokeObjectURL(url));
-      setSelectedFiles([]);
-      setPreviewUrls([]);
+      setSessionImages([...previewUrls]);
+      setSelectedFileIds([]);
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
@@ -329,37 +323,40 @@ export default function PurifierPage() {
           </div>
 
           <form onSubmit={submitPurification} className="space-y-6">
-            <div
-              className="w-full border-2 border-dashed border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/5 rounded-2xl p-6 text-center cursor-pointer transition-all"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <ImageIcon size={32} className="text-emerald-400 mx-auto mb-3" />
-              <p className="text-sm font-bold text-slate-300">{t.uploadLabel}</p>
-              <p className="text-xs text-slate-500 mt-1">JPEG, PNG only</p>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/jpeg, image/png, image/jpg"
-                multiple
-                className="hidden"
-              />
+            <div className="space-y-4">
+              <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">{t.uploadLabel}</label>
+              <div className="w-full max-h-48 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-900 custom-scrollbar space-y-1">
+                {userFiles.length === 0 ? (
+                  <div className="p-4 text-center text-xs font-bold text-slate-500">
+                    No sources found in Dashboard
+                  </div>
+                ) : (
+                  userFiles.map(file => {
+                    const isSelected = selectedFileIds.includes(file.id);
+                    return (
+                      <div 
+                        key={file.id} 
+                        onClick={() => {
+                          setSelectedFileIds(prev => 
+                            isSelected ? prev.filter(id => id !== file.id) : [...prev, file.id]
+                          );
+                        }}
+                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${isSelected ? 'bg-emerald-500/10 border-emerald-500/30 shadow-sm' : 'bg-slate-800 border-transparent hover:border-slate-700'}`}
+                      >
+                        <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-600 bg-slate-700'}`}>
+                          {isSelected && <Check size={12} />}
+                        </div>
+                        <span className={`text-sm font-bold truncate flex-1 ${isSelected ? 'text-emerald-400' : 'text-slate-300'}`}>
+                          {file.name || 'Untitled Source'}
+                        </span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
             </div>
 
-            {previewUrls.length > 0 && (
-              <div className="flex flex-wrap gap-3">
-                {previewUrls.map((url, i) => (
-                  <div key={i} className="relative w-16 h-16 rounded-xl border border-slate-700 overflow-hidden shadow-inner group">
-                    <img src={url} alt={`preview-${i}`} className="w-full h-full object-cover" />
-                    <div onClick={(e) => { e.stopPropagation(); removeFile(i); }} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                       <X size={16} className="text-white"/>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <button type="submit" disabled={isLoading || selectedFiles.length === 0} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-400 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95">
+            <button type="submit" disabled={isLoading || selectedFileIds.length === 0} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-400 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95">
               {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
               {isLoading ? t.generating : t.generateBtn}
             </button>
@@ -525,38 +522,41 @@ export default function PurifierPage() {
                   )}
                 </div>
               ) : (
-                <form onSubmit={(e) => { submitPurification(e); if(selectedFiles.length > 0) setIsMobileDrawerOpen('none'); }} className="space-y-6">
-                  <div
-                    className="w-full border-2 border-dashed border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/5 rounded-2xl p-6 text-center cursor-pointer transition-all"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <ImageIcon size={32} className="text-emerald-400 mx-auto mb-3" />
-                    <p className="text-sm font-bold text-slate-300">{t.uploadLabel}</p>
-                    <p className="text-xs text-slate-500 mt-1">JPEG, PNG only</p>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/jpeg, image/png, image/jpg"
-                      multiple
-                      className="hidden"
-                    />
+                <form onSubmit={(e) => { submitPurification(e); if(selectedFileIds.length > 0) setIsMobileDrawerOpen('none'); }} className="space-y-6">
+                  <div className="space-y-4">
+                    <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">{t.uploadLabel}</label>
+                    <div className="w-full max-h-48 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-900 custom-scrollbar space-y-1">
+                      {userFiles.length === 0 ? (
+                        <div className="p-4 text-center text-xs font-bold text-slate-500">
+                          No sources found in Dashboard
+                        </div>
+                      ) : (
+                        userFiles.map(file => {
+                          const isSelected = selectedFileIds.includes(file.id);
+                          return (
+                            <div 
+                              key={file.id} 
+                              onClick={() => {
+                                setSelectedFileIds(prev => 
+                                  isSelected ? prev.filter(id => id !== file.id) : [...prev, file.id]
+                                );
+                              }}
+                              className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${isSelected ? 'bg-emerald-500/10 border-emerald-500/30 shadow-sm' : 'bg-slate-800 border-transparent hover:border-slate-700'}`}
+                            >
+                              <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-600 bg-slate-700'}`}>
+                                {isSelected && <Check size={12} />}
+                              </div>
+                              <span className={`text-sm font-bold truncate flex-1 ${isSelected ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                {file.name || 'Untitled Source'}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
 
-                  {previewUrls.length > 0 && (
-                    <div className="flex flex-wrap gap-3">
-                      {previewUrls.map((url, i) => (
-                        <div key={i} className="relative w-16 h-16 rounded-xl border border-slate-700 overflow-hidden shadow-inner group">
-                          <img src={url} alt={`preview-${i}`} className="w-full h-full object-cover" />
-                          <div onClick={(e) => { e.stopPropagation(); removeFile(i); }} className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-100 lg:opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                             <X size={16} className="text-white"/>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <button type="submit" disabled={isLoading || selectedFiles.length === 0} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-400 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95">
+                  <button type="submit" disabled={isLoading || selectedFileIds.length === 0} className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-400 text-white font-black tracking-wide rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 transition-all active:scale-95">
                     {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
                     {isLoading ? t.generating : t.generateBtn}
                   </button>
