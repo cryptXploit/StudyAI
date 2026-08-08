@@ -253,7 +253,7 @@ export async function explainSnippetHandler(req: Request, res: Response): Promis
       await applyCreditMutation({ userId, amount: -cost, reason: 'Explain Snippet AI', idempotencyKey: `book-jumper-explain:${userId}:${Date.now()}` });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
     let prompt = `You are a helpful study assistant. Explain the following snippet of a book simply and concisely in 2-3 sentences. Context query: "${query || 'General'}". Snippet: "${snippet}"`;
 
     let strictLangInstruction = "";

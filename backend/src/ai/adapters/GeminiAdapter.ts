@@ -34,9 +34,9 @@ export class GeminiAdapter implements ProviderAdapter {
     if (lower.includes('flash-2.0') || lower.includes('2.0-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
     if (lower.includes('pro-2.0') || lower.includes('2.0-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-3.1-pro-preview';
     
-    // Explicit 1.5 Mappings (Adding -latest for API compatibility)
-    if (lower.includes('1.5-flash')) return 'gemini-1.5-flash-latest';
-    if (lower.includes('1.5-pro')) return 'gemini-1.5-pro-latest';
+    // Explicit 1.5 Mappings (Auto-upgrade to 3.5 since 1.5 is deprecated)
+    if (lower.includes('1.5-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
+    if (lower.includes('1.5-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-3.1-pro-preview';
     
     // Generic Fallbacks
     if (lower === 'gemini' || lower === 'flash') return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
