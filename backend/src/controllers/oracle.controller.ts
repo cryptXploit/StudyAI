@@ -76,91 +76,60 @@ export const runOraclePrediction = async (req: Request, res: Response) => {
 
     const router = new ModelRouter();
 
-    // 3. Step 2 of RAG: Embedding Generation for Topics
+    // 3. Stage 1: Zero-Cost Database Clustering (Node.js Vector Math)
     const { cosineSimilarity } = await import('../utils/vectorMath');
     
-    // Embed Topics
-    const topicVectors = await Promise.all(topics.map(async (t) => {
-       return { topic: t, vector: await router.embed(t) };
-    }));
-
-    // Parse the file chunks (the backend already embedded them, wait! We can use the existing embeddings!)
-    // Wait, the embedding format might be pgvector string format (e.g., "[0.1, 0.2, ...]"). We need to parse it to number[]
-    // Or, if we can't parse it easily, we can just use the chunk text and re-embed. But let's try to parse it to save costs.
-    // A pgvector string looks like: "[0.1,0.2,...]"
     const questionVectors = chunks.map(chunk => {
       let vec: number[] = [];
       if (typeof chunk.embedding === 'string') {
-        try {
-          vec = JSON.parse(chunk.embedding);
-        } catch (e) {
-          // fallback
-        }
+        try { vec = JSON.parse(chunk.embedding); } catch (e) {}
       } else if (Array.isArray(chunk.embedding)) {
         vec = chunk.embedding;
       }
       return { text: chunk.content, vector: vec };
-    }).filter(qv => qv.vector.length > 0);
+    }).filter(qv => qv.vector.length > 0 && qv.text.length > 20); // filter out empty or tiny chunks
 
-    // If for some reason we couldn't parse the embeddings, re-embed them (fallback)
     if (questionVectors.length === 0) {
-      await Promise.all(chunks.map(async (chunk) => {
-         const vec = await router.embed(chunk.content);
-         questionVectors.push({ text: chunk.content, vector: vec });
-      }));
+      return res.status(400).json({ error: 'No valid questions found in the selected files.' });
     }
 
-    // 4. Step 3 & 4 of RAG: Cosine Similarity Math & Statistical Probability
-    const groupedQuestions: Record<string, { count: number, totalSimilarity: number, bestQuestion: string }> = {};
+    // O(N^2) Density Clustering to find repeating questions
+    const clusters: { count: number, texts: string[] }[] = [];
+    const visited = new Set<number>();
+    const SIMILARITY_THRESHOLD = 0.82; // High threshold for near-identical or highly similar questions
 
-    for (const qv of questionVectors) {
-      let bestTopic = '';
-      let highestSim = -1;
+    for (let i = 0; i < questionVectors.length; i++) {
+      if (visited.has(i)) continue;
+      
+      const currentCluster = { count: 1, texts: [questionVectors[i].text] };
+      visited.add(i);
 
-      for (const tv of topicVectors) {
-        const sim = cosineSimilarity(qv.vector, tv.vector);
-        if (sim > highestSim) {
-          highestSim = sim;
-          bestTopic = tv.topic;
+      for (let j = i + 1; j < questionVectors.length; j++) {
+        if (visited.has(j)) continue;
+        const sim = cosineSimilarity(questionVectors[i].vector, questionVectors[j].vector);
+        if (sim > SIMILARITY_THRESHOLD) {
+          currentCluster.count++;
+          // Keep up to 3 text samples per cluster to save token context
+          if (currentCluster.texts.length < 3) {
+            currentCluster.texts.push(questionVectors[j].text);
+          }
+          visited.add(j);
         }
       }
-
-      // If similarity is reasonably high, count it
-      if (highestSim > 0.4 && bestTopic) {
-        // Group by similar question text using a basic string matching or just group by Topic for probability
-        // Since questions repeat in different years, we group them by topic and exact question text similarity.
-        const hash = bestTopic + "::" + qv.text.substring(0, 30); 
-        
-        if (!groupedQuestions[hash]) {
-          groupedQuestions[hash] = { count: 0, totalSimilarity: 0, bestQuestion: qv.text };
-        }
-        groupedQuestions[hash].count += 1;
-        groupedQuestions[hash].totalSimilarity += highestSim;
-      }
+      clusters.push(currentCluster);
     }
 
-    // Calculate final probability and sort
-    const maxPossibleFrequency = 5; // Heuristic for frequency normalization
-    const topRawMatches = Object.values(groupedQuestions).map((g) => {
-      const avgSim = g.totalSimilarity / g.count;
-      // Probability = (Frequency factor) * (Similarity)
-      let probability = (g.count / maxPossibleFrequency) * avgSim * 100;
-      // Boost probability slightly to make it realistic (70-99%)
-      probability = Math.min(99, Math.max(10, probability + (avgSim * 50)));
+    // Sort clusters by frequency (highest first) and take the top 20
+    clusters.sort((a, b) => b.count - a.count);
+    const topClusters = clusters.slice(0, 20);
 
-      return {
-        topic: g.bestQuestion.substring(0, 50),
-        rawText: g.bestQuestion,
-        confidence: Math.round(probability)
-      };
-    }).sort((a, b) => b.confidence - a.confidence).slice(0, 15); // Top 15 raw matches for context
-
-    if (topRawMatches.length === 0) {
-      return res.status(400).json({ error: 'No relevant questions found matching the syllabus topics.' });
+    if (topClusters.length === 0) {
+      return res.status(400).json({ error: 'Could not find any clear patterns in the past papers.' });
     }
 
-    // Step 5: Oracle Core (LLM Generation)
-    const contextString = topRawMatches.map((m, i) => `[Topic Snippet: ${m.topic} | Confidence: ${m.confidence}%]\nRaw Fragment: ${m.rawText}`).join('\n\n');
+    // 4. Stage 2: Micro-Formatting with Cheap/Fast AI Model
+    // We only send the text from the most frequent clusters
+    const contextString = topClusters.map((c, i) => `[Cluster ${i+1} | Frequency: ${c.count}]\nTexts:\n${c.texts.join('\n---\n')}`).join('\n\n==========\n\n');
 
     let strictLangInstruction = "";
     if (language === 'Bangla') {
@@ -169,14 +138,13 @@ export const runOraclePrediction = async (req: Request, res: Response) => {
       strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
     }
 
-    const systemPrompt = `You are the ultimate Board Exam Oracle for students. Your task is to analyze raw, messy OCR text fragments from past board exams and synthesize them into perfectly formatted, highly probable exam questions.
+    const systemPrompt = `You are a Board Exam Oracle. Your task is to review clusters of repeating past exam questions and format them into beautiful, clean predicted questions.
 
 CRITICAL INSTRUCTIONS:
-1. You will receive context chunks mapped to syllabus topics.
-2. Group related fragments and synthesize them into a fully formed, meaningful board-standard question.
-3. If the topic is essay-type or creative, divide the question into logical subquestions (e.g., a, b, c, d).
-4. Assign a realistic confidence score (75-99%) based on the context's provided confidence.
-5. You MUST return ONLY a strict JSON array. No markdown blocks, no extra text.${strictLangInstruction}
+1. You will receive clusters of raw question texts. The "Frequency" indicates how many times this question appeared in past years.
+2. For each cluster, synthesize the raw messy texts into a single, perfectly formatted board-standard question.
+3. Assign a realistic confidence score (75-99%) based purely on the Frequency. (e.g., Frequency 1 = 70-80%, Frequency 2 = 85-90%, Frequency 3+ = 95-99%).
+4. Return ONLY a strict JSON array. No markdown, no extra text.${strictLangInstruction}
 
 JSON FORMAT:
 [
@@ -190,26 +158,27 @@ JSON FORMAT:
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: `Here is the raw past paper context:\n\n${contextString}\n\nAnalyze this data, extract the true underlying questions, and return the structured JSON array of predictions (limit to top 10).` }
+      { role: 'user', content: `Here are the top repeating question clusters:\n\n${contextString}\n\nFormat them into the JSON array of predictions (generate up to 20 questions).` }
     ];
 
-    // Use 'Pro' tier for Oracle to get best reasoning and format compliance
-    const aiResponse = await router.generate(messages as any, userId, 'Pro', { temperature: 0.2 });
+    const router = new ModelRouter();
     
-    // Parse JSON from AI response
+    // 🚀 Use 'General' tier (Flash/Groq) for lightning fast speed & ultra low cost
+    const aiResponse = await router.generate(messages as any, userId, 'General', { temperature: 0.1 });
+    
+    // 5. Parse JSON from AI response
     let finalPredictions = [];
     try {
-      // Strip markdown json formatting if AI adds it
       const cleanedResponse = aiResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
       finalPredictions = JSON.parse(cleanedResponse);
     } catch (e) {
       console.error("Oracle AI JSON Parsing Error:", e);
-      // Fallback to raw matches if JSON fails
-      finalPredictions = topRawMatches.map((m, index) => ({
+      // Fallback if JSON fails
+      finalPredictions = topClusters.map((c, index) => ({
         id: String(index + 1),
-        topic: m.topic + "...",
-        format: m.rawText,
-        confidence: m.confidence
+        topic: "Predicted Topic " + (index + 1),
+        format: c.texts[0],
+        confidence: Math.min(99, 70 + (c.count * 5))
       }));
     }
 
