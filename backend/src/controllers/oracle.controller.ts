@@ -138,13 +138,14 @@ export const runOraclePrediction = async (req: Request, res: Response) => {
       strictLangInstruction = "\n\nCRITICAL INSTRUCTION: You MUST generate your entire response ONLY in Hindi language. Do not use English and do not hallucinate.";
     }
 
-    const systemPrompt = `You are a Board Exam Oracle. Your task is to review clusters of repeating past exam questions and format them into beautiful, clean predicted questions.
+    const systemPrompt = `You are a Board Exam Oracle. Your task is to review clusters of text from study materials, past papers, or research papers and format them into beautiful, clean predicted exam questions.
 
 CRITICAL INSTRUCTIONS:
-1. You will receive clusters of raw question texts. The "Frequency" indicates how many times this question appeared in past years.
-2. For each cluster, synthesize the raw messy texts into a single, perfectly formatted board-standard question.
-3. Assign a realistic confidence score (75-99%) based purely on the Frequency. (e.g., Frequency 1 = 70-80%, Frequency 2 = 85-90%, Frequency 3+ = 95-99%).
-4. Return ONLY a strict JSON array. No markdown, no extra text.${strictLangInstruction}
+1. You will receive clusters of raw text. The "Frequency" indicates how many times this topic appeared.
+2. If the text contains actual exam questions, synthesize them into a single, perfectly formatted board-standard question.
+3. If the text contains notes, research papers, or general topics (NOT questions), YOU MUST GENERATE a highly probable exam question based on the key concepts in the text.
+4. Assign a realistic confidence score (75-99%) based purely on the Frequency. (e.g., Frequency 1 = 70-80%, Frequency 2 = 85-90%, Frequency 3+ = 95-99%).
+5. Return ONLY a strict JSON array. No markdown, no extra text.${strictLangInstruction}
 
 JSON FORMAT:
 [
@@ -158,24 +159,32 @@ JSON FORMAT:
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: `Here are the top repeating question clusters:\n\n${contextString}\n\nFormat them into the JSON array of predictions (generate up to 20 questions).` }
+      { role: 'user', content: `Here are the top repeating topic clusters:\n\n${contextString}\n\nFormat them into the JSON array of predicted questions (generate up to 20 questions).` }
     ];
 
+    const router = new ModelRouter();
+    
     // 🚀 Use 'Free' tier (Flash/Groq) for lightning fast speed & ultra low cost
-    const aiResponse = await router.generate(messages as any, userId, 'Free', { temperature: 0.1 });
+    const aiResponse = await router.generate(messages as any, userId, 'Free', { temperature: 0.2 });
     
     // 5. Parse JSON from AI response
     let finalPredictions = [];
     try {
-      const cleanedResponse = aiResponse.replace(/```json/gi, '').replace(/```/g, '').trim();
-      finalPredictions = JSON.parse(cleanedResponse);
+      const startIndex = aiResponse.indexOf('[');
+      const endIndex = aiResponse.lastIndexOf(']');
+      if (startIndex !== -1 && endIndex !== -1 && endIndex > startIndex) {
+         const jsonStr = aiResponse.substring(startIndex, endIndex + 1);
+         finalPredictions = JSON.parse(jsonStr);
+      } else {
+         throw new Error("No JSON array found in response");
+      }
     } catch (e) {
-      console.error("Oracle AI JSON Parsing Error:", e);
+      console.error("Oracle AI JSON Parsing Error:", e, "Raw Output:", aiResponse);
       // Fallback if JSON fails
       finalPredictions = topClusters.map((c, index) => ({
         id: String(index + 1),
         topic: "Predicted Topic " + (index + 1),
-        format: c.texts[0],
+        format: c.texts[0].substring(0, 300) + "...",
         confidence: Math.min(99, 70 + (c.count * 5))
       }));
     }
