@@ -20,7 +20,17 @@ function SignUpForm() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (resendCooldown > 0) {
+      timer = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   useEffect(() => {
     if (referralCode) {
@@ -67,6 +77,26 @@ function SignUpForm() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (resendCooldown > 0 || isResending) return;
+    setIsResending(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?flow=signup`,
+        }
+      });
+      if (error) throw error;
+      setResendCooldown(60); // 60 seconds cooldown
+    } catch (error: any) {
+      // Ignore or show small toast
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -140,19 +170,51 @@ function SignUpForm() {
         >
           {message?.type === 'success' ? (
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="py-12 flex flex-col items-center justify-center text-center space-y-4"
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{ type: "spring", duration: 0.6, bounce: 0.4 }}
+              className="py-10 flex flex-col items-center justify-center text-center space-y-5"
             >
-              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+              <motion.div 
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                  boxShadow: ["0 0 0 0 rgba(16, 185, 129, 0)", "0 0 0 20px rgba(16, 185, 129, 0.1)", "0 0 0 0 rgba(16, 185, 129, 0)"]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mb-4"
+              >
+                <Mail className="w-12 h-12 text-emerald-400" />
+              </motion.div>
+              
+              <div className="space-y-2">
+                <h3 className="text-3xl font-black text-white">Check Your Inbox!</h3>
+                <p className="text-emerald-400 font-semibold text-lg">We just sent a confirmation link to</p>
+                <p className="text-white font-bold bg-white/10 px-4 py-2 rounded-lg inline-block">{email}</p>
               </div>
-              <h3 className="text-2xl font-bold text-white">Awesome!</h3>
-              <p className="text-emerald-400 font-medium">Registration successful.</p>
-              <p className="text-gray-400 text-sm">Please check your email to confirm your account and get started.</p>
-              <Link href="/login" className="mt-4 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium transition-colors">
-                Go to Login
-              </Link>
+              
+              <p className="text-gray-400 text-sm max-w-sm mt-4 leading-relaxed">
+                You must click the link in that email to activate your account before you can log in. If you don't see it, check your spam folder.
+              </p>
+              
+              <div className="flex flex-col w-full gap-3 mt-6 pt-6 border-t border-white/10">
+                <Link href="/login" className="w-full px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2">
+                  I have confirmed my email <ArrowRight size={18} />
+                </Link>
+                
+                <button 
+                  onClick={handleResendEmail} 
+                  disabled={isResending || resendCooldown > 0}
+                  className="w-full px-6 py-3 bg-transparent hover:bg-white/5 border border-white/10 text-gray-300 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isResending ? (
+                    <><Loader2 className="animate-spin" size={16} /> Sending...</>
+                  ) : resendCooldown > 0 ? (
+                    `Resend Email (${resendCooldown}s)`
+                  ) : (
+                    `Send Again`
+                  )}
+                </button>
+              </div>
             </motion.div>
           ) : (
             <form className="space-y-5" onSubmit={handleSignUp}>
