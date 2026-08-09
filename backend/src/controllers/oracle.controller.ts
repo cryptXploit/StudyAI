@@ -161,10 +161,8 @@ JSON FORMAT:
       { role: 'user', content: `Here are the top repeating question clusters:\n\n${contextString}\n\nFormat them into the JSON array of predictions (generate up to 20 questions).` }
     ];
 
-    const router = new ModelRouter();
-    
-    // 🚀 Use 'General' tier (Flash/Groq) for lightning fast speed & ultra low cost
-    const aiResponse = await router.generate(messages as any, userId, 'General', { temperature: 0.1 });
+    // 🚀 Use 'Free' tier (Flash/Groq) for lightning fast speed & ultra low cost
+    const aiResponse = await router.generate(messages as any, userId, 'Free', { temperature: 0.1 });
     
     // 5. Parse JSON from AI response
     let finalPredictions = [];
