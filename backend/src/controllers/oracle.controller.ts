@@ -162,8 +162,6 @@ JSON FORMAT:
       { role: 'user', content: `Here are the top repeating topic clusters:\n\n${contextString}\n\nFormat them into the JSON array of predicted questions (generate up to 20 questions).` }
     ];
 
-    const router = new ModelRouter();
-    
     // 🚀 Use 'Free' tier (Flash/Groq) for lightning fast speed & ultra low cost
     const aiResponse = await router.generate(messages as any, userId, 'Free', { temperature: 0.2 });
     
