@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Volume2, Pin, CheckCircle2, History, ShieldCheck, Music, CloudRain, Users, Share2, AlertTriangle } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, Pin, CheckCircle2, History, ShieldCheck, Music, CloudRain, Users, Share2, AlertTriangle, Network, User } from 'lucide-react';
 import io from 'socket.io-client';
 
 const translations = {
@@ -105,6 +105,58 @@ const AMBIENT_SOUNDS = [
 
 let socket: any;
 
+
+function NeuralTree({ users }: { users: any[] }) {
+  if (!users || users.length === 0) return null;
+  const radius = 60;
+  return (
+    <div className="relative w-full h-48 flex items-center justify-center bg-slate-900 rounded-2xl border border-slate-700/50 shadow-inner overflow-hidden mb-4">
+      {/* Central Node (Room Server/Root) */}
+      <motion.div 
+        animate={{ scale: [1, 1.1, 1] }} 
+        transition={{ duration: 4, repeat: Infinity }}
+        className="absolute w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center z-20 shadow-[0_0_15px_rgba(99,102,241,0.5)] border border-indigo-400"
+      >
+         <Network size={20} className="text-indigo-300" />
+      </motion.div>
+      
+      {/* Users branching out */}
+      {users.map((user, i) => {
+        const angle = (i / users.length) * 2 * Math.PI;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        const isFocused = user.isFocused;
+        
+        return (
+          <React.Fragment key={user.id}>
+             <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+               <motion.line 
+                  x1="50%" y1="50%" 
+                  x2={`calc(50% + ${x}px)`} y2={`calc(50% + ${y}px)`} 
+                  stroke={isFocused ? "#10b981" : "#ef4444"} 
+                  strokeWidth="2"
+                  strokeDasharray={isFocused ? "none" : "5,5"}
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 1 }}
+                  className={isFocused ? "opacity-50" : "opacity-80 animate-pulse"}
+               />
+             </svg>
+             <motion.div 
+               initial={{ opacity: 0, scale: 0 }}
+               animate={{ opacity: 1, scale: 1, x, y }}
+               className={`absolute w-8 h-8 rounded-full border-2 flex items-center justify-center z-30 shadow-md ${isFocused ? 'bg-emerald-50 border-emerald-400' : 'bg-rose-50 border-rose-400'}`}
+               title={user.name}
+             >
+                <span className={`text-[10px] font-black ${isFocused ? 'text-emerald-700' : 'text-rose-700'}`}>{user.name.charAt(0).toUpperCase()}</span>
+             </motion.div>
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
 function FocusIslandContent() {
   const supabase = createClient();
   const searchParams = useSearchParams();
@@ -120,7 +172,8 @@ function FocusIslandContent() {
   const [isRunning, setIsRunning] = useState(false);
   const [history, setHistory] = useState<any[]>([]);
   const [pinnedText, setPinnedText] = useState('');
-  const [isPinned, setIsPinned] = useState(false); // 🟢 Pinned State
+  const [isPinned, setIsPinned] = useState(false);
+  const [pinHistory, setPinHistory] = useState<any[]>([]); // 🟢 Pin History State
 
   // Audio States
   const [lofiVolume, setLofiVolume] = useState(30);
@@ -196,12 +249,37 @@ function FocusIslandContent() {
     document.addEventListener('visibilitychange', handleVisibility);
 
     socket.on('room-update', (users: any) => { setRoomUsers(users); });
+    socket.on('pin-history-update', (hist: any[]) => {
+      setPinHistory(hist);
+      if (hist.length > 0) {
+        setPinnedText(hist[hist.length - 1].text);
+        setIsPinned(true);
+      }
+    });
+    socket.on('audio-sync', (audio: any) => {
+      if (audio.lofiUrl) setSelectedLofi(audio.lofiUrl);
+      if (audio.ambientUrl) setSelectedAmbient(audio.ambientUrl);
+    });
 
     return () => {
        document.removeEventListener('visibilitychange', handleVisibility);
        socket.off('room-update');
+       socket.off('pin-history-update');
+       socket.off('audio-sync');
     };
   }, [roomCode, currentUser]);
+
+  const handleAudioChange = (type: 'lofi' | 'ambient', url: string) => {
+    if (type === 'lofi') setSelectedLofi(url);
+    if (type === 'ambient') setSelectedAmbient(url);
+    
+    // Broadcast if in a room
+    if (roomCode) {
+      const newLofi = type === 'lofi' ? url : selectedLofi;
+      const newAmbient = type === 'ambient' ? url : selectedAmbient;
+      socket.emit('sync-audio', { roomCode, lofiUrl: newLofi, ambientUrl: newAmbient });
+    }
+  };
 
   // Audio Sync
   useEffect(() => {
@@ -400,7 +478,7 @@ function FocusIslandContent() {
                <div className="space-y-4">
                   <div className="flex justify-between items-center">
                      <label className="text-[10px] md:text-xs font-black tracking-widest text-indigo-300 uppercase flex items-center gap-2"><Music size={14} className="text-indigo-400"/> {t.lofiTrack}</label>
-                     <select value={selectedLofi} onChange={(e) => setSelectedLofi(e.target.value)} className="bg-slate-950/80 text-white text-[10px] font-bold outline-none rounded-xl px-3 py-1.5 border border-white/10 max-w-[140px] truncate shadow-inner focus:border-indigo-500 transition-all cursor-pointer">
+                     <select value={selectedLofi} onChange={(e) => handleAudioChange('lofi', e.target.value)} className="bg-slate-950/80 text-white text-[10px] font-bold outline-none rounded-xl px-3 py-1.5 border border-white/10 max-w-[140px] truncate shadow-inner focus:border-indigo-500 transition-all cursor-pointer">
                         {LOFI_STREAMS.map(stream => <option key={stream.url} value={stream.url}>{stream.name}</option>)}
                      </select>
                   </div>
@@ -410,7 +488,7 @@ function FocusIslandContent() {
                <div className="space-y-4">
                   <div className="flex justify-between items-center">
                      <label className="text-[10px] md:text-xs font-black tracking-widest text-violet-300 uppercase flex items-center gap-2"><CloudRain size={14} className="text-violet-400"/> {t.ambientSound}</label>
-                     <select value={selectedAmbient} onChange={(e) => setSelectedAmbient(e.target.value)} className="bg-slate-950/80 text-white text-[10px] font-bold outline-none rounded-xl px-3 py-1.5 border border-white/10 max-w-[140px] truncate shadow-inner focus:border-violet-500 transition-all cursor-pointer">
+                     <select value={selectedAmbient} onChange={(e) => handleAudioChange('ambient', e.target.value)} className="bg-slate-950/80 text-white text-[10px] font-bold outline-none rounded-xl px-3 py-1.5 border border-white/10 max-w-[140px] truncate shadow-inner focus:border-violet-500 transition-all cursor-pointer">
                         {AMBIENT_SOUNDS.map(sound => <option key={sound.url} value={sound.url}>{sound.name}</option>)}
                      </select>
                   </div>
@@ -441,22 +519,35 @@ function FocusIslandContent() {
          {/* 🟢 Right Side Panels (Desktop Only) */}
          <div className={`hidden lg:flex ${roomCode ? 'w-2/5' : 'w-1/3'} bg-white p-0 border-l border-slate-200 flex-col transition-all duration-300`}>
 
+            
             {/* MULTIPLAYER ZONE */}
             {roomCode && (
-               <div className="p-6 bg-slate-50 border-b border-slate-200">
-                  <h3 className="text-xs font-black tracking-widest text-slate-500 uppercase flex items-center gap-1.5 mb-4"><Users size={14} className="text-indigo-500"/> {t.friends}</h3>
-                  <div className="grid grid-cols-2 gap-3 max-h-40 overflow-y-auto custom-scrollbar">
-                     {roomUsers.map((u, i) => (
-                        <div key={i} className={`p-3 rounded-xl border flex items-center justify-between transition-all ${u.isFocused ? 'bg-white border-emerald-200 shadow-sm' : 'bg-red-50 border-red-200 animate-pulse'}`}>
-                           <p className={`text-xs font-black truncate ${u.isFocused ? 'text-slate-700' : 'text-red-600'}`}>{u.name}</p>
-                           {!u.isFocused && <AlertTriangle size={14} className="text-red-500"/>}
-                        </div>
-                     ))}
+               <div className="p-4 md:p-6 bg-slate-950 border-b border-slate-800">
+                  <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-1.5 mb-4">
+                    <Users size={14} className="text-indigo-400"/> {t.friends} (Neural Topology)
+                  </h3>
+                  
+                  <NeuralTree users={roomUsers} />
+
+                  <div className="bg-slate-900 rounded-xl p-3 border border-slate-800">
+                    <h4 className="text-[10px] font-black tracking-widest text-slate-500 uppercase mb-2">Leaderboard</h4>
+                    <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                       {roomUsers.map((u, i) => (
+                          <div key={i} className={`p-2.5 rounded-lg border flex items-center justify-between transition-all ${u.isFocused ? 'bg-slate-800 border-emerald-500/30' : 'bg-rose-950/30 border-rose-500/30 animate-pulse'}`}>
+                             <div className="flex items-center gap-2">
+                               <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${u.isFocused ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                                 {i + 1}
+                               </div>
+                               <p className={`text-xs font-black truncate ${u.isFocused ? 'text-slate-200' : 'text-rose-400'}`}>{u.name}</p>
+                             </div>
+                             {!u.isFocused ? <AlertTriangle size={14} className="text-rose-500"/> : <CheckCircle2 size={14} className="text-emerald-500"/>}
+                          </div>
+                       ))}
+                    </div>
                   </div>
                </div>
             )}
-
-            {/* 🟢 PINNED NOTES (Saved in LocalStorage) */}
+{/* 🟢 PINNED NOTES (Saved in LocalStorage) */}
             <div className="p-6 flex-1 flex flex-col">
                <div className="flex justify-between items-center mb-3">
                   <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase flex items-center gap-1.5">

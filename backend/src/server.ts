@@ -87,8 +87,8 @@ const io = new Server(server, { cors: { origin: '*' } });
 
 // 🟢 ZERO-LATENCY MULTIPLAYER SOCKET ENGINE
 const roomUsers: Record<string, any[]> = {};
-
-// 🟢 BATTLE GROUND MULTIPLAYER ENGINE
+const roomPins: Record<string, { text: string, author: string, timestamp: number }[]> = {};
+const roomAudio: Record<string, { lofiUrl: string, ambientUrl: string }> = {};
 const battleRooms: Record<string, { players: any[], currentQuestion: number, status: string }> = {};
 
 // Tracing middleware - attaches X-Trace-Id
@@ -303,13 +303,20 @@ io.on('connection', (socket) => {
   socket.on('join-room', ({ roomCode, user }) => {
     socket.join(roomCode);
     if (!roomUsers[roomCode]) roomUsers[roomCode] = [];
+    if (!roomPins[roomCode]) roomPins[roomCode] = [];
     
     // Add user if not exists
     const existing = roomUsers[roomCode].find(u => u.id === user.id);
     if (!existing) {
-      roomUsers[roomCode].push({ id: user.id, name: user.name || 'Student', isFocused: true });
+      roomUsers[roomCode].push({ id: user.id, name: user.name || 'Student', isFocused: true, avatar: user.avatar });
     }
     io.to(roomCode).emit('room-update', roomUsers[roomCode]);
+    
+    // Send existing state to the new user
+    socket.emit('pin-history-update', roomPins[roomCode]);
+    if (roomAudio[roomCode]) {
+      socket.emit('audio-sync', roomAudio[roomCode]);
+    }
   });
 
   socket.on('tab-status', ({ roomCode, userId, isFocused }) => {
@@ -320,6 +327,24 @@ io.on('connection', (socket) => {
          io.to(roomCode).emit('room-update', roomUsers[roomCode]);
       }
     }
+  });
+
+  // 🟢 Collaborative Cheatsheet
+  socket.on('update-pin', ({ roomCode, text, author }) => {
+    if (!roomPins[roomCode]) roomPins[roomCode] = [];
+    
+    // Only push if text changed to avoid redundant history
+    const lastPin = roomPins[roomCode][roomPins[roomCode].length - 1];
+    if (!lastPin || lastPin.text !== text) {
+      roomPins[roomCode].push({ text, author, timestamp: Date.now() });
+      io.to(roomCode).emit('pin-history-update', roomPins[roomCode]);
+    }
+  });
+
+  // 🟢 Audio Synchronization
+  socket.on('sync-audio', ({ roomCode, lofiUrl, ambientUrl }) => {
+    roomAudio[roomCode] = { lofiUrl, ambientUrl };
+    socket.to(roomCode).emit('audio-sync', roomAudio[roomCode]); // broadcast to others
   });
 
   // ⚔️ Battle Arena Sockets

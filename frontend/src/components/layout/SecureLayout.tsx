@@ -49,7 +49,8 @@ export default function SecureLayout({ children }: { children: React.ReactNode }
       const isPublicPath = publicPaths.some(p => pathname === p || pathname.startsWith(`${p}/`));
 
       if (!session && !isPublicPath) {
-        router.replace('/login');
+        const currentUrl = encodeURIComponent(pathname + window.location.search);
+        router.replace(`/login?redirectTo=${currentUrl}`);
         return;
       }
 
