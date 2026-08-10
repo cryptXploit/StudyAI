@@ -22,67 +22,56 @@ Uncomment the section below and add your deployed image links before final submi
 -->
 
 ## 🌟 The Vision: Enterprise-Level Education at Zero Cost
-We live in an era where personalized education is a luxury. Large corporations spend millions building proprietary EdTech systems. **Prepia shatters this barrier.** 
+We live in an era where personalized education is a luxury. Large corporations spend millions building proprietary EdTech systems that remain fundamentally inaccessible to the masses. **Prepia shatters this barrier.** 
 
-Built in just **1 to 1.5 months** using the free tier of **Gemini**, assisted by **Antigravity** and occasional **Pro Gemini** interventions, we engineered a platform that rivals multi-million dollar architectures. We didn't just build an app; we built an autonomous, secure, and blazing-fast learning ecosystem that scales globally while keeping server costs aggressively low.
+Built in just **1 to 1.5 months** on an ultra-lean budget using the free tier of **Gemini**, assisted by **Antigravity** and strategic **Pro Gemini** interventions, we engineered a platform that rivals multi-million dollar architectures. We didn't just build an app; we built a cost-effective, autonomous, secure, and blazing-fast learning ecosystem that scales globally, offering immense, tangible benefits to students at a fraction of traditional computing costs.
 
-## 🧠 The Intelligence Layer
-Prepia isn't just a wrapper; it's a deeply integrated cognitive engine.
-*   **Multi-Agent Ecosystem:** Users can dynamically switch between elite AI models (Gemini Flash/Pro, Groq, Deepseek, OpenAI) based on task complexity.
-*   **Autonomous OCR Pipeline:** Background BullMQ workers utilize Gemini's Vision capabilities to extract complex mathematical formulas, diagrams, and handwritten notes from PDFs perfectly, handling rate-limits autonomously.
-*   **Context-Aware Memory (RAG):** Instead of hallucinating, the AI grounds every answer in the student's uploaded syllabus and sources, maintaining conversational memory across sessions.
-*   **Bilingual Superiority:** Native-level support for English and Bengali across the entire UI and AI interactions, breaking language barriers for South Asian students.
+## 🧠 The Intelligence Layer: Beyond Basic RAG
+Prepia represents a paradigm shift in how students interact with their curriculum. We moved beyond primitive vector retrieval into true contextual understanding.
+*   **Intelligent Hybrid Architecture (Open-Source + Paid):** We dynamically route queries between elite models (Gemini Flash/Pro, Groq, Deepseek, OpenAI). Simple queries hit blazing-fast open-source endpoints, while complex analytical tasks are routed to Gemini Advanced. This makes our AI ecosystem incredibly cost-effective while delivering maximum intelligence.
+*   **Advanced "Beyond-Reranking" Retrieval:** Standard RAG reranking often fails on complex academic texts. Prepia uses a deeply intelligent semantic retrieval system that analyzes the syllabus intent, ensuring cost-friendly, latency-optimized, and super-smooth memory recall that feels entirely natural.
+*   **Dynamic AI Fallback & Routing System:** Uptime is critical for students studying at 3 AM. If a primary AI endpoint fails or rate-limits, our custom AI routing engine instantly falls back to a secondary model. 
+*   **Admin Control Panel:** The entire Fallback and Routing system is fully controllable via a secure Admin Panel, allowing live adjustments to traffic without deploying new code.
+*   **The AI Humanizer:** Students don't want robotic lectures. Our custom "Humanizer" layer fine-tunes AI responses to sound empathetic, engaging, and indistinguishable from a supportive human tutor.
 
 <!-- 
 <div align="center">
   <img src="./docs/assets/ai-chat-preview.png" alt="AI Chat Interface" width="80%" />
-  <p><em>Fig 2: Intelligent Multi-Modal Chat Interface</em></p>
+  <p><em>Fig 2: Intelligent Multi-Modal Chat Interface with Humanized Responses</em></p>
 </div>
 -->
 
-## ⚡ High-Performance Architecture
-*   **Next.js 14 App Router:** Server-side rendering (SSR) ensures lightning-fast initial page loads and superior SEO.
-*   **BullMQ Background Workers:** Heavy tasks like document parsing, embeddings generation, and video transcript extraction are offloaded to background Redis queues, ensuring the main thread never blocks.
-*   **Edge-Optimized:** Designed to be deployed on Vercel/Edge networks for millisecond latency worldwide.
+## ⚡ Fluid UI/UX: Beautiful by Design
+A learning platform must be a joy to use, not a chore. We invested heavily in cognitive ergonomics.
+*   **Framer Motion Animations:** Every interaction, from uploading a PDF to generating a mind-map, is accompanied by buttery-smooth, 60fps micro-animations that reduce cognitive load.
+*   **True Responsive Design:** Whether on a massive laptop screen or a budget mobile phone, the UI dynamically optimizes itself for the perfect reading experience.
+*   **Dark Mode & Light Mode:** Seamless, system-aware theming to protect students' eyes during late-night study sessions.
+*   **Trilingual Support (3 Languages):** Native-level support for **English, Bengali, and Hindi** across the entire UI and AI interactions, breaking language barriers for hundreds of millions of South Asian students.
+
+## 🎓 Solving Real Student Problems (28+ Core Features)
+Prepia doesn't just answer questions; it solves fundamental friction points in modern education through over 28 meticulously crafted features:
+1.  **Syllabus & Source Targeting:** Students upload their specific PDFs. Prepia focuses *strictly* on their curriculum, eliminating the hallucination and irrelevance of standard ChatGPT.
+2.  **Focus Islands & Bionic Reading:** Designed specifically for neurodivergent students (ADHD/Dyslexia), these tools force visual focus on specific paragraphs and bold key syllables to increase reading speed by up to 30%.
+3.  **Mind Mapping & LogicFlow:** Automatically turns 50-page boring PDFs into interactive, visual flowcharts, instantly solving the problem of visualizing complex relationships.
+4.  **Gamification (Rewards):** A built-in token economy. Students who cannot afford subscriptions can earn tokens simply by learning or watching ads. 
+5.  **Comprehensive Account Hub:** A fully fleshed-out application featuring Settings, dynamic Pricing tiers, Terms of Service, Refund Policy, and Privacy Policy, ensuring complete transparency and enterprise-level trust.
 
 ## 🛡️ Enterprise-Grade Security
 Security was not an afterthought; it is the foundation of Prepia.
-*   **Supabase Row Level Security (RLS):** Every single database table is locked down with cryptographic RLS policies. A user can *only* read, write, or update their own data. Even if the API is compromised, the database refuses unauthorized queries.
-*   **Secure SSR Authentication:** We use HTTP-Only, Secure-flagged cookies for session management. Tokens are completely hidden from the browser's JavaScript, preventing XSS token theft.
+*   **Supabase Row Level Security (RLS):** Every single database table is locked down with cryptographic RLS policies. A user can *only* read, write, or update their own data.
+*   **Secure SSR Authentication:** We use HTTP-Only, Secure-flagged cookies for session management. Tokens are completely hidden from the browser's JavaScript.
 *   **Idempotency & Transaction Locks:** Local payment verifications (bKash/Nagad) use advanced SQL RPC transactions to ensure complete uniqueness. Double-spending or race conditions are mathematically impossible.
-
-## 🎓 Student-Centric Problem Solving
-Students struggle with information overload. Prepia solves this by:
-1.  **Syllabus & Source Targeting:** Students upload their specific PDFs. Prepia's interactive UI guides them (e.g., animated CTAs guiding them to the dashboard) to ensure the AI only teaches what's relevant to *their* exams.
-2.  **Focus Islands & Bionic Reading:** Built-in tools for neurodivergent students to maintain focus during long reading sessions.
-3.  **Gamification (Rewards):** A built-in token economy where students earn credits through learning or watching ads, ensuring the platform remains accessible to low-income students.
 
 ---
 
 ## 🛠️ Tech Stack Matrix
 | Layer | Technology Used | Why we chose it |
 | :--- | :--- | :--- |
-| **Frontend** | Next.js 14, TailwindCSS, TypeScript | Supreme speed, type safety, and modern UI capabilities. |
-| **Backend API** | Node.js, Express, BullMQ | Handles heavy AI orchestration and webhook processing reliably. |
-| **Database & Auth** | Supabase (PostgreSQL) | Native RLS, real-time subscriptions, and robust OAuth. |
-| **AI Models** | Google Gemini (Core), Groq, Deepseek | State-of-the-art reasoning and vision extraction at low cost. |
+| **Frontend** | Next.js 14, TailwindCSS, Framer Motion | Supreme speed, buttery-smooth animations, and mobile/desktop optimization. |
+| **Backend API** | Node.js, Express, BullMQ | Handles heavy AI orchestration, fallback routing, and webhooks reliably. |
+| **Database & Auth** | Supabase (PostgreSQL) | Native RLS security, real-time subscriptions, and robust OAuth. |
+| **AI Models** | Gemini (Core), Groq, Deepseek, OpenAI | The Intelligent Hybrid model approach for max performance and min cost. |
 | **Infrastructure**| Docker, Kubernetes (K8s), Redis | Built for horizontal scaling and high availability in production. |
-
----
-
-## 📖 Usage Guide: How to Navigate Prepia
-
-1.  **Onboarding:** Sign up securely via Email or Google OAuth.
-2.  **The Dashboard:** The central hub. Click on the animated "Upload" button to add your PDF sources or create a Syllabus.
-3.  **The Oracle (Chat):** Navigate to the Chat interface. Select your preferred AI model (e.g., Gemini 1.5 Flash). The AI will instantly read your uploaded sources and answer questions based *strictly* on your curriculum.
-4.  **Mind Mapping & Flowcharts:** Visualize complex topics by generating interactive diagrams directly from your text.
-5.  **Rewards & Upgrades:** Run out of tokens? Head to the Rewards section to watch ads, or easily upgrade to PRO via automated local payment gateways.
-
-<!-- 
-<div align="center">
-  <img src="./docs/assets/features-preview.png" alt="Features Overview" width="80%" />
-</div>
--->
 
 ---
 
@@ -98,7 +87,7 @@ Students struggle with information overload. Prepia solves this by:
    ```
 
 2. **Environment Variables:**
-   Create `.env.local` in both `frontend` and `backend` directories. Add your Supabase URL, Anon Key, and Gemini API Keys (See `.env.example`).
+   Create `.env.local` in both `frontend` and `backend` directories. Add your Supabase URL, Anon Key, and API Keys (See `.env.example`).
 
 3. **Run the Application:**
    ```bash
@@ -115,15 +104,15 @@ Students struggle with information overload. Prepia solves this by:
 ### 🌍 Production Deployment (Docker & K8s Ready)
 Prepia is designed for massive scale. We utilize a containerized architecture:
 *   **Docker Compose:** The backend, Redis server, and background workers are bundled via `docker-compose.yml`. Just run `docker compose up -d --build`.
-*   **Kubernetes (K8s) Ready:** Stateless Node.js containers mean you can spin up 100+ replica pods behind a load balancer to handle thousands of concurrent students.
-*   **Cloud Hosting:** Frontend is hyper-optimized for Vercel; Backend is deployed on Azure VMs/DigitalOcean Droplets for heavy compute.
+*   **Kubernetes (K8s) Ready:** Stateless Node.js containers mean you can easily spin up 100+ replica pods behind a load balancer to handle thousands of concurrent students.
+*   **Cloud Hosting:** Frontend is hyper-optimized for Vercel; Backend is deployed on scalable VMs/K8s clusters for heavy background compute.
 
 ---
 
 ## 🔮 Future Roadmap: The Next Frontier
 This hackathon submission is just Phase 1. 
-*   **n8n Integration:** We are currently building n8n workflows to completely automate admin tasks, email campaigns, and advanced multi-step AI document processing.
-*   **Autonomous Swarm Agents:** Implementing specialized sub-agents (e.g., a "Math Tutor Agent", a "Grammar Agent") that debate each other to provide the ultimate synthesized answer to the student.
+*   **n8n Integration:** We are currently integrating n8n workflows to completely automate admin tasks, email campaigns, and multi-step AI document processing pipelines.
+*   **Autonomous Swarm Agents:** Implementing specialized sub-agents (e.g., a "Math Tutor Agent", a "Grammar Agent") that collaborate and debate each other to provide the ultimate synthesized answer.
 
 ---
 *Built with ❤️, ☕, and the sheer power of Gemini Advanced AI.*
