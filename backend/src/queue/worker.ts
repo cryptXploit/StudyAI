@@ -55,8 +55,15 @@ async function extractContent(buffer: Buffer, mimetype: string, path: string): P
           const miniPdfBytes = await miniPdf.save();
           const miniBuffer = Buffer.from(miniPdfBytes);
           
-          const ocrText = await performVisionAnalysis(miniBuffer, 'application/pdf');
-          extractedChunks.push({ content: `[Page ${pageNum}]\n${ocrText.trim()}`, pageNumber: pageNum });
+          try {
+            const ocrText = await performVisionAnalysis(miniBuffer, 'application/pdf');
+            extractedChunks.push({ content: `[Page ${pageNum}]\n${ocrText.trim()}`, pageNumber: pageNum });
+            // Add a small delay to avoid rate-limiting on Gemini free tier
+            await new Promise(res => setTimeout(res, 2000));
+          } catch (ocrErr: any) {
+            logger.warn(`OCR failed for page ${pageNum}: ${ocrErr.message}`);
+            extractedChunks.push({ content: `[Page ${pageNum}]\n[Image content could not be extracted due to API limits]`, pageNumber: pageNum });
+          }
         } else {
           // Free Fast Lane: Normal digital text
           extractedChunks.push({ content: `[Page ${pageNum}]\n${pageText.trim()}`, pageNumber: pageNum });
@@ -304,4 +311,14 @@ export const documentWorker = new Worker(
 );
 
 documentWorker.on('completed', (job) => logger.info('worker.completed', { jobId: job.id }));
-documentWorker.on('failed', (job, err) => logger.error('worker.failed', { jobId: job?.id, error: err.message }));
+documentWorker.on('failed', async (job, err) => {
+  logger.error('worker.failed', { jobId: job?.id, error: err.message });
+  // dYY FIX: Update DB on failure so the UI doesn't get stuck in 'uploading' forever
+  if (job?.data?.fileId) {
+    try {
+      await supabase.from('files').update({ status: 'failed' }).eq('id', job.data.fileId);
+    } catch (dbErr) {
+      logger.error('worker.failed.db_update_error', { error: dbErr });
+    }
+  }
+});
