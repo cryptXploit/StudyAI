@@ -26,6 +26,8 @@ We live in an era where personalized education is a luxury. Large corporations s
 
 Built in just **1 to 1.5 months** on an ultra-lean budget using the free tier of **Gemini**, assisted by **Antigravity** and strategic **Pro Gemini** interventions, we engineered a platform that rivals multi-million dollar architectures. We didn't just build an app; we built a cost-effective, autonomous, secure, and blazing-fast learning ecosystem that scales globally, offering immense, tangible benefits to students at a fraction of traditional computing costs.
 
+---
+
 ## 🧠 The Intelligence Layer: Beyond Basic RAG
 Prepia represents a paradigm shift in how students interact with their curriculum. We moved beyond primitive vector retrieval into true contextual understanding.
 *   **Intelligent Hybrid Architecture (Open-Source + Paid):** We dynamically route queries between elite models (Gemini Flash/Pro, Groq, Deepseek, OpenAI). Simple queries hit blazing-fast open-source endpoints, while complex analytical tasks are routed to Gemini Advanced. This makes our AI ecosystem incredibly cost-effective while delivering maximum intelligence.
@@ -41,6 +43,8 @@ Prepia represents a paradigm shift in how students interact with their curriculu
 </div>
 -->
 
+---
+
 ## ⚡ Fluid UI/UX: Beautiful by Design
 A learning platform must be a joy to use, not a chore. We invested heavily in cognitive ergonomics.
 *   **Framer Motion Animations:** Every interaction, from uploading a PDF to generating a mind-map, is accompanied by buttery-smooth, 60fps micro-animations that reduce cognitive load.
@@ -48,8 +52,11 @@ A learning platform must be a joy to use, not a chore. We invested heavily in co
 *   **Dark Mode & Light Mode:** Seamless, system-aware theming to protect students' eyes during late-night study sessions.
 *   **Trilingual Support (3 Languages):** Native-level support for **English, Bengali, and Hindi** across the entire UI and AI interactions, breaking language barriers for hundreds of millions of South Asian students.
 
+---
+
 ## 🎓 Solving Real Student Problems (28+ Core Features)
 Prepia doesn't just answer questions; it solves fundamental friction points in modern education through over 28 meticulously crafted features:
+
 1.  **Syllabus & Source Targeting:** Students upload their specific PDFs. Prepia focuses *strictly* on their curriculum, eliminating the hallucination and irrelevance of standard ChatGPT.
 2.  **Focus Islands & Bionic Reading:** Designed specifically for neurodivergent students (ADHD/Dyslexia), these tools force visual focus on specific paragraphs and bold key syllables to increase reading speed by up to 30%.
 3.  **Mind Mapping & LogicFlow:** Automatically turns 50-page boring PDFs into interactive, visual flowcharts, instantly solving the problem of visualizing complex relationships.
@@ -60,6 +67,8 @@ Prepia doesn't just answer questions; it solves fundamental friction points in m
 8.  **The Podcast Room:** Don't want to read? Prepia converts any textbook chapter into an engaging, multi-speaker AI podcast, allowing students to study while commuting or exercising.
 9.  **Wallpaper & Story Generation:** Students can instantly generate beautiful, motivational AI wallpapers or "Stories" containing bite-sized facts from their syllabus to share directly on their social media, effectively turning every user into a brand ambassador.
 10. **Comprehensive Account Hub:** A fully fleshed-out application featuring Settings, dynamic Pricing tiers, Terms of Service, Refund Policy, and Privacy Policy, ensuring complete transparency and enterprise-level trust.
+
+---
 
 ## 🛡️ Enterprise-Grade Security
 Security was not an afterthought; it is the foundation of Prepia.
@@ -80,37 +89,113 @@ Security was not an afterthought; it is the foundation of Prepia.
 
 ---
 
-## 🚀 Installation & Deployment
+## 📁 Project Structure
 
-### 💻 Local Development (For Judges/Contributors)
+```
+Prepia/
+├── frontend/                           Next.js 14 app
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── layout.tsx              Root with providers
+│   │   │   ├── login/page.tsx          Public login page
+│   │   │   ├── dashboard/page.tsx      Protected dashboard
+│   │   │   ├── chat/page.tsx           Protected chat
+│   │   │   └── auth/callback/          OAuth callback
+│   │   ├── components/
+│   │   │   ├── providers/              Auth & i18n contexts
+│   │   │   └── layout/                 SecureLayout wrapper
+│   │   └── lib/supabase/               Supabase client
+│   ├── middleware.ts                   Route protection
+│   ├── .env.local.example              Env template
+│   └── package.json
+│
+├── backend/                            Node.js Express app
+│   ├── src/workers/                    BullMQ workers
+│   ├── .env.example                    Env template
+│   └── package.json
+│
+├── QUICK_START.md                      ⭐ Read this first
+├── FRONTEND_COMPLETE.md                Completion summary
+├── DOCUMENTATION_MASTER_INDEX.md       All 26 docs indexed
+└── [22 more documentation files]
+```
 
-1. **Clone & Install Dependencies:**
-   ```bash
-   git clone https://github.com/cryptXploit/StudyAI.git
-   cd StudyAI
-   npm install
-   ```
+---
 
-2. **Environment Variables:**
-   Create `.env.local` in both `frontend` and `backend` directories. Add your Supabase URL, Anon Key, and API Keys (See `.env.example`).
+## 🚀 Installation & Quick Start (5 minutes)
 
-3. **Run the Application:**
-   ```bash
-   # Terminal 1: Frontend
-   cd frontend
-   npm run dev
+### 1. Environment Configuration
 
-   # Terminal 2: Backend API & Redis Queue
-   cd backend
-   npm run dev
-   ```
-   Visit `http://localhost:3000`.
+Create `.env.local` in the `frontend` directory. Get credentials from [Supabase Dashboard](https://app.supabase.com):
 
-### 🌍 Production Deployment (Docker & K8s Ready)
-Prepia is designed for massive scale. We utilize a containerized architecture:
-*   **Docker Compose:** The backend, Redis server, and background workers are bundled via `docker-compose.yml`. Just run `docker compose up -d --build`.
-*   **Kubernetes (K8s) Ready:** Stateless Node.js containers mean you can easily spin up 100+ replica pods behind a load balancer to handle thousands of concurrent students.
-*   **Cloud Hosting:** Frontend is hyper-optimized for Vercel; Backend is deployed on scalable VMs/K8s clusters for heavy background compute.
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
+```
+
+### 2. Local Development
+
+```bash
+# Terminal 1: Frontend
+cd frontend
+npm install
+npm run dev
+
+# Terminal 2: Backend API & Redis Queue
+cd backend
+npm install
+npm run dev
+```
+Visit `http://localhost:3000`. Your frontend is now running with complete auth, protected routes, and bilingual support.
+
+### 3. Production Deployment (Docker, K8s, Vercel)
+*   **Frontend (Fastest):** Vercel handles the Next.js 14 App Router flawlessly. Run `vercel` in the frontend directory.
+*   **Backend (Scalable):** The backend, Redis server, and background workers are bundled via `docker-compose.yml`. Just run `docker compose up -d --build`.
+*   **Kubernetes (K8s) Ready:** Stateless Node.js containers mean you can spin up 100+ replica pods behind a load balancer to handle thousands of concurrent students.
+
+---
+
+## 📚 Documentation Map
+
+### Start Here ⭐
+- **[QUICK_START.md](./QUICK_START.md)** - Complete 30-minute setup (from zero to production)
+- **[FRONTEND_COMPLETE.md](./FRONTEND_COMPLETE.md)** - What was built, architecture, security features
+
+### Detailed Guides
+- **[FRONTEND_SETUP_GUIDE.md](./FRONTEND_SETUP_GUIDE.md)** - Frontend setup, auth flows, route protection (20 min)
+- **[ENVIRONMENT_SETUP_GUIDE.md](./ENVIRONMENT_SETUP_GUIDE.md)** - All environment variables & credentials (15 min)
+- **[FRONTEND_DEPLOYMENT_GUIDE.md](./FRONTEND_DEPLOYMENT_GUIDE.md)** - Testing, building, deploying to Vercel/Docker (30 min)
+- **[FRONTEND_I18N_REFERENCE.md](./FRONTEND_I18N_REFERENCE.md)** - Bilingual translations (40+ keys)
+
+### Backend & Workers
+- **[BULLMQ_WORKERS_QUICKSTART.md](./BULLMQ_WORKERS_QUICKSTART.md)** - Background job setup (10 min)
+- **[N8N_NOTIFICATION_HUB_QUICKSTART.md](./N8N_NOTIFICATION_HUB_QUICKSTART.md)** - Notification routing (5 min)
+- **[COMPLETE_DELIVERY_SUMMARY.md](./COMPLETE_DELIVERY_SUMMARY.md)** - Full system architecture (30 min)
+
+### Master Index
+- **[DOCUMENTATION_MASTER_INDEX.md](./DOCUMENTATION_MASTER_INDEX.md)** - Complete guide to all 26 docs
+
+---
+
+## 🧪 Testing Checklist
+
+Before deploying to production, verify:
+- [ ] Frontend loads at `http://localhost:3000`
+- [ ] Can sign up with email and verification works
+- [ ] Google OAuth works seamlessly
+- [ ] Protected routes redirect accurately
+- [ ] Language toggle (EN/BN/HI) persists across all pages
+- [ ] Local payment webhooks (MacroDroid -> Express API) process successfully
+- [ ] Lighthouse score > 90
+
+---
+
+## 🆘 Common Troubleshooting
+
+*   **"Cannot find module '@supabase/ssr'":** Run `npm install @supabase/ssr @supabase/supabase-js`.
+*   **"NEXT_PUBLIC_SUPABASE_URL is not defined":** Ensure `.env.local` is present in the `frontend` root.
+*   **Auth not working:** Check Supabase project is active, clear browser cache, and check DevTools Console (F12).
+*   *See **[FRONTEND_DEPLOYMENT_GUIDE.md](./FRONTEND_DEPLOYMENT_GUIDE.md)** for 15+ more solutions.*
 
 ---
 
