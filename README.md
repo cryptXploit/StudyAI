@@ -158,22 +158,22 @@ Visit `http://localhost:3000`. Your frontend is now running with complete auth, 
 ## 📚 Documentation Map
 
 ### Start Here ⭐
-- **[QUICK_START.md](./QUICK_START.md)** - Complete 30-minute setup (from zero to production)
-- **[FRONTEND_COMPLETE.md](./FRONTEND_COMPLETE.md)** - What was built, architecture, security features
+- **[QUICK_START.md](https://github.com/cryptXploit/StudyAI/blob/main/QUICK_START.md)** - Complete 30-minute setup (from zero to production)
+- **[FRONTEND_COMPLETE.md](https://github.com/cryptXploit/StudyAI/blob/main/FRONTEND_COMPLETE.md)** - What was built, architecture, security features
 
 ### Detailed Guides
-- **[FRONTEND_SETUP_GUIDE.md](./FRONTEND_SETUP_GUIDE.md)** - Frontend setup, auth flows, route protection (20 min)
-- **[ENVIRONMENT_SETUP_GUIDE.md](./ENVIRONMENT_SETUP_GUIDE.md)** - All environment variables & credentials (15 min)
-- **[FRONTEND_DEPLOYMENT_GUIDE.md](./FRONTEND_DEPLOYMENT_GUIDE.md)** - Testing, building, deploying to Vercel/Docker (30 min)
-- **[FRONTEND_I18N_REFERENCE.md](./FRONTEND_I18N_REFERENCE.md)** - Bilingual translations (40+ keys)
+- **[FRONTEND_SETUP_GUIDE.md](https://github.com/cryptXploit/StudyAI/blob/main/FRONTEND_SETUP_GUIDE.md)** - Frontend setup, auth flows, route protection (20 min)
+- **[ENVIRONMENT_SETUP_GUIDE.md](https://github.com/cryptXploit/StudyAI/blob/main/ENVIRONMENT_SETUP_GUIDE.md)** - All environment variables & credentials (15 min)
+- **[FRONTEND_DEPLOYMENT_GUIDE.md](https://github.com/cryptXploit/StudyAI/blob/main/FRONTEND_DEPLOYMENT_GUIDE.md)** - Testing, building, deploying to Vercel/Docker (30 min)
+- **[FRONTEND_I18N_REFERENCE.md](https://github.com/cryptXploit/StudyAI/blob/main/FRONTEND_I18N_REFERENCE.md)** - Bilingual translations (40+ keys)
 
 ### Backend & Workers
-- **[BULLMQ_WORKERS_QUICKSTART.md](./BULLMQ_WORKERS_QUICKSTART.md)** - Background job setup (10 min)
-- **[N8N_NOTIFICATION_HUB_QUICKSTART.md](./N8N_NOTIFICATION_HUB_QUICKSTART.md)** - Notification routing (5 min)
-- **[COMPLETE_DELIVERY_SUMMARY.md](./COMPLETE_DELIVERY_SUMMARY.md)** - Full system architecture (30 min)
+- **[BULLMQ_WORKERS_QUICKSTART.md](https://github.com/cryptXploit/StudyAI/blob/main/BULLMQ_WORKERS_QUICKSTART.md)** - Background job setup (10 min)
+- **[N8N_NOTIFICATION_HUB_QUICKSTART.md](https://github.com/cryptXploit/StudyAI/blob/main/N8N_NOTIFICATION_HUB_QUICKSTART.md)** - Notification routing (5 min)
+- **[COMPLETE_DELIVERY_SUMMARY.md](https://github.com/cryptXploit/StudyAI/blob/main/COMPLETE_DELIVERY_SUMMARY.md)** - Full system architecture (30 min)
 
 ### Master Index
-- **[DOCUMENTATION_MASTER_INDEX.md](./DOCUMENTATION_MASTER_INDEX.md)** - Complete guide to all 26 docs
+- **[DOCUMENTATION_MASTER_INDEX.md](https://github.com/cryptXploit/StudyAI/blob/main/DOCUMENTATION_MASTER_INDEX.md)** - Complete guide to all 26 docs
 
 ---
 
@@ -195,7 +195,7 @@ Before deploying to production, verify:
 *   **"Cannot find module '@supabase/ssr'":** Run `npm install @supabase/ssr @supabase/supabase-js`.
 *   **"NEXT_PUBLIC_SUPABASE_URL is not defined":** Ensure `.env.local` is present in the `frontend` root.
 *   **Auth not working:** Check Supabase project is active, clear browser cache, and check DevTools Console (F12).
-*   *See **[FRONTEND_DEPLOYMENT_GUIDE.md](./FRONTEND_DEPLOYMENT_GUIDE.md)** for 15+ more solutions.*
+*   *See **[FRONTEND_DEPLOYMENT_GUIDE.md](https://github.com/cryptXploit/StudyAI/blob/main/FRONTEND_DEPLOYMENT_GUIDE.md)** for 15+ more solutions.*
 
 ---
 
