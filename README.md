@@ -53,8 +53,13 @@ Prepia doesn't just answer questions; it solves fundamental friction points in m
 1.  **Syllabus & Source Targeting:** Students upload their specific PDFs. Prepia focuses *strictly* on their curriculum, eliminating the hallucination and irrelevance of standard ChatGPT.
 2.  **Focus Islands & Bionic Reading:** Designed specifically for neurodivergent students (ADHD/Dyslexia), these tools force visual focus on specific paragraphs and bold key syllables to increase reading speed by up to 30%.
 3.  **Mind Mapping & LogicFlow:** Automatically turns 50-page boring PDFs into interactive, visual flowcharts, instantly solving the problem of visualizing complex relationships.
-4.  **Gamification (Rewards):** A built-in token economy. Students who cannot afford subscriptions can earn tokens simply by learning or watching ads. 
-5.  **Comprehensive Account Hub:** A fully fleshed-out application featuring Settings, dynamic Pricing tiers, Terms of Service, Refund Policy, and Privacy Policy, ensuring complete transparency and enterprise-level trust.
+4.  **Dopamine-Driven Gamification:** A built-in token economy paired with a "Dopamine Release UI" (satisfying micro-interactions, confetti, and sound cues). Students who cannot afford subscriptions can earn tokens by learning or watching ads, keeping them hooked on studying rather than doom-scrolling.
+5.  **Growth Engine & Inside Marketing:** A self-sustaining internal marketing system featuring a robust **Referral System**. Existing users invite peers to unlock premium tokens, creating viral, zero-cost user acquisition.
+6.  **Panic Mode & Emergency Referrals:** When exams are tomorrow and students are out of tokens, they can trigger "Panic Mode." This gives them immediate emergency access in exchange for completing specific high-value referral tasks, turning desperation into massive organic growth.
+7.  **Alumni Bounty Board:** Graduates and seniors can post specific tasks or "bounties" (e.g., summarizing a 100-page thesis) for juniors to solve and earn real rewards, creating a vibrant peer-to-peer micro-economy.
+8.  **The Podcast Room:** Don't want to read? Prepia converts any textbook chapter into an engaging, multi-speaker AI podcast, allowing students to study while commuting or exercising.
+9.  **Wallpaper & Story Generation:** Students can instantly generate beautiful, motivational AI wallpapers or "Stories" containing bite-sized facts from their syllabus to share directly on their social media, effectively turning every user into a brand ambassador.
+10. **Comprehensive Account Hub:** A fully fleshed-out application featuring Settings, dynamic Pricing tiers, Terms of Service, Refund Policy, and Privacy Policy, ensuring complete transparency and enterprise-level trust.
 
 ## 🛡️ Enterprise-Grade Security
 Security was not an afterthought; it is the foundation of Prepia.
