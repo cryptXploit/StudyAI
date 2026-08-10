@@ -249,6 +249,7 @@ export async function getAdStatusHandler(req: Request, res: Response): Promise<v
       claimsToday: currentClaims,
       tokensPerAd: REWARD_CONFIG.TOKENS_PER_AD,
       timerSeconds: REWARD_CONFIG.AD_TIMER_SECONDS,
+      adShowThreshold: REWARD_CONFIG.AD_SHOW_THRESHOLD,
       smartlinkUrl: REWARD_CONFIG.SMARTLINK_URL,
       currentTokens: user.tokens
     });

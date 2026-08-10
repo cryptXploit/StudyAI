@@ -11,6 +11,7 @@ interface AdStatus {
   claimsToday: number;
   tokensPerAd: number;
   timerSeconds: number;
+  adShowThreshold?: number;
   smartlinkUrl: string;
   currentTokens: number;
 }
@@ -193,9 +194,11 @@ export default function RewardedAdCard() {
   // VISIBILITY LOGIC:
   // - If max ads reached -> Hide
   // - If started watching today (claims > 0) -> Show until max ads reached
-  // - If tokens < 400 -> Show warning/ad prompt
+  // - If tokens < threshold -> Show warning/ad prompt
   if (status.claimsToday >= status.maxAds) return null;
-  if (status.claimsToday === 0 && status.currentTokens >= 400) return null;
+  
+  const threshold = status.adShowThreshold !== undefined ? status.adShowThreshold : 400;
+  if (status.claimsToday === 0 && status.currentTokens >= threshold) return null;
 
   const progressPercentage = (status.claimsToday / status.maxAds) * 100;
 
