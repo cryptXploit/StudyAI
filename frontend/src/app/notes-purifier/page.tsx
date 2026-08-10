@@ -14,6 +14,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { fetchUserFiles, File as DBFile } from '@/services/dashboard.service';
+import UploadCTA from '@/components/dashboard/UploadCTA';
 
 const translations = {
   English: {
@@ -327,10 +328,8 @@ export default function PurifierPage() {
               <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">{t.uploadLabel}</label>
               <div className="w-full max-h-48 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-900 custom-scrollbar space-y-1">
                 {userFiles.length === 0 ? (
-                  <div className="p-4 text-center text-xs font-bold text-slate-500">
-                    No sources found in Dashboard
-                  </div>
-                ) : (
+                <UploadCTA type="source" title="No Sources Found" description="Upload PDFs or Documents in your workspace to enable AI to chat with them." />
+              ) : (
                   userFiles.map(file => {
                     const isSelected = selectedFileIds.includes(file.id);
                     return (
@@ -527,10 +526,8 @@ export default function PurifierPage() {
                     <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">{t.uploadLabel}</label>
                     <div className="w-full max-h-48 overflow-y-auto border border-slate-800 rounded-2xl p-2 bg-slate-900 custom-scrollbar space-y-1">
                       {userFiles.length === 0 ? (
-                        <div className="p-4 text-center text-xs font-bold text-slate-500">
-                          No sources found in Dashboard
-                        </div>
-                      ) : (
+                <UploadCTA type="source" title="No Sources Found" description="Upload PDFs or Documents in your workspace to enable AI to chat with them." />
+              ) : (
                         userFiles.map(file => {
                           const isSelected = selectedFileIds.includes(file.id);
                           return (

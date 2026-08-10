@@ -15,6 +15,7 @@ import 'katex/dist/katex.min.css';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
+import UploadCTA from '@/components/dashboard/UploadCTA';
 
 // 🟢 Local i18n Dictionary
 const translations = {
@@ -764,7 +765,7 @@ function FlashcardsPageContent() {
           {isMobileDrawerOpen === 'files' && (
             <div className="space-y-2 pb-10">
               {files.length === 0 ? (
-                <div className="text-center mt-4 p-6 border-2 border-dashed rounded-3xl border-slate-700 bg-slate-950"><p className="text-sm text-slate-500 font-medium">{t.noIndexedNotes}</p></div>
+                <UploadCTA type="source" title="No Sources Found" description="Upload PDFs or Documents in your workspace to enable AI to chat with them." />
               ) : (
                 files.map(file => (
                   <div key={file.id} onClick={() => toggleFile(file.id)}

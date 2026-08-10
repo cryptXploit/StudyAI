@@ -14,6 +14,7 @@ import 'katex/dist/katex.min.css';
 import { useTokens } from '@/hooks/useTokens';
 import { getPublicErrorMessage, showPublicError } from '@/lib/errors/publicError';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
+import UploadCTA from '@/components/dashboard/UploadCTA';
 
 // 🟢 Local i18n Dictionary
 const translations = {
@@ -578,7 +579,7 @@ export default function StoryGeneratorPage() {
           {isMobileDrawerOpen === 'files' && (
             <div className="space-y-2 pb-10">
               {files.length === 0 ? (
-                <div className={`text-center mt-4 p-6 border-2 border-dashed rounded-3xl ${uiTheme === 'dark' ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-slate-50'}`}><p className="text-sm text-slate-500 font-medium">No Indexed Notes Found</p></div>
+                <UploadCTA type="source" title="No Sources Found" description="Upload PDFs or Documents in your workspace to enable AI to chat with them." />
               ) : (
                 files.map(file => (
                   <div key={file.id} onClick={() => {

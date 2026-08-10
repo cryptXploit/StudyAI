@@ -7,6 +7,7 @@ import { Play, Code, Loader2, FileText, CheckCircle2, Clock, Trophy, Copy, Histo
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
+import UploadCTA from '@/components/dashboard/UploadCTA';
 
 // 🟢 Local i18n Dictionary
 const translations = {
@@ -429,8 +430,8 @@ function QuizGeneratorPageContent() {
           <h3 className={`text-[11px] font-black tracking-widest uppercase mb-3 flex items-center gap-1.5 ${uiTheme === 'dark' ? 'text-indigo-400' : 'text-indigo-500'}`}><BookOpen size={14}/> {t.studyMaterials}</h3>
           <div className="space-y-2 mb-6">
             {files.length === 0 ? (
-              <p className={`text-sm italic text-center py-2 ${uiTheme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>{t.noIndexedFiles}</p>
-            ) : (
+                <UploadCTA type="source" title="No Sources Found" description="Upload PDFs or Documents in your workspace to enable AI to chat with them." />
+              ) : (
               files.map(file => (
                 <div key={file.id} onClick={() => toggleFile(file.id)} className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer border-2 transition-all ${selectedFileIds.includes(file.id) ? (uiTheme === 'dark' ? 'bg-indigo-500/20 border-indigo-500' : 'bg-indigo-50 border-indigo-500') : (uiTheme === 'dark' ? 'bg-slate-800 border-transparent hover:border-slate-700' : 'bg-white border-transparent hover:border-slate-200')}`}>
                   <div className="mt-0.5">{selectedFileIds.includes(file.id) ? <CheckCircle2 className={uiTheme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'} size={18} /> : <div className={`w-4 h-4 border-2 rounded ${uiTheme === 'dark' ? 'border-slate-600' : 'border-slate-300'}`} />}</div>

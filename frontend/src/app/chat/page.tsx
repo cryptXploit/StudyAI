@@ -15,6 +15,7 @@ import 'katex/dist/katex.min.css';
 import { toast } from 'react-hot-toast';
 import { useTokens } from '@/hooks/useTokens';
 import OutOfTokensModal from '@/components/modals/OutOfTokensModal';
+import UploadCTA from '@/components/dashboard/UploadCTA';
 
 // 🟢 Local i18n Dictionary
 const translations = {
@@ -505,8 +506,8 @@ export default function ChatPage() {
           <h3 className="text-[11px] font-black tracking-widest text-indigo-400 uppercase mb-3 flex items-center gap-1.5"><BookOpen size={14}/> {t.knowledgeBase}</h3>
           <div className="space-y-2 mb-6">
             {files.length === 0 ? (
-              <div className={`text-center mt-4 p-4 border-2 border-dashed rounded-xl ${uiTheme === 'dark' ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200'}`}><p className="text-sm text-slate-500 font-medium">{t.noMaterials}</p></div>
-            ) : (
+                <UploadCTA type="source" title="No Sources Found" description="Upload PDFs or Documents in your workspace to enable AI to chat with them." />
+              ) : (
               files.map(file => (
                 <div key={file.id} onClick={() => toggleFile(file.id)} className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer border transition-all ${selectedFileIds.includes(file.id) ? 'bg-indigo-500/20 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : (uiTheme === 'dark' ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-transparent hover:border-slate-200 shadow-sm')}`}>
                   <div className="mt-0.5">{selectedFileIds.includes(file.id) ? <CheckCircle2 className="text-indigo-400" size={18} /> : <div className={`w-4 h-4 border-2 rounded ${uiTheme === 'dark' ? 'border-slate-600' : 'border-slate-300'}`} />}</div>
@@ -738,7 +739,7 @@ export default function ChatPage() {
           {isMobileDrawerOpen === 'files' && (
             <div className="space-y-3 pb-10">
               {files.length === 0 ? (
-                <div className={`text-center mt-4 p-6 border-2 border-dashed rounded-3xl ${uiTheme === 'dark' ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white'}`}><p className="text-sm text-slate-500 font-medium">{t.noMaterials}</p></div>
+                <UploadCTA type="source" title="No Sources Found" description="Upload PDFs or Documents in your workspace to enable AI to chat with them." />
               ) : (
                 files.map(file => (
                   <div key={file.id} onClick={() => toggleFile(file.id)} className={`flex items-start gap-4 p-4 rounded-2xl cursor-pointer border-2 transition-all active:scale-95 ${selectedFileIds.includes(file.id) ? 'bg-indigo-500/10 border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : (uiTheme === 'dark' ? 'bg-slate-900 border-slate-800' : 'bg-white border-transparent shadow-sm')}`}>
@@ -753,7 +754,7 @@ export default function ChatPage() {
           {isMobileDrawerOpen === 'syllabus' && (
             <div className="pb-10">
               {syllabuses.length === 0 ? (
-                 <div className={`text-center mt-4 p-6 border-2 border-dashed rounded-3xl ${uiTheme === 'dark' ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-white'}`}><p className="text-sm text-slate-500 font-medium">{t.noSyllabusFound}</p></div>
+                <UploadCTA type="syllabus" title="No Syllabus Forged Yet" description="Create a structured syllabus in your workspace to generate targeted study materials." />
               ) : (
                 <>
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">{t.courseMax1}</p>
