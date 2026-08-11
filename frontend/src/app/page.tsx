@@ -8,6 +8,8 @@ import Lightfall from '@/components/ui/Lightfall';
 import LandingContactWidget from '@/components/ui/LandingContactWidget';
 import CheckoutModal from '@/components/payment/CheckoutModal';
 import { useAuth } from '@/components/providers/AuthContext';
+import { useI18n, Language } from '@/components/providers/I18nContext';
+import { LANDING_TRANSLATIONS } from './landingTranslations';
 
 const FAQS = [
   { q: "What exactly is Prepia?", a: "Prepia is a next-generation, context-aware AI built specifically for students. It uses RAG (Retrieval-Augmented Generation) to read your exact textbooks and syllabuses, answering questions based only on your materials, preventing hallucinations." },
@@ -18,7 +20,7 @@ const FAQS = [
   { q: "What happens if I run out of tokens?", a: "You will see our OutOfTokens Modal. You can either wait for your daily free drip (if applicable), invite friends, or upgrade to Pro." },
   { q: "Is my data secure?", a: "100%. We use Supabase Row Level Security (RLS) and strict IDOR protections. Your uploaded PDFs are private to your account." },
   { q: "Can teachers use this?", a: "Absolutely. Teachers use Prepia to instantly generate quizzes, syllabus outlines, and grading rubrics from their raw lecture notes." },
-  { q: "How are guardians benefitted?", a: "Guardians can track their child's progress via the Analytics page and ensure they are studying safely without internet distractions." },
+  { q: "How are guardians benefitted?", a: "{lT('test3.role')}s can track their child's progress via the Analytics page and ensure they are studying safely without internet distractions." },
   { q: "What is the Night Before Exam feature?", a: "It's a high-speed panic button. It reads all your uploaded documents simultaneously and gives you a 5-minute condensed cheat sheet of only the most critical topics." },
   { q: "What is the 3D Molecule Lab?", a: "It visualizes complex chemical structures dynamically in 3D right in your browser, perfect for organic chemistry." },
   { q: "Can I use it on my phone?", a: "Yes. Prepia is 100% mobile-optimized with an app-like feel, bottom sheets, and native-feeling swiping interactions." },
@@ -49,6 +51,8 @@ export default function LandingPage() {
 
   // Pricing State
   const { user } = useAuth();
+  const { language, setLanguage } = useI18n();
+  const lT = (key: string) => LANDING_TRANSLATIONS[key]?.[language as keyof typeof LANDING_TRANSLATIONS[string]] || LANDING_TRANSLATIONS[key]?.en || key;
   const [tiers, setTiers] = useState<any[]>([]);
   const [isLoadingPricing, setIsLoadingPricing] = useState(true);
   const [selectedTier, setSelectedTier] = useState<any | null>(null);
@@ -131,18 +135,23 @@ export default function LandingPage() {
             <span className="text-2xl font-black tracking-tight text-white">Prepia</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            <button onClick={() => scrollToSection('features')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">Features</button>
-            <button onClick={() => scrollToSection('why-us')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">Why Us?</button>
-            <button onClick={() => scrollToSection('testimonials')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">Testimonials</button>
-            <button onClick={() => scrollToSection('faq')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">FAQ</button>
+            <button onClick={() => scrollToSection('features')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">{lT('nav.features')}</button>
+            <button onClick={() => scrollToSection('why-us')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">{lT('nav.whyUs')}</button>
+            <button onClick={() => scrollToSection('testimonials')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">{lT('nav.testimonials')}</button>
+            <button onClick={() => scrollToSection('faq')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">{lT('nav.faq')}</button>
           </div>
           <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1 mr-2">
+              <button onClick={() => setLanguage('en')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'en' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>EN</button>
+              <button onClick={() => setLanguage('bn')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'bn' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>বাং</button>
+              <button onClick={() => setLanguage('hi')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'hi' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>हिं</button>
+            </div>
             {user ? (
-              <Link href="/dashboard" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">Dashboard</Link>
+              <Link href="/dashboard" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">{lT('nav.dashboard')}</Link>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-bold text-slate-300 hover:text-emerald-500">Sign In</Link>
-                <Link href="/signup" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">Get Started</Link>
+                <Link href="/login" className="text-sm font-bold text-slate-300 hover:text-emerald-500">{lT('nav.signIn')}</Link>
+                <Link href="/signup" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">{lT('nav.getStarted')}</Link>
               </>
             )}
           </div>
@@ -174,24 +183,24 @@ export default function LandingPage() {
         
         <div className="relative z-10 max-w-7xl mx-auto pointer-events-none">
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 backdrop-blur-md border border-slate-800 shadow-sm text-sm font-black uppercase tracking-widest text-emerald-500 mb-6 pointer-events-auto">
-            <Play size={12} /> The Million-Dollar AI Engine
+            <Play size={12} /> {lT('hero.badge')}
           </motion.div>
           
           <motion.h1 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-6xl md:text-8xl font-black tracking-tighter mb-8 text-white pointer-events-auto">
-            Study Smarter.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-blue-500">Not Harder.</span>
+            {lT('hero.title1')}<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-blue-500">{lT('hero.title2')}</span>
           </motion.h1>
           
           <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-xl md:text-2xl text-slate-400 font-medium max-w-3xl mx-auto mb-12 leading-relaxed pointer-events-auto">
-            Upload your syllabus. Our 28 purpose-built AI agents will instantly generate flashcards, 3D labs, mock exams, and personalized roadmaps.
+            {lT('hero.subtitle')}
           </motion.p>
           
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4 pointer-events-auto">
             <Link href="/signup" className="w-full sm:w-auto px-8 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-lg tracking-wide transition-all shadow-[0_10px_40px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-3">
-              Start for Free <ArrowRight size={20} />
+              {lT('hero.cta')} <ArrowRight size={20} />
             </Link>
             <button onClick={() => scrollToSection('why-us')} className="w-full sm:w-auto px-8 py-5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white rounded-2xl font-black text-lg tracking-wide transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3">
-              <Play size={20} /> See How it Works
+              <Play size={20} /> {lT('hero.secondaryCta')}
             </button>
           </motion.div>
         </div>
@@ -201,28 +210,28 @@ export default function LandingPage() {
       <section id="why-us" className="py-24 bg-slate-900 border-y border-slate-800">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white">Why We Destroy ChatGPT.</h2>
-            <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto">We didn't build a generic chatbot. We built a hyper-specialized academic engine.</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white">{lT('why.title')}</h2>
+            <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto">{lT('why.subtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-12">
             <div className="bg-slate-950 p-10 rounded-[2.5rem] border border-slate-800 relative overflow-hidden group shadow-lg">
-              <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white"><XCircle className="text-rose-500"/> General AI (ChatGPT)</h3>
+              <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white"><XCircle className="text-rose-500"/> {lT('why.chatgpt.title')}</h3>
               <ul className="space-y-4 text-slate-400 font-medium leading-relaxed">
-                <li>• Suffers from hallucinations (makes up fake facts).</li>
-                <li>• Answers from general internet data, not your professor's specific syllabus.</li>
-                <li>• Requires tedious "Prompt Engineering" to get what you want.</li>
-                <li>• Extremely boring text-only interface.</li>
+                <li>• {lT('why.chatgpt.point1')}</li>
+                <li>• {lT('why.chatgpt.point2')}</li>
+                <li>• {lT('why.chatgpt.point3')}</li>
+                <li>• {lT('why.chatgpt.point4')}</li>
               </ul>
             </div>
             
             <div className="bg-slate-950 p-10 rounded-[2.5rem] border border-emerald-500/30 relative overflow-hidden shadow-2xl">
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-emerald-500/20 blur-3xl rounded-full"></div>
-              <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white"><CheckCircle2 className="text-emerald-500"/> Prepia Engine</h3>
+              <h3 className="text-2xl font-black mb-4 flex items-center gap-3 text-white"><CheckCircle2 className="text-emerald-500"/> {lT('why.prepia.title')}</h3>
               <ul className="space-y-4 text-slate-300 font-medium leading-relaxed relative z-10">
-                <li>• <strong>RAG Architecture:</strong> Strictly answers using ONLY the PDFs you upload. Zero hallucinations.</li>
-                <li>• <strong>28 Micro-Apps:</strong> 1-Click Flashcards, 1-Click Concept Battles, 1-Click Podcasts. No prompting required.</li>
-                <li>• <strong>Dopamine UI:</strong> TikTok-style Neural Feeds, Gamified Arenas, and immersive 3D Labs.</li>
+                <li>• <strong>RAG Architecture:</strong> {lT('why.prepia.point1')}</li>
+                <li>• <strong>28 Micro-Apps:</strong> {lT('why.prepia.point2')}</li>
+                <li>• <strong>Dopamine UI:</strong> {lT('why.prepia.point3')}</li>
               </ul>
             </div>
           </div>
@@ -232,8 +241,8 @@ export default function LandingPage() {
       {/* 🚀 FEATURES GRID */}
       <section id="features" className="py-24 bg-slate-950">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white">28 Magical Features. 1 App.</h2>
-          <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto mb-20">Everything you need to survive college, built right in.</p>
+          <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white">{lT('features.title')}</h2>
+          <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto mb-20">{lT('features.subtitle')}</p>
           
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 text-left">
             {[
@@ -262,35 +271,50 @@ export default function LandingPage() {
       <section id="testimonials" className="py-24 bg-slate-950 text-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">Loved by the Ecosystem.</h2>
-            <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto">How students, teachers, and guardians are thriving.</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">{lT('testimonials.title')}</h2>
+            <p className="text-xl text-slate-400 font-medium max-w-2xl mx-auto">{lT('testimonials.subtitle')}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800">
               <div className="flex text-amber-400 mb-6"><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/></div>
-              <p className="text-slate-300 font-medium leading-relaxed mb-8">"I uploaded my 800-page medical textbook. The Night Before Exam feature literally saved me from failing anatomy. The AI only gave me exactly what I needed."</p>
+              <p className="text-slate-300 font-medium leading-relaxed mb-8">{lT('test1.text')}</p>
               <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1 mr-2">
+              <button onClick={() => setLanguage('en')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'en' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>EN</button>
+              <button onClick={() => setLanguage('bn')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'bn' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>বাং</button>
+              <button onClick={() => setLanguage('hi')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'hi' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>हिं</button>
+            </div>
                 <div className="w-12 h-12 bg-slate-800 rounded-full"></div>
-                <div><h4 className="font-black text-sm">Sarah J.</h4><p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Medical Student</p></div>
+                <div><h4 className="font-black text-sm">Sarah J.</h4><p className="text-xs text-slate-500 font-bold uppercase tracking-widest">{lT('test1.role')}</p></div>
               </div>
             </div>
             
             <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800">
               <div className="flex text-amber-400 mb-6"><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/></div>
-              <p className="text-slate-300 font-medium leading-relaxed mb-8">"I teach computer science. I drop my raw markdown lecture notes into Prepia and it instantly generates quizzes and lab graphs for my students. It saves me 10 hours a week."</p>
+              <p className="text-slate-300 font-medium leading-relaxed mb-8">{lT('test2.text')}</p>
               <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1 mr-2">
+              <button onClick={() => setLanguage('en')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'en' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>EN</button>
+              <button onClick={() => setLanguage('bn')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'bn' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>বাং</button>
+              <button onClick={() => setLanguage('hi')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'hi' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>हिं</button>
+            </div>
                 <div className="w-12 h-12 bg-slate-800 rounded-full"></div>
-                <div><h4 className="font-black text-sm">Prof. Rahman</h4><p className="text-xs text-slate-500 font-bold uppercase tracking-widest">University Teacher</p></div>
+                <div><h4 className="font-black text-sm">Prof. Rahman</h4><p className="text-xs text-slate-500 font-bold uppercase tracking-widest">{lT('test2.role')}</p></div>
               </div>
             </div>
 
             <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800">
               <div className="flex text-amber-400 mb-6"><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/><Star size={20} fill="currentColor"/></div>
-              <p className="text-slate-300 font-medium leading-relaxed mb-8">"My son used to get distracted on ChatGPT. With Prepia's Focus Island and detailed analytics, I know exactly what he is studying in a safe, enclosed environment."</p>
+              <p className="text-slate-300 font-medium leading-relaxed mb-8">{lT('test3.text')}</p>
               <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2 bg-slate-900 border border-slate-800 rounded-lg p-1 mr-2">
+              <button onClick={() => setLanguage('en')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'en' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>EN</button>
+              <button onClick={() => setLanguage('bn')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'bn' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>বাং</button>
+              <button onClick={() => setLanguage('hi')} className={`px-2 py-1 text-xs font-bold rounded-md transition-colors ${language === 'hi' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>हिं</button>
+            </div>
                 <div className="w-12 h-12 bg-slate-800 rounded-full"></div>
-                <div><h4 className="font-black text-sm">Ahmed H.</h4><p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Guardian</p></div>
+                <div><h4 className="font-black text-sm">Ahmed H.</h4><p className="text-xs text-slate-500 font-bold uppercase tracking-widest">{lT('test3.role')}</p></div>
               </div>
             </div>
           </div>
@@ -301,8 +325,8 @@ export default function LandingPage() {
       <section id="faq" className="py-24 bg-slate-900 border-t border-slate-800">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white">Top 50 Questions Answered.</h2>
-            <p className="text-xl text-slate-400 font-medium">Everything you ever wanted to know about how we operate.</p>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6 text-white">{lT('faq.title')}</h2>
+            <p className="text-xl text-slate-400 font-medium">{lT('faq.subtitle')}</p>
           </div>
 
           <div className="space-y-4">
@@ -337,13 +361,13 @@ export default function LandingPage() {
           
           <div className="max-w-4xl mx-auto text-center relative z-10">
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-black uppercase tracking-widest mb-8">
-              <Crown size={16} /> Unlock the Matrix
+              <Crown size={16} /> {lT('pricing.badge')}
             </motion.div>
             <motion.h2 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-4xl md:text-6xl font-black tracking-tight text-white mb-6 leading-tight">
-              An Unfair Advantage for <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Serious Students.</span>
+              {lT('pricing.title1')} <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">{lT('pricing.title2')}</span>
             </motion.h2>
             <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-400 font-medium max-w-2xl mx-auto text-lg md:text-xl leading-relaxed">
-              Why settle for general-purpose chatbots? Prepia is a multi-modal, deep-context machine designed strictly to help you dominate your exams.
+              {lT('pricing.subtitle')}
             </motion.p>
           </div>
         </div>
@@ -359,13 +383,13 @@ export default function LandingPage() {
                 onClick={() => setCurrency('BDT')}
                 className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${currency === 'BDT' ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
               >
-                BDT (Bangladesh)
+                {lT('pricing.toggle.bdt')}
               </button>
               <button 
                 onClick={() => setCurrency('USD')}
                 className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${currency === 'USD' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}`}
               >
-                USD (International)
+                {lT('pricing.toggle.usd')}
               </button>
             </div>
 
@@ -375,13 +399,13 @@ export default function LandingPage() {
                 onClick={() => setPlanType('solo')}
                 className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${planType === 'solo' ? 'bg-teal-500 text-slate-950' : 'text-slate-400 hover:text-white'}`}
               >
-                Solo Plans
+                {lT('pricing.toggle.solo')}
               </button>
               <button 
                 onClick={() => setPlanType('family')}
                 className={`px-6 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${planType === 'family' ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:text-white'}`}
               >
-                <Users size={16} /> Family Plans
+                <Users size={16} /> {lT('pricing.toggle.family')}
               </button>
             </div>
           </div>
@@ -396,22 +420,22 @@ export default function LandingPage() {
               {/* FREE PLAN */}
               {planType === 'solo' && (
               <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="p-8 md:p-10 rounded-[2.5rem] bg-slate-900 border border-slate-800 shadow-xl shadow-slate-950/50 flex flex-col">
-                <h3 className="text-2xl font-black text-white mb-2">Free Starter</h3>
-                <p className="text-slate-400 text-sm mb-8 font-medium leading-relaxed">Experience the ecosystem. Good for light research and casual assignments.</p>
+                <h3 className="text-2xl font-black text-white mb-2">{lT('pricing.free.title')}</h3>
+                <p className="text-slate-400 text-sm mb-8 font-medium leading-relaxed">{lT('pricing.free.desc')}</p>
                 
                 <div className="mb-8">
-                  <span className="text-5xl font-black text-white">{currency === 'BDT' ? '৳ 0' : '$ 0'}</span>
-                  <span className="text-slate-500 font-bold">/forever</span>
+                  <span className="text-5xl font-black text-white">{currency === 'BDT' ? `৳ ${lT('pricing.free.price')}` : `$ ${lT('pricing.free.price')}`}</span>
+                  <span className="text-slate-500 font-bold">{lT('pricing.free.period')}</span>
                 </div>
                 
                 <ul className="space-y-5 mb-10 flex-1">
-                  <li className="flex items-start gap-3 text-sm text-slate-300 font-bold"><CheckCircle2 size={20} className="text-slate-500 shrink-0"/> 500 Initial Tokens</li>
-                  <li className="flex items-start gap-3 text-sm text-slate-300 font-bold"><CheckCircle2 size={20} className="text-slate-500 shrink-0"/> Access to Basic Models</li>
-                  <li className="flex items-start gap-3 text-sm text-slate-500 font-bold line-through"><XCircle size={20} className="text-rose-500/50 shrink-0"/> No High-Compute Features</li>
+                  <li className="flex items-start gap-3 text-sm text-slate-300 font-bold"><CheckCircle2 size={20} className="text-slate-500 shrink-0"/> {lT('pricing.free.f1')}</li>
+                  <li className="flex items-start gap-3 text-sm text-slate-300 font-bold"><CheckCircle2 size={20} className="text-slate-500 shrink-0"/> {lT('pricing.free.f2')}</li>
+                  <li className="flex items-start gap-3 text-sm text-slate-500 font-bold line-through"><XCircle size={20} className="text-rose-500/50 shrink-0"/> {lT('pricing.free.f3')}</li>
                 </ul>
                 
                 <button disabled className="w-full py-4 bg-slate-800 text-slate-400 font-black uppercase tracking-widest text-xs rounded-2xl cursor-not-allowed border border-slate-700">
-                  Your Current Plan
+                  {lT('pricing.free.btn')}
                 </button>
               </motion.div>
               )}
@@ -435,13 +459,13 @@ export default function LandingPage() {
                   
                   {tier.popular && (
                     <div className="inline-flex w-max items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-6">
-                      <Sparkles size={14} /> Most Popular
+                      <Sparkles size={14} /> {lT('pricing.pro.popular')}
                     </div>
                   )}
                   
                   <h3 className="text-2xl font-black text-white mb-2">{tier.title}</h3>
                   <p className="text-slate-400 text-sm mb-6 font-medium leading-relaxed">
-                    Access to {tier.tokens.toLocaleString()} Premium AI Tokens for high-compute micro-apps.
+                    Access to {tier.tokens.toLocaleString()} {lT('pricing.pro.desc')}
                   </p>
                   
                   <div className="mb-8 flex flex-col gap-1">
@@ -449,25 +473,25 @@ export default function LandingPage() {
                       <span className="text-5xl font-black text-white">
                         {currency === 'BDT' ? `৳ ${tier.bdPrice}` : `$${tier.intPrice}`}
                       </span>
-                      <span className="text-slate-500 font-bold">/{tier.durationDays} days</span>
+                      <span className="text-slate-500 font-bold">/{tier.durationDays} {lT('pricing.pro.days')}</span>
                     </div>
                     {/* Strikethrough pricing */}
                     {(currency === 'BDT' ? tier.originalBdPrice : tier.originalIntPrice) && (
                       <div className="text-slate-500 font-bold text-sm">
-                        Regularly <span className="line-through">{currency === 'BDT' ? `৳ ${tier.originalBdPrice}` : `$${tier.originalIntPrice}`}</span>
+                        {lT('pricing.pro.regularly')} <span className="line-through">{currency === 'BDT' ? `৳ ${tier.originalBdPrice}` : `$${tier.originalIntPrice}`}</span>
                       </div>
                     )}
                   </div>
                   
                   <ul className="space-y-5 mb-10 flex-1">
                     <li className="flex items-start gap-3 text-sm text-slate-300 font-bold">
-                      <Zap size={20} className="text-amber-500 shrink-0"/> {tier.tokens.toLocaleString()} Tokens
+                      <Zap size={20} className="text-amber-500 shrink-0"/> {tier.tokens.toLocaleString()} {lT('pricing.pro.tokens')}
                     </li>
                     <li className="flex items-start gap-3 text-sm text-slate-300 font-bold">
-                      <CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> Unlock all 28 Micro-Apps
+                      <CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> {lT('pricing.pro.unlockAll')}
                     </li>
                     <li className="flex items-start gap-3 text-sm text-slate-300 font-bold">
-                      <CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> Priority Claude/GPT-4 Access
+                      <CheckCircle2 size={20} className="text-emerald-500 shrink-0"/> {lT('pricing.pro.priority')}
                     </li>
                   </ul>
                   
@@ -479,7 +503,7 @@ export default function LandingPage() {
                         : 'bg-slate-800 hover:bg-slate-700 text-white border border-slate-700'
                       }`}
                   >
-                    Upgrade Now <ChevronRight size={16} />
+                    {lT('pricing.pro.upgrade')} <ChevronRight size={16} />
                   </button>
                 </motion.div>
               ))}
@@ -491,8 +515,8 @@ export default function LandingPage() {
         {/* COMPARISON: WHY WE ARE BETTER */}
         <div className="max-w-5xl mx-auto px-4 md:px-8 mt-32">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">Prepia vs General AI</h2>
-            <p className="text-slate-400 font-medium">Why millions of students are switching from generic chatbots.</p>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">{lT('compare.title')}</h2>
+            <p className="text-slate-400 font-medium">{lT('compare.subtitle')}</p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-8">
@@ -504,15 +528,15 @@ export default function LandingPage() {
                 <li className="flex gap-4">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Target size={16} className="text-emerald-400"/></div>
                   <div>
-                    <h4 className="font-bold text-white text-sm mb-1">Hyper-Specific Context (RAG)</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed">Unlike ChatGPT which hallucinates answers from the internet, Prepia strictly answers from YOUR uploaded syllabuses and books using advanced Pinecone Vector Search.</p>
+                    <h4 className="font-bold text-white text-sm mb-1">{lT('compare.p.f1.title')}</h4>
+                    <p className="text-slate-400 text-xs leading-relaxed">{lT('compare.p.f1.desc')}</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0"><Zap size={16} className="text-emerald-400"/></div>
                   <div>
-                    <h4 className="font-bold text-white text-sm mb-1">28 Purpose-Built Micro-Apps</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed">No need to prompt-engineer. Want flashcards? Click a button. Want a 3D Knowledge Universe? Click a button. Want an exam roadmap? Click a button.</p>
+                    <h4 className="font-bold text-white text-sm mb-1">{lT('compare.p.f2.title')}</h4>
+                    <p className="text-slate-400 text-xs leading-relaxed">{lT('compare.p.f2.desc')}</p>
                   </div>
                 </li>
               </ul>
@@ -526,15 +550,15 @@ export default function LandingPage() {
                 <li className="flex gap-4">
                   <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0"><ShieldCheck size={16} className="text-slate-500"/></div>
                   <div>
-                    <h4 className="font-bold text-slate-300 text-sm mb-1">Generic, Broad Answers</h4>
-                    <p className="text-slate-500 text-xs leading-relaxed">Will give you generic Wikipedia-style answers that don't match your professor's specific syllabus or exact textbook phrasing.</p>
+                    <h4 className="font-bold text-slate-300 text-sm mb-1">{lT('compare.c.f1.title')}</h4>
+                    <p className="text-slate-500 text-xs leading-relaxed">{lT('compare.c.f1.desc')}</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
                   <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center shrink-0"><ShieldCheck size={16} className="text-slate-500"/></div>
                   <div>
-                    <h4 className="font-bold text-slate-300 text-sm mb-1">Heavy Prompting Required</h4>
-                    <p className="text-slate-500 text-xs leading-relaxed">You have to write 5 paragraphs of instructions just to get a decent set of flashcards or a study plan, wasting precious study time.</p>
+                    <h4 className="font-bold text-slate-300 text-sm mb-1">{lT('compare.c.f2.title')}</h4>
+                    <p className="text-slate-500 text-xs leading-relaxed">{lT('compare.c.f2.desc')}</p>
                   </div>
                 </li>
               </ul>
@@ -545,8 +569,8 @@ export default function LandingPage() {
         {/* TOKEN ECONOMICS */}
         <div className="max-w-5xl mx-auto px-4 md:px-8 mt-32 mb-16">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">Transparent Token Economics</h2>
-            <p className="text-slate-400 font-medium">Exactly what it costs to run our heavy computing clusters.</p>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">{lT('economics.title')}</h2>
+            <p className="text-slate-400 font-medium">{lT('economics.subtitle')}</p>
           </div>
           
           <div className="bg-slate-900 rounded-3xl border border-slate-800 shadow-sm overflow-hidden">
@@ -570,14 +594,14 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col items-center">
           <div className="text-2xl font-black tracking-tight text-white mb-6">Prepia<span className="text-emerald-500">.</span></div>
           <div className="flex flex-wrap justify-center gap-6 mb-8">
-            <Link href="/privacy-policy" className="hover:text-white transition-colors font-bold text-sm">Privacy Policy</Link>
-            <Link href="/terms-of-service" className="hover:text-white transition-colors font-bold text-sm">Terms of Service</Link>
-            <Link href="/refund-policy" className="hover:text-white transition-colors font-bold text-sm">Refund Policy</Link>
-            <Link href="/docs" className="hover:text-white transition-colors font-bold text-sm">Documentation</Link>
-            <Link href="/pricing" className="hover:text-white transition-colors font-bold text-sm">Pricing</Link>
-            <Link href="/contact" className="hover:text-white transition-colors font-bold text-sm">Contact Us</Link>
+            <Link href="/privacy-policy" className="hover:text-white transition-colors font-bold text-sm">{lT('footer.privacy')}</Link>
+            <Link href="/terms-of-service" className="hover:text-white transition-colors font-bold text-sm">{lT('footer.terms')}</Link>
+            <Link href="/refund-policy" className="hover:text-white transition-colors font-bold text-sm">{lT('footer.refund')}</Link>
+            <Link href="/docs" className="hover:text-white transition-colors font-bold text-sm">{lT('footer.docs')}</Link>
+            <Link href="/pricing" className="hover:text-white transition-colors font-bold text-sm">{lT('footer.pricing')}</Link>
+            <Link href="/contact" className="hover:text-white transition-colors font-bold text-sm">{lT('footer.contact')}</Link>
           </div>
-          <p className="text-sm font-medium">&copy; 2026 Prepia. All rights reserved.</p>
+          <p className="text-sm font-medium">{lT('footer.rights')}</p>
         </div>
       </footer>
 

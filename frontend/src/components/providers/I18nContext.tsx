@@ -2,12 +2,13 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type Language = 'en' | 'bn';
+export type Language = 'en' | 'bn' | 'hi';
 
 interface Translations {
   [key: string]: {
     en: string;
     bn: string;
+    hi?: string;
   };
 }
 
@@ -90,7 +91,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       console.warn(`Translation key not found: ${key}`);
       return fallback ?? key;
     }
-    return translation[language];
+    return translation[language] || translation['en'] || fallback || key;
   };
 
   return (
