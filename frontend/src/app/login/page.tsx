@@ -11,7 +11,7 @@ import { Mail, Lock, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signIn, signInWithGoogle, isLoading, error: authError } = useAuth();
+  const { user, signIn, signInWithGoogle, isLoading, error: authError } = useAuth();
   const { t, language, setLanguage } = useI18n();
 
   const [email, setEmail] = useState('');
@@ -21,6 +21,12 @@ function LoginPageContent() {
   const redirectTo = searchParams.get('redirectTo') || '/dashboard';
   const confirmationStatus = searchParams.get('confirmation');
   const passwordResetStatus = searchParams.get('passwordReset');
+
+  React.useEffect(() => {
+    if (user && !isLoading) {
+      router.push(redirectTo);
+    }
+  }, [user, isLoading, router, redirectTo]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();

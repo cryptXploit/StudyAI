@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '@/components/providers/AuthContext';
 import { useI18n } from '@/components/providers/I18nContext';
 import { createClient } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,6 +11,8 @@ import { Mail, Lock, User, Loader2, ArrowRight, CheckCircle2 } from 'lucide-reac
 
 function SignUpForm() {
   const { t, language, setLanguage } = useI18n();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
   const supabase = createClient();
   const searchParams = useSearchParams();
   
@@ -31,6 +34,12 @@ function SignUpForm() {
     }
     return () => clearTimeout(timer);
   }, [resendCooldown]);
+
+  useEffect(() => {
+    if (user && !isAuthLoading) {
+      router.push('/dashboard');
+    }
+  }, [user, isAuthLoading, router]);
 
   useEffect(() => {
     if (referralCode) {

@@ -137,8 +137,14 @@ export default function LandingPage() {
             <button onClick={() => scrollToSection('faq')} className="text-sm font-bold text-slate-300 hover:text-emerald-500 transition-colors">FAQ</button>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/login" className="text-sm font-bold text-slate-300 hover:text-emerald-500">Sign In</Link>
-            <Link href="/signup" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">Get Started</Link>
+            {user ? (
+              <Link href="/dashboard" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">Dashboard</Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-bold text-slate-300 hover:text-emerald-500">Sign In</Link>
+                <Link href="/signup" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">Get Started</Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
