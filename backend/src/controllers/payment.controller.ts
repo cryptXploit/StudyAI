@@ -32,9 +32,9 @@ export const smsWebhookHandler = async (req: Request, res: Response): Promise<vo
 
   try {
     const messageText = String(req.body?.message || '');
-    const trxMatch = messageText.match(/TrxID\s+([A-Z0-9]+)/i);
-    const amountMatch = messageText.match(/Tk\s+([\d.]+)/i);
-    const senderMatch = messageText.match(/from\s+(\d{11})/i);
+    const trxMatch = messageText.match(/(?:TrxID|TxnID|TxnId)\s*:?\s*([A-Z0-9]+)/i);
+    const amountMatch = messageText.match(/Tk\s*:?\s*([\d.]+)/i);
+    const senderMatch = messageText.match(/(?:from|Sender|A\/C)\s*:?\s*(\d{11})/i);
 
     if (!trxMatch || !amountMatch || !senderMatch) {
       res.status(400).json({ detail: 'Payment notification could not be parsed' });
