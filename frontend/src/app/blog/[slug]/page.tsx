@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: post.title,
       description: post.excerpt,
-      images: [`https://prepia.app/api/og?title=${encodeURIComponent(post.title)}&subtitle=${encodeURIComponent('Prepia AI Blog')}`],
+      images: [`https://www.prepia.app/api/og?title=${encodeURIComponent(post.title)}&subtitle=${encodeURIComponent('Prepia AI Blog')}`],
     },
   };
 }

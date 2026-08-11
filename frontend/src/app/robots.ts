@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://prepia.app/sitemap.xml',
+    sitemap: 'https://www.prepia.app/sitemap.xml',
   };
 }
 
