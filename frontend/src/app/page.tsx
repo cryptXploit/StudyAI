@@ -11,13 +11,10 @@ import { useAuth } from '@/components/providers/AuthContext';
 import { useI18n, Language } from '@/components/providers/I18nContext';
 import { LANDING_TRANSLATIONS } from './landingTranslations';
 
-];
-
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Pricing State
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const { language, setLanguage } = useI18n();
   const lT = (key: string) => LANDING_TRANSLATIONS[key]?.[language as keyof typeof LANDING_TRANSLATIONS[string]] || LANDING_TRANSLATIONS[key]?.en || key;
   const [tiers, setTiers] = useState<any[]>([]);
@@ -113,7 +110,11 @@ export default function LandingPage() {
               <button onClick={() => setLanguage('bn')} className={`px-1.5 sm:px-2 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-colors ${language === 'bn' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>বাং</button>
               <button onClick={() => setLanguage('hi')} className={`px-1.5 sm:px-2 py-1 text-[10px] sm:text-xs font-bold rounded-md transition-colors ${language === 'hi' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'}`}>हिं</button>
             </div>
-            {user ? (
+            {isLoading ? (
+              <div className="flex items-center justify-center w-24 h-10">
+                <Loader2 size={20} className="text-emerald-500 animate-spin" />
+              </div>
+            ) : user ? (
               <Link href="/dashboard" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-md">{lT('nav.dashboard')}</Link>
             ) : (
               <>
@@ -163,9 +164,15 @@ export default function LandingPage() {
           </motion.p>
           
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4 pointer-events-auto">
-            <Link href="/signup" className="w-full sm:w-auto px-8 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-lg tracking-wide transition-all shadow-[0_10px_40px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-3">
-              {lT('hero.cta')} <ArrowRight size={20} />
-            </Link>
+            {isLoading ? (
+              <div className="w-full sm:w-auto px-8 py-5 bg-emerald-600/50 text-white rounded-2xl flex items-center justify-center">
+                <Loader2 size={24} className="animate-spin" />
+              </div>
+            ) : (
+              <Link href={user ? "/dashboard" : "/signup"} className="w-full sm:w-auto px-8 py-5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-lg tracking-wide transition-all shadow-[0_10px_40px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-3">
+                {user ? lT('nav.dashboard') : lT('hero.cta')} <ArrowRight size={20} />
+              </Link>
+            )}
             <button onClick={() => scrollToSection('why-us')} className="w-full sm:w-auto px-8 py-5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white rounded-2xl font-black text-lg tracking-wide transition-all shadow-sm active:scale-95 flex items-center justify-center gap-3">
               <Play size={20} /> {lT('hero.secondaryCta')}
             </button>
