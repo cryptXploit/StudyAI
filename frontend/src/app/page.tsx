@@ -11,39 +11,6 @@ import { useAuth } from '@/components/providers/AuthContext';
 import { useI18n, Language } from '@/components/providers/I18nContext';
 import { LANDING_TRANSLATIONS } from './landingTranslations';
 
-const FAQS = [
-  { q: "What exactly is Prepia?", a: "Prepia is a next-generation, context-aware AI built specifically for students. It uses RAG (Retrieval-Augmented Generation) to read your exact textbooks and syllabuses, answering questions based only on your materials, preventing hallucinations." },
-  { q: "How is it different from ChatGPT?", a: "ChatGPT gives generic answers from the internet. Prepia gives hyper-specific answers tailored to your exam syllabus. Plus, we have 28 purpose-built tools (Flashcards, 3D Labs, Concept Battles) that ChatGPT doesn't have." },
-  { q: "Why did you build this?", a: "We built Prepia because we saw students wasting hours prompt-engineering generic AIs to get decent study materials. We wanted a one-click 'Magic Button' for every study need." },
-  { q: "How do you give services here?", a: "We use a multi-agent architecture powered by OpenAI and Anthropic. You upload a PDF, our OCR engines extract the text, chunk it, embed it via Pinecone, and our controllers route your requests to the cheapest/fastest LLM." },
-  { q: "How do tokens work?", a: "You get 500 free tokens on signup. Different tools cost different amounts (e.g., Night Before Exam = 5 tokens). You can buy Pro for 10,000 monthly tokens." },
-  { q: "What happens if I run out of tokens?", a: "You will see our OutOfTokens Modal. You can either wait for your daily free drip (if applicable), invite friends, or upgrade to Pro." },
-  { q: "Is my data secure?", a: "100%. We use Supabase Row Level Security (RLS) and strict IDOR protections. Your uploaded PDFs are private to your account." },
-  { q: "Can teachers use this?", a: "Absolutely. Teachers use Prepia to instantly generate quizzes, syllabus outlines, and grading rubrics from their raw lecture notes." },
-  { q: "How are guardians benefitted?", a: "{lT('test3.role')}s can track their child's progress via the Analytics page and ensure they are studying safely without internet distractions." },
-  { q: "What is the Night Before Exam feature?", a: "It's a high-speed panic button. It reads all your uploaded documents simultaneously and gives you a 5-minute condensed cheat sheet of only the most critical topics." },
-  { q: "What is the 3D Molecule Lab?", a: "It visualizes complex chemical structures dynamically in 3D right in your browser, perfect for organic chemistry." },
-  { q: "Can I use it on my phone?", a: "Yes. Prepia is 100% mobile-optimized with an app-like feel, bottom sheets, and native-feeling swiping interactions." },
-  { q: "What is the Neural Feed?", a: "A TikTok-style infinitely scrolling feed of bite-sized educational concepts extracted from your syllabus." },
-  { q: "Does it support Bengali?", a: "Yes, our AI fully supports Bengali, English, and Hindi. It can extract context in English and teach you in native Bengali." },
-  { q: "What is the Concept Battle?", a: "A gamified multiplayer arena where you battle other students or bots in real-time by answering questions from your syllabus." },
-  { q: "Are there any hidden costs?", a: "No. The token costs are clearly listed on our Pricing page. No hidden fees." },
-  { q: "Can I cancel my Pro subscription?", a: "Yes, you can cancel anytime from the Dashboard Settings." },
-  { q: "What is the Bionic Reader?", a: "It bolds the first few letters of words, helping neurodivergent students or speed-readers consume text 2x faster." },
-  { q: "How do I earn Karma points?", a: "By helping others on the Bounty Board, completing daily quests, and maintaining your login streak." },
-  { q: "What is the Career Hacker?", a: "An AI that analyzes your skills and generates a step-by-step roadmap for landing jobs in tech." },
-  { q: "Can I share my notes with friends?", a: "Yes, using the 'Share Context Pack' feature." },
-  { q: "What is Focus Island?", a: "A pomodoro timer mixed with gamification. Keep focusing to grow your island, lose focus and the island dies." },
-  { q: "How fast is the AI?", a: "We use edge caching (Upstash Redis) and stream responses. Cache hits are under 20ms, generations are streamed instantly." },
-  { q: "Can I upload handwritten notes?", a: "Yes, our OCR pipeline handles messy handwritten notes and purifies them into clean digital text." },
-  { q: "What is the Panic Mode?", a: "A viral gamification loop where you must invite 3 friends or pay tokens to unlock a crucial exam survival kit." },
-  { q: "Is there a student discount?", a: "Our Pro plan is already heavily subsidized for students at just ৳299/month." },
-  { q: "What happens to my files if I downgrade?", a: "Free users have a 7-day retention limit. Pro users get permanent storage." },
-  { q: "Can it solve math problems?", a: "Yes, the Pro Academic Solver handles advanced calculus, physics, and LaTeX rendering." },
-  { q: "Do you have an affiliate program?", a: "Yes, invite friends and earn free tokens for both of you." },
-  { q: "How many files can I upload?", a: "Free users can upload 3 files per week. Pro users have unlimited uploads." },
-  // Adding the rest to hit 50 for the user's specific request
-  ...Array.from({length: 20}).map((_, i) => ({ q: `FAQ Question ${i + 31}: Technical details about architecture?`, a: `We use Next.js App Router, Supabase, Pinecone Vector DB, Redis caching, and robust security middleware to ensure top-tier performance.` }))
 ];
 
 export default function LandingPage() {
@@ -330,19 +297,19 @@ export default function LandingPage() {
           </div>
 
           <div className="space-y-4">
-            {FAQS.map((faq, idx) => (
+            {Array.from({length: 50}).map((_, idx) => (
               <div key={idx} className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden transition-all shadow-sm hover:border-emerald-500/30">
                 <button 
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                   className="w-full px-6 py-5 text-left font-black text-slate-200 flex items-center justify-between hover:bg-slate-900 transition-colors"
                 >
-                  {faq.q}
+                  {lT(`faq.${idx + 1}.q`)}
                   <ChevronDown className={`transform transition-transform ${openFaq === idx ? 'rotate-180 text-emerald-500' : 'text-slate-500'}`} />
                 </button>
                 <AnimatePresence>
                   {openFaq === idx && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="px-6 pb-5">
-                      <p className="text-slate-400 font-medium leading-relaxed pt-2 border-t border-slate-800">{faq.a}</p>
+                      <p className="text-slate-400 font-medium leading-relaxed pt-2 border-t border-slate-800">{lT(`faq.${idx + 1}.a`)}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
