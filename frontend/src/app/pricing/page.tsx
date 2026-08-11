@@ -5,9 +5,12 @@ import { motion } from 'framer-motion';
 import { Sparkles, CheckCircle2, Zap, Target, ShieldCheck, XCircle, ChevronRight, Crown, Loader2, Users } from 'lucide-react';
 import CheckoutModal from '@/components/payment/CheckoutModal';
 import { useAuth } from '@/components/providers/AuthContext';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 export default function PricingPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [tiers, setTiers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTier, setSelectedTier] = useState<any | null>(null);
@@ -45,6 +48,11 @@ export default function PricingPage() {
   }, []);
 
   const handleUpgrade = (tier: any) => {
+    if (!user) {
+      toast.error('Please sign in or create an account to upgrade.');
+      router.push('/login?redirect=/pricing');
+      return;
+    }
     setSelectedTier(tier);
     setIsModalOpen(true);
   };
