@@ -169,12 +169,13 @@ async function processDocument(job: Job) {
     // If a page is huge, we should still split it to avoid embedding size limits.
     const subChunks = splitTextIntoChunks(pageChunk.content, 1000);
     for (const chunk of subChunks) {
-      if (chunk.trim().length < 10) continue;
-      const vector = await generateEmbedding(chunk, 1536);
+      const safeChunk = chunk.replace(/\u0000/g, '');
+      if (safeChunk.trim().length < 10) continue;
+      const vector = await generateEmbedding(safeChunk, 1536);
       chunksToInsert.push({
         file_id: fileId,
         user_id: userId,
-        content: chunk,
+        content: safeChunk,
         embedding: vector,
         chunk_index: index,
         page_number: pageChunk.pageNumber

@@ -166,8 +166,8 @@ export class GeminiAdapter implements ProviderAdapter {
     const apiKey = this.getApiKey();
     if (!apiKey) throw new Error('Gemini API Key is missing.');
 
-    // Fallback to text-embedding-004 if model is not properly passed
-    const actualModel = model ? model : 'text-embedding-004';
+    // Fallback to gemini-embedding-001 if model is not properly passed
+    const actualModel = model ? model : 'gemini-embedding-001';
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${actualModel}:embedContent?key=${apiKey}`, {
       method: 'POST',

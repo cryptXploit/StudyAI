@@ -94,8 +94,8 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
     try {
       const apiUrlBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/+$/, '');
       const fetchUrl = apiUrlBase.endsWith('/api') 
-        ? `${apiUrlBase}/payments/verify-bd-trx` 
-        : `${apiUrlBase}/api/payments/verify-bd-trx`;
+        ? `${apiUrlBase}/payments/submit-bd-trx` 
+        : `${apiUrlBase}/api/payments/submit-bd-trx`;
       const { data: { session } } = await (await import('../../lib/supabase/client')).createClient().auth.getSession();
       if (!session?.access_token) {
         throw new Error('Please sign in again before verifying your payment.');
@@ -109,6 +109,7 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
         },
         body: JSON.stringify({
           trx_id: trxId,
+          sender_number: bKashNumber,
           tier_id: selectedTier.id,
         })
       });
@@ -119,10 +120,7 @@ export default function CheckoutModal({ isOpen, onClose, userId, selectedTier, c
         throw new Error(data.detail || 'Verification failed');
       }
 
-      toast.success(data.message || 'Payment verified! PRO activated.', { duration: 5000 });
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      toast.success(data.message || 'Payment submitted! Please wait for admin verification.', { duration: 8000 });
       onClose();
     } catch (error: any) {
       toast.error(error.message || 'Something went wrong');

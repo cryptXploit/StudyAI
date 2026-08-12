@@ -44,7 +44,7 @@ export const TOKEN_COSTS = {
   BATTLE_ARENA_HOST: 10,
   
   // 🔒 Security Limits
-  FREE_USER_WEEKLY_FILE_LIMIT: 3,
+  FREE_USER_WEEKLY_FILE_LIMIT: 5,
   
   // 🎟️ User Tier Limits
   FREE_USER_INITIAL_TOKENS: 300,

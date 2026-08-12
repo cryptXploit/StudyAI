@@ -52,6 +52,7 @@ export default function FileList({ files, isLoading = false, onDelete, uiTheme =
           </span>
         );
       case 'error':
+      case 'failed':
         return (
           <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-800 text-xs font-medium rounded-full">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -135,7 +136,7 @@ export default function FileList({ files, isLoading = false, onDelete, uiTheme =
 
           <div className="flex items-center gap-4">
             <div>{getStatusBadge(file.status)}</div>
-            {onDelete && file.status !== 'uploading' && (
+            {onDelete && (
               <button
                 onClick={() => onDelete(file.id)}
                 className={`p-2 rounded-xl transition-colors ${uiTheme === 'dark' ? 'text-slate-500 hover:text-white hover:bg-red-500' : 'text-slate-400 hover:text-white hover:bg-red-500'}`}

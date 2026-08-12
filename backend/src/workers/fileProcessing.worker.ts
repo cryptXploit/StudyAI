@@ -58,9 +58,9 @@ export const fileProcessingWorker = createWorker<FileProcessingJobData>(
         // 4. Generate Embeddings via Gemini
         console.log(`[FileProcessingWorker] Generating embeddings for ${docs.length} chunks...`);
         const chunksToInsert = await Promise.all(docs.map(async (doc, index) => {
-          const textContent = doc.pageContent;
+          const textContent = doc.pageContent.replace(/\u0000/g, '');
           const embedResponse = await ai.models.embedContent({
-            model: 'text-embedding-004',
+            model: 'gemini-embedding-001',
             contents: textContent,
           });
           

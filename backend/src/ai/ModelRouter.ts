@@ -369,7 +369,7 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
 
     // Default fallback
     if (this.geminiAdapter.generateEmbedding) {
-      return await this.geminiAdapter.generateEmbedding(text, 'text-embedding-004');
+      return await this.geminiAdapter.generateEmbedding(text, 'gemini-embedding-001');
     }
     
     throw new Error('No embedding provider available.');

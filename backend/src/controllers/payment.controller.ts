@@ -33,7 +33,7 @@ export const smsWebhookHandler = async (req: Request, res: Response): Promise<vo
   try {
     const messageText = String(req.body?.message || '');
     const trxMatch = messageText.match(/(?:TrxID|TxnID|TxnId)\s*:?\s*([A-Z0-9]+)/i);
-    const amountMatch = messageText.match(/Tk\s*:?\s*([\d.]+)/i);
+    const amountMatch = messageText.match(/Tk\s*:?\s*([\d.,]+)/i);
     const senderMatch = messageText.match(/(?:from|Sender|A\/C)\s*:?\s*(\d{11})/i);
 
     if (!trxMatch || !amountMatch || !senderMatch) {
@@ -43,7 +43,7 @@ export const smsWebhookHandler = async (req: Request, res: Response): Promise<vo
 
     const { error } = await supabaseAdmin.from('bd_transactions').insert({
       trx_id: trxMatch[1].toUpperCase(),
-      amount: Number(amountMatch[1]),
+      amount: Number(amountMatch[1].replace(/,/g, '')),
       sender_number: senderMatch[1],
       status: 'pending',
     });
@@ -98,5 +98,41 @@ export const verifyBdPaymentHandler = async (req: Request, res: Response): Promi
     const message = error?.message || 'Payment verification failed';
     const status = /INVALID_OR_CLAIMED|PAYMENT_AMOUNT_MISMATCH/.test(message) ? 400 : 500;
     res.status(status).json({ detail: status === 400 ? 'Invalid, already claimed, or incorrectly priced transaction.' : message });
+  }
+};
+
+export const submitBdPaymentHandler = async (req: Request, res: Response): Promise<void> => {
+  const userId = (req as any).user?.id;
+  const trxId = String(req.body?.trx_id || '').trim().toUpperCase();
+  const senderNumber = String(req.body?.sender_number || '').trim();
+  const tierId = String(req.body?.tier_id || '').trim();
+  const tier = PRICING_TIERS[tierId];
+
+  if (!userId || !trxId || !senderNumber || !tier) {
+    res.status(400).json({ detail: 'Valid TrxID, Mobile Number, and Pricing Tier are required' });
+    return;
+  }
+
+  try {
+    const { error } = await supabaseAdmin.from('payment_requests').insert({
+      user_id: userId,
+      trx_id: trxId,
+      sender_number: senderNumber,
+      plan_type: tier.id,
+      status: 'pending'
+    });
+
+    if (error) {
+      if (error.code === '23505') {
+         res.status(400).json({ detail: 'This TrxID has already been submitted.' });
+         return;
+      }
+      throw error;
+    }
+    
+    res.status(200).json({ status: 'success', message: 'Your payment request has been submitted.' });
+  } catch (error: any) {
+    console.error('Submit BD payment error:', error);
+    res.status(500).json({ detail: 'Internal Server Error' });
   }
 };

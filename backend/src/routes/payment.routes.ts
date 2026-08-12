@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   smsWebhookHandler,
   verifyBdPaymentHandler,
+  submitBdPaymentHandler,
   getPricingConfigHandler
 } from '../controllers/payment.controller';
 import { requireAuth } from '../middlewares/auth.middleware';
@@ -19,5 +20,8 @@ router.post('/webhook/sms-forwarder', smsWebhookHandler);
 
 // Verification API called by frontend (Requires authentication)
 router.post('/verify-bd-trx', requireAuth, verifyBdPaymentHandler);
+
+// Submission API called by frontend to record user payment requests (Requires authentication)
+router.post('/submit-bd-trx', requireAuth, submitBdPaymentHandler);
 
 export default router;

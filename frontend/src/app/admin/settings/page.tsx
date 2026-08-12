@@ -33,6 +33,11 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
+  // SMS Processing State
+  const [smsText, setSmsText] = useState('');
+  const [smsStatus, setSmsStatus] = useState<{type: 'success'|'error', message: string} | null>(null);
+  const [isProcessingSms, setIsProcessingSms] = useState(false);
+
   const ALL_FEATURES = [
     'chat', 'quiz', 'live', 'voice', 'night-before', 'mind-map', 'flashcard', 
     'story', 'solver', 'podcast', 'molecule', 'curve', 'planner', 'presentation', 
@@ -186,6 +191,31 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleProcessSms = async () => {
+    if (!smsText.trim()) return;
+    setIsProcessingSms(true);
+    setSmsStatus(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`${apiOrigin}/api/admin/process-sms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({ message: smsText }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to process SMS');
+      setSmsStatus({ type: 'success', message: data.message || 'Payment verified successfully.' });
+      setSmsText('');
+    } catch (error: any) {
+      setSmsStatus({ type: 'error', message: error.message });
+    } finally {
+      setIsProcessingSms(false);
+    }
+  };
+
   const filteredConfigs = configs.filter(c => c.task_type === activeTab);
 
   return (
@@ -210,6 +240,35 @@ export default function AdminSettingsPage() {
           <button onClick={() => setActiveTab('embedding')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'embedding' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>1. Embedding AI</button>
           <button onClick={() => setActiveTab('general')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'general' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>2. Free Users (General)</button>
           <button onClick={() => setActiveTab('complex')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'complex' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>3. Pro Users (Complex)</button>
+        </div>
+
+        {/* MANUAL SMS PROCESSING UI */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+           <h2 className="text-lg font-bold text-slate-800 mb-2">Manual Payment Verification (bKash/Nagad/Rocket)</h2>
+           <p className="text-sm text-slate-500 mb-4">Paste the full "Send Money" SMS here. The system will extract the TrxID and Amount, find the pending request submitted by the user, and activate their package.</p>
+           
+           <div className="flex flex-col gap-3">
+             <textarea 
+               className="w-full min-h-[100px] p-3 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-sm"
+               placeholder="Example: You have received Tk 1,399.00 from 01518901803... TrxID DHC5D7TJ43"
+               value={smsText}
+               onChange={(e) => setSmsText(e.target.value)}
+             />
+             <div className="flex justify-between items-center">
+               <button 
+                 onClick={handleProcessSms} 
+                 disabled={isProcessingSms || !smsText.trim()}
+                 className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition"
+               >
+                 {isProcessingSms ? 'Verifying...' : 'Verify & Activate'}
+               </button>
+               {smsStatus && (
+                 <div className={`px-4 py-2 rounded-lg text-sm font-medium ${smsStatus.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                   {smsStatus.message}
+                 </div>
+               )}
+             </div>
+           </div>
         </div>
 
         {/* FEATURE MAPPING UI */}

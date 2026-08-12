@@ -54,5 +54,88 @@ export function registerAdminRoutes(app: any): void {
     res.json({ costs: costsResult.data || [], health: healthResult.data || [] });
   });
 
+  router.post('/process-sms', processSmsHandler);
+
   app.use('/api/admin', router);
 }
+
+import { PRICING_TIERS } from '../config/pricing.config';
+import { claimBdPaymentAndActivateFamilyPlan, claimBangladeshPayment } from '../services/creditLedger.service';
+
+export const processSmsHandler = async (req: Request, res: Response): Promise<void> => {
+  const messageText = String(req.body?.message || '');
+  
+  const trxMatch = messageText.match(/(?:TrxID|TxnID|TxnId)\s*[:\-]?\s*([A-Z0-9]+)/i);
+  const amountMatch = messageText.match(/(?:Tk|টাকা|Tk\.|BDT)\s*[:\-]?\s*([\d.,]+)|([\d.,]+)\s*(?:Tk|টাকা|Tk\.|BDT)/i);
+  const senderMatch = messageText.match(/(?:from|Sender|A\/C|থেকে|হতে)\s*[:\-]?\s*(\d{11})|(\d{11})\s*(?:থেকে|হতে)/i);
+
+  const trxId = trxMatch?.[1]?.toUpperCase();
+  const amountStr = amountMatch ? (amountMatch[1] || amountMatch[2]) : null;
+  const senderNumber = senderMatch ? (senderMatch[1] || senderMatch[2]) : null;
+
+  if (!trxId || !amountStr || !senderNumber) {
+    res.status(400).json({ error: 'Could not parse SMS. Please ensure it contains TrxID, Amount, and Sender Number.' });
+    return;
+  }
+
+  const amount = Number(amountStr.replace(/,/g, ''));
+
+  try {
+    // Look up the pending request submitted by the user
+    const { data: requestRow, error: reqError } = await supabase
+      .from('payment_requests')
+      .select('*')
+      .eq('trx_id', trxId)
+      .eq('status', 'pending')
+      .single();
+
+    if (reqError || !requestRow) {
+      res.status(404).json({ error: 'No pending payment request found from a user for this TrxID.' });
+      return;
+    }
+
+    const tier = PRICING_TIERS[requestRow.plan_type];
+    if (!tier) {
+      res.status(400).json({ error: 'Invalid plan type in payment request.' });
+      return;
+    }
+
+    if (amount < tier.bdPrice) {
+      res.status(400).json({ error: `Amount mismatch. SMS amount is ${amount} but plan costs ${tier.bdPrice}.` });
+      return;
+    }
+
+    // Process the payment
+    const periodEnd = new Date();
+    periodEnd.setDate(periodEnd.getDate() + tier.durationDays);
+
+    if (tier.planKind === 'family') {
+      await claimBdPaymentAndActivateFamilyPlan({
+        userId: requestRow.user_id,
+        transactionId: trxId,
+        expectedAmount: tier.bdPrice,
+        planType: tier.id,
+        memberLimit: tier.memberLimit!,
+        tokensPerMember: tier.tokensPerMember!,
+        periodEnd: periodEnd.toISOString(),
+      });
+    } else {
+      await claimBangladeshPayment({
+        userId: requestRow.user_id,
+        transactionId: trxId,
+        expectedAmount: tier.bdPrice,
+        credits: tier.tokens,
+        planType: tier.id,
+        periodEnd: periodEnd.toISOString(),
+      });
+    }
+
+    // Mark request as completed
+    await supabase.from('payment_requests').update({ status: 'completed' }).eq('id', requestRow.id);
+
+    res.json({ success: true, message: `Payment verified. ${tier.title} activated for the user.` });
+  } catch (error: any) {
+    console.error('Process SMS error:', error);
+    res.status(500).json({ error: error.message || 'Failed to process payment.' });
+  }
+};

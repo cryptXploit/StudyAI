@@ -68,6 +68,7 @@ export async function fetchUserFiles(userId: string): Promise<File[]> {
     .from('files')
     .select('id, name, status, created_at, file_type, file_size, user_id')
     .eq('user_id', userId)
+    .neq('status', 'deleted')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -128,7 +129,7 @@ export async function deleteFile(fileId: string): Promise<void> {
 
   const { error: fileError } = await supabase
     .from('files')
-    .delete()
+    .update({ status: 'deleted' })
     .eq('id', fileId);
 
   if (fileError) {
@@ -155,7 +156,8 @@ export async function getFileStats(userId: string): Promise<{
   const { data, error } = await supabase
     .from('files')
     .select('file_size, status')
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .neq('status', 'deleted');
 
   if (error || !data) {
     return { totalFiles: 0, indexedFiles: 0, totalSize: 0 };
