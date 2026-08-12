@@ -109,6 +109,19 @@ export const processSmsHandler = async (req: Request, res: Response): Promise<vo
     const periodEnd = new Date();
     periodEnd.setDate(periodEnd.getDate() + tier.durationDays);
 
+    // INJECT INTO bd_transactions first so the RPC can claim it!
+    const { error: insertError } = await supabase.from('bd_transactions').insert({
+      trx_id: trxId,
+      amount: amount,
+      sender_number: senderNumber,
+      status: 'pending'
+    });
+
+    // If it's already there (e.g. from an old MacroDroid attempt), we just proceed.
+    if (insertError && insertError.code !== '23505') {
+      throw new Error(`Failed to stage transaction: ${insertError.message}`);
+    }
+
     if (tier.planKind === 'family') {
       await claimBdPaymentAndActivateFamilyPlan({
         userId: requestRow.user_id,
