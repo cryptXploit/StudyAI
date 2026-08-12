@@ -26,12 +26,19 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       return;
     }
 
+    // Fetch the single source of truth from profiles to prevent stale metadata issues
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('tier, tenant_id')
+      .eq('id', user.id)
+      .single();
+
     // Attach verified user to request object (Matches your chat.controller logic)
     (req as any).user = {
       id: user.id,
       email: user.email,
-      tier: user.user_metadata?.tier || 'Free',
-      tenantId: user.user_metadata?.tenant_id,
+      tier: profile?.tier || user.user_metadata?.tier || 'Free',
+      tenantId: profile?.tenant_id || user.user_metadata?.tenant_id,
     };
 
     next();
