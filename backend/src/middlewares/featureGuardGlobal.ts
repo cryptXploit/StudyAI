@@ -41,8 +41,8 @@ export const featureGuardGlobal = async (req: Request, res: Response, next: Next
     if (userTier.toLowerCase() === 'pro') {
       isProUser = true;
     } else if (userId) {
-      const { data: profile } = await supabase.from('profiles').select('is_pro, subscription_tier').eq('id', userId).single();
-      if (profile?.is_pro || profile?.subscription_tier === 'Pro') {
+      const { data: profile } = await supabase.from('profiles').select('tier').eq('id', userId).single();
+      if (profile?.tier === 'Pro') {
         isProUser = true;
       }
     }
