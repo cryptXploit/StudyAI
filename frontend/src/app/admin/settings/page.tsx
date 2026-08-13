@@ -108,6 +108,19 @@ export default function AdminSettingsPage() {
         if (data.data) {
           models = data.data.map((m: any) => m.id);
         }
+      } else if (provider.toLowerCase() === 'openai' || provider.toLowerCase() === 'deepseek') {
+        const baseUrl = provider.toLowerCase() === 'deepseek' ? 'https://api.deepseek.com' : 'https://api.openai.com/v1';
+        try {
+          const res = await fetch(`${baseUrl}/models`, {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+          });
+          const data = await res.json();
+          if (data.data) {
+            models = data.data.map((m: any) => m.id);
+          }
+        } catch (e) {
+          models = [];
+        }
       } else if (provider.toLowerCase() === 'atomesus') {
         // 🟢 NEW: Attempt to fetch models from Atomesus (Standard format)
         try {
