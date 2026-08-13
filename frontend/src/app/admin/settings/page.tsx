@@ -25,11 +25,16 @@ export default function AdminSettingsPage() {
   const supabase = createClient();
   const [configs, setConfigs] = useState<ApiConfig[]>([]);
   const [featureMappings, setFeatureMappings] = useState<{tier: string, features: string[]}[]>([
-    { tier: 'embedding', features: [] },
-    { tier: 'general', features: [] },
-    { tier: 'complex', features: [] }
+    { tier: 'free_embedding', features: [] },
+    { tier: 'free_general', features: [] },
+    { tier: 'free_complex', features: [] },
+    { tier: 'pro_embedding', features: [] },
+    { tier: 'pro_general', features: [] },
+    { tier: 'pro_complex', features: [] }
   ]);
   const [activeTab, setActiveTab] = useState<'embedding' | 'general' | 'complex'>('embedding');
+  const [mappingUserType, setMappingUserType] = useState<'free' | 'pro'>('free');
+  const [activeMappingTab, setActiveMappingTab] = useState<'embedding' | 'general' | 'complex'>('embedding');
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
@@ -273,27 +278,43 @@ export default function AdminSettingsPage() {
 
         {/* FEATURE MAPPING UI */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-           <h2 className="text-lg font-bold text-slate-800 mb-2">Features assigned to {activeTab === 'general' ? 'Free Users' : activeTab === 'complex' ? 'Pro Users' : 'Embedding'}</h2>
-           <p className="text-sm text-slate-500 mb-4">Unassigned features will automatically fall back to the Pro (Complex) tier for security.</p>
+           <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4 gap-4">
+             <div>
+               <h2 className="text-lg font-bold text-slate-800">Feature Mappings</h2>
+               <p className="text-sm text-slate-500">Map which API tier features use depending on the user's subscription.</p>
+             </div>
+             <div className="flex bg-slate-100 rounded-lg p-1 w-max">
+                <button onClick={() => setMappingUserType('free')} className={`px-4 py-1.5 rounded-md font-semibold text-sm transition ${mappingUserType === 'free' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>Free Users</button>
+                <button onClick={() => setMappingUserType('pro')} className={`px-4 py-1.5 rounded-md font-semibold text-sm transition ${mappingUserType === 'pro' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>Pro Users</button>
+             </div>
+           </div>
+           
+           <div className="flex space-x-2 bg-slate-100 p-1 rounded-xl w-max mb-4">
+             <button onClick={() => setActiveMappingTab('embedding')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeMappingTab === 'embedding' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>1. Embedding API</button>
+             <button onClick={() => setActiveMappingTab('general')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeMappingTab === 'general' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>2. General API</button>
+             <button onClick={() => setActiveMappingTab('complex')} className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeMappingTab === 'complex' ? 'bg-white shadow text-indigo-700' : 'text-slate-600 hover:bg-slate-200'}`}>3. Complex API</button>
+           </div>
+
            <div className="flex flex-wrap gap-2">
              {ALL_FEATURES.map(feat => {
-               const currentMapping = featureMappings.find(m => m.tier === activeTab);
+               const activeTierName = `${mappingUserType}_${activeMappingTab}`;
+               const currentMapping = featureMappings.find(m => m.tier === activeTierName);
                const isSelected = currentMapping?.features.includes(feat);
-               const isAssignedElsewhere = featureMappings.find(m => m.tier !== activeTab && m.features.includes(feat));
+               const isAssignedElsewhere = featureMappings.find(m => m.tier !== activeTierName && m.tier.startsWith(`${mappingUserType}_`) && m.features.includes(feat));
                
                return (
                  <label key={feat} className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm cursor-pointer transition ${isSelected ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium' : isAssignedElsewhere ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60' : 'bg-white border-slate-200 hover:bg-slate-50'}`}>
                    <input 
                      type="checkbox" 
                      className="hidden" 
-                     checked={isSelected}
+                     checked={!!isSelected}
                      onChange={(e) => {
                        setFeatureMappings(prev => prev.map(m => {
-                         if (m.tier === activeTab) {
+                         if (m.tier === activeTierName) {
                            return { ...m, features: e.target.checked ? [...m.features, feat] : m.features.filter(f => f !== feat) };
                          }
-                         if (e.target.checked && m.features.includes(feat)) {
-                           return { ...m, features: m.features.filter(f => f !== feat) }; // Remove from other tiers
+                         if (e.target.checked && m.tier.startsWith(`${mappingUserType}_`) && m.features.includes(feat)) {
+                           return { ...m, features: m.features.filter(f => f !== feat) };
                          }
                          return m;
                        }));

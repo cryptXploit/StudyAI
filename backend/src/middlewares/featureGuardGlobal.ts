@@ -55,31 +55,50 @@ export const featureGuardGlobal = async (req: Request, res: Response, next: Next
     }
     
     let requiredTier = 'complex'; // Default to Pro if unmapped (per user request)
+    let isUnmapped = true;
     
     if (cachedMappings) {
-      const generalMap = cachedMappings.find(m => m.tier === 'general');
-      const complexMap = cachedMappings.find(m => m.tier === 'complex');
-      const embeddingMap = cachedMappings.find(m => m.tier === 'embedding');
+      const prefix = isProUser ? 'pro_' : 'free_';
+      
+      const generalMap = cachedMappings.find(m => m.tier === `${prefix}general`);
+      const complexMap = cachedMappings.find(m => m.tier === `${prefix}complex`);
+      const embeddingMap = cachedMappings.find(m => m.tier === `${prefix}embedding`);
       
       if (embeddingMap?.features.includes(featureName)) {
          requiredTier = 'embedding';
+         isUnmapped = false;
       } else if (generalMap?.features.includes(featureName)) {
          requiredTier = 'general';
+         isUnmapped = false;
       } else if (complexMap?.features.includes(featureName)) {
          requiredTier = 'complex';
+         isUnmapped = false;
       }
     }
 
-    if (requiredTier === 'complex' && !isProUser) {
-      const forceDowngrade = req.headers['x-force-downgrade'] === 'true' || req.query['forceDowngrade'] === 'true';
+    if (!isProUser) {
+      let isProFeature = false;
+      if (cachedMappings) {
+        const proComplexMap = cachedMappings.find(m => m.tier === 'pro_complex');
+        if (proComplexMap?.features.includes(featureName)) {
+          isProFeature = true;
+        }
+      }
       
-      if (!forceDowngrade) {
-         return res.status(403).json({ 
-           error: 'PRO_FEATURE_CONSENT_REQUIRED',
-           message: 'This is a Pro feature. Do you want to use the Free model instead (Pro tokens will still be deducted)?'
-         });
-      } else {
-         (req as any).forcedDowngrade = true;
+      // Show modal if it's a Pro feature but Free user is mapped to general, OR if it's totally unmapped
+      const needsModal = (requiredTier === 'general' && isProFeature) || isUnmapped;
+      
+      if (needsModal) {
+        const forceDowngrade = req.headers['x-force-downgrade'] === 'true' || req.query['forceDowngrade'] === 'true';
+        
+        if (!forceDowngrade) {
+           return res.status(403).json({ 
+             error: 'PRO_FEATURE_CONSENT_REQUIRED',
+             message: 'This is a Pro feature. Do you want to use the Free model instead (Pro tokens will still be deducted)?'
+           });
+        } else {
+           (req as any).forcedDowngrade = true;
+        }
       }
     }
 
