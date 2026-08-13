@@ -52,7 +52,10 @@ export class DeepSeekAdapter implements ProviderAdapter {
       stream: true,
     });
 
-    for await (const chunk of stream) {
+    for await (const chunk of (stream as any)) {
+      const reasoning = chunk.choices[0]?.delta?.reasoning_content;
+      if (reasoning) yield reasoning;
+
       const content = chunk.choices[0]?.delta?.content;
       if (content) yield content;
     }
