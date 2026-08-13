@@ -34,6 +34,21 @@ export default function FetchInterceptor() {
         try {
           const body = await clonedResponse.json();
           if (body.error === 'PRO_FEATURE_CONSENT_REQUIRED') {
+            const counterStr = localStorage.getItem('pro_consent_counter') || '0';
+            const counter = parseInt(counterStr, 10);
+            
+            // If counter is between 1 and 4, silently downgrade and increment
+            if (counter > 0 && counter < 5) {
+              localStorage.setItem('pro_consent_counter', (counter + 1).toString());
+              
+              const headers = new Headers(config?.headers || {});
+              headers.append('X-Force-Downgrade', 'true');
+              
+              // Call originalFetch to avoid infinite interceptor loops
+              return await originalFetch(url, { ...config, headers });
+            }
+
+            // Otherwise (counter 0 or 5), show dialog
             return new Promise((resolve, reject) => {
               setPendingRequest({
                 args,
@@ -64,6 +79,8 @@ export default function FetchInterceptor() {
       headers.append('X-Force-Downgrade', 'true');
       
       try {
+        // Reset counter to 1 after explicit consent
+        localStorage.setItem('pro_consent_counter', '1');
         const response = await window.fetch(url, { ...config, headers });
         pendingRequest.resolve(response);
       } catch (error) {
