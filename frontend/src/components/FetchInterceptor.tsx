@@ -28,10 +28,9 @@ export default function FetchInterceptor() {
       
       if (!isPost || isBackground) return response;
       
-      // Clone response to read body without consuming the original
-      const clonedResponse = response.clone();
-      
       if (response.status === 403) {
+        // Clone response ONLY for 403s so we don't tee/hang 200 OK streaming responses
+        const clonedResponse = response.clone();
         try {
           const body = await clonedResponse.json();
           if (body.error === 'PRO_FEATURE_CONSENT_REQUIRED') {
