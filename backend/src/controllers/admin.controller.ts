@@ -42,6 +42,25 @@ export function registerAdminRoutes(app: any): void {
     res.json({ success: true });
   });
 
+  router.get('/feature-mappings', async (_req: Request, res: Response) => {
+    const { data, error } = await supabase.from('ai_feature_mappings').select('*');
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ data: data || [] });
+  });
+
+  router.put('/feature-mappings', async (req: Request, res: Response) => {
+    const mappings = req.body?.mappings;
+    if (!Array.isArray(mappings)) return res.status(400).json({ error: 'mappings array is required' });
+    
+    for (const mapping of mappings) {
+      if (!mapping.tier) continue;
+      const { error } = await supabase.from('ai_feature_mappings')
+        .upsert({ tier: mapping.tier, features: mapping.features || [] });
+      if (error) return res.status(500).json({ error: error.message });
+    }
+    res.json({ success: true });
+  });
+
   router.get('/analytics', async (_req: Request, res: Response) => {
     const [costsResult, healthResult] = await Promise.all([
       supabase.from('api_cost_logs').select('*').order('created_at', { ascending: false }).limit(50),
