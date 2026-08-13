@@ -117,7 +117,7 @@ export default function ForgotPasswordPage() {
         {/* Header Section */}
         <motion.div variants={itemVariants} className="text-center mb-8 space-y-2">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl shadow-xl shadow-indigo-500/20 mb-4 overflow-hidden">
-             <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-cover scale-125" />
+             <img src="/icon.png" alt="Prepia Logo" className="w-full h-full object-cover scale-125" />
           </div>
           <h2 className="text-3xl font-bold text-white tracking-tight">
             {t('auth.forgotPassword')}

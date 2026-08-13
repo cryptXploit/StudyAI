@@ -94,7 +94,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
             <div className="w-9 h-9 flex items-center justify-center overflow-hidden rounded-xl shadow-lg">
-               <img src="/icon.svg" alt="Prepia Logo" className="w-full h-full object-cover scale-110" />
+               <img src="/icon.png" alt="Prepia Logo" className="w-full h-full object-cover scale-110" />
             </div>
             <span className="text-2xl font-black tracking-tight text-white">Prepia</span>
           </div>
