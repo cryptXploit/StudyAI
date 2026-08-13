@@ -4,8 +4,8 @@ import { ProviderAdapter, ChatMessage, CompletionOptions, CompletionResult } fro
 export class DeepSeekAdapter implements ProviderAdapter {
   providerName = 'deepseek';
 
-  private getClient(): OpenAI {
-    const apiKey = process.env.DEEPSEEK_API_KEY;
+  private getClient(dynamicApiKey?: string): OpenAI {
+    const apiKey = dynamicApiKey || process.env.DEEPSEEK_API_KEY;
     if (!apiKey) {
       throw new Error('DeepSeek API key is not configured for the selected route.');
     }
@@ -21,9 +21,9 @@ export class DeepSeekAdapter implements ProviderAdapter {
     model: string,
     options?: CompletionOptions
   ): Promise<CompletionResult> {
-    const response = await this.getClient().chat.completions.create({
+    const response = await this.getClient(options?.apiKey).chat.completions.create({
       model,
-      messages: messages as any[], // openai types match role: 'user'|'assistant'|'system'
+      messages: messages as any[],
       temperature: options?.temperature ?? 0.7,
       max_tokens: options?.maxTokens,
     });
@@ -44,7 +44,7 @@ export class DeepSeekAdapter implements ProviderAdapter {
     model: string,
     options?: CompletionOptions
   ): AsyncIterable<string> {
-    const stream = await this.getClient().chat.completions.create({
+    const stream = await this.getClient(options?.apiKey).chat.completions.create({
       model,
       messages: messages as any[],
       temperature: options?.temperature ?? 0.7,
