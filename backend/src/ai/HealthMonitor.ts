@@ -13,24 +13,24 @@ export class HealthMonitor {
   private static openedAt: Record<string, number> = {};
   private static readonly CIRCUIT_COOLDOWN_MS = 30_000;
   
-  static async getState(providerName: string): Promise<CircuitState> {
-    const state = this.states[providerName] || CircuitState.CLOSED;
-    if (state === CircuitState.OPEN && Date.now() - (this.openedAt[providerName] || 0) >= this.CIRCUIT_COOLDOWN_MS) {
-      this.states[providerName] = CircuitState.HALF_OPEN;
+  static async getState(identifier: string): Promise<CircuitState> {
+    const state = this.states[identifier] || CircuitState.CLOSED;
+    if (state === CircuitState.OPEN && Date.now() - (this.openedAt[identifier] || 0) >= this.CIRCUIT_COOLDOWN_MS) {
+      this.states[identifier] = CircuitState.HALF_OPEN;
       return CircuitState.HALF_OPEN;
     }
     return state;
   }
 
-  static async recordSuccess(provider: string, latencyMs: number) {
-    this.states[provider] = CircuitState.CLOSED;
-    delete this.openedAt[provider];
+  static async recordSuccess(identifier: string, provider: string, latencyMs: number) {
+    this.states[identifier] = CircuitState.CLOSED;
+    delete this.openedAt[identifier];
     await this.logToDB(provider, 'success', latencyMs);
   }
 
-  static async recordFailure(provider: string, isTimeout: boolean) {
-    this.states[provider] = CircuitState.OPEN;
-    this.openedAt[provider] = Date.now();
+  static async recordFailure(identifier: string, provider: string, isTimeout: boolean) {
+    this.states[identifier] = CircuitState.OPEN;
+    this.openedAt[identifier] = Date.now();
     await this.logToDB(provider, isTimeout ? 'timeout' : 'error', 0);
   }
 
