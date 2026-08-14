@@ -150,16 +150,16 @@ export default function LandingPage() {
         </div>
         
         <div className="relative z-10 max-w-7xl mx-auto pointer-events-none">
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/50 backdrop-blur-md border border-slate-800 shadow-sm text-sm font-black uppercase tracking-widest text-emerald-500 mb-6 pointer-events-auto">
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-0 rounded-full bg-slate-900/50 backdrop-blur-md border border-slate-800 shadow-sm text-sm font-black uppercase tracking-widest text-emerald-300 mb-6 pointer-events-auto">
             <Play size={12} /> {lT('hero.badge')}
           </motion.div>
           
-          <motion.h1 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-6xl md:text-8xl font-black tracking-tighter mb-8 text-white pointer-events-auto">
+          <motion.h1 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-5xl md:text-6xl font-black tracking-tighter mb-8 text-white pointer-events-auto">
             {lT('hero.title1')}<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-blue-500">{lT('hero.title2')}</span>
           </motion.h1>
           
-          <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-xl md:text-2xl text-slate-400 font-medium max-w-3xl mx-auto mb-12 leading-relaxed pointer-events-auto">
+          <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-xl md:text-2xl text-slate-400 font-medium max-w-2xl mx-auto mb-10 leading-relaxed pointer-events-auto">
             {lT('hero.subtitle')}
           </motion.p>
           
