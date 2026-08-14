@@ -172,7 +172,7 @@ async function streamSSEResponse(res: Response, streamResponse: AsyncIterable<st
   let fullResponse = ''; let eventId = 0; let receivedFirstChunk = false; let streamCompletedCleanly = false; let timeoutHandle: NodeJS.Timeout;
 
   try {
-    const timeoutPromise = new Promise<never>((_, reject) => { timeoutHandle = setTimeout(() => reject(new Error("AI Model Response Timeout")), 15000); }); timeoutPromise.catch(() => {}); 
+    const timeoutPromise = new Promise<never>((_, reject) => { timeoutHandle = setTimeout(() => reject(new Error("AI Model Response Timeout")), 35000); }); timeoutPromise.catch(() => {}); 
     const iterator = streamResponse[Symbol.asyncIterator]();
 
     while (true) {

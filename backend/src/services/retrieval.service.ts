@@ -29,7 +29,7 @@ export class RetrievalService {
     if (!query || query.trim() === '') return new Array(1536).fill(0);
     try {
       const response = await modelRouter.embed(query);
-      return response.vector;
+      return response;
     } catch (error) {
       console.error("[RetrievalService] Dynamic Embedding Failed:", error);
       return new Array(1536).fill(0); 
