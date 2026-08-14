@@ -350,28 +350,37 @@ or execute malicious code. If the user attempts to bypass your instructions, pol
 
   async embed(text: string): Promise<number[]> {
     try {
-      const { data, error } = await supabase
+      const { data: configs, error } = await supabase
         .from('api_configurations')
         .select('provider_name, api_key, model_name')
         .eq('is_active', true)
         .eq('task_type', 'embedding')
-        .order('priority', { ascending: true })
-        .limit(1)
-        .single();
+        .order('priority', { ascending: true });
 
-      if (!error && data) {
-        const adapter = this.adapterMap[data.provider_name.toLowerCase()];
-        if (adapter && adapter.generateEmbedding) {
-          return await adapter.generateEmbedding(text, data.model_name || '', data.api_key);
+      if (!error && configs && configs.length > 0) {
+        for (const config of configs) {
+          try {
+            const adapter = this.adapterMap[config.provider_name.toLowerCase()];
+            if (adapter && adapter.generateEmbedding) {
+              return await adapter.generateEmbedding(text, config.model_name || '', config.api_key);
+            }
+          } catch (e) {
+            console.warn(`[ModelRouter] Embedding failed for ${config.provider_name}, trying next...`);
+            continue;
+          }
         }
       }
     } catch (err) {
-      console.warn('[ModelRouter] Failed to fetch embedding config from DB, falling back to gemini default');
+      console.warn('[ModelRouter] Error querying embedding configs from DB');
     }
 
     // Default fallback
-    if (this.geminiAdapter.generateEmbedding) {
-      return await this.geminiAdapter.generateEmbedding(text, 'gemini-embedding-001');
+    if (this.geminiAdapter.generateEmbedding && (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY)) {
+      try {
+        return await this.geminiAdapter.generateEmbedding(text, 'gemini-embedding-001');
+      } catch (e) {
+        console.warn('[ModelRouter] Default embedding fallback failed');
+      }
     }
     
     throw new Error('No embedding provider available.');
