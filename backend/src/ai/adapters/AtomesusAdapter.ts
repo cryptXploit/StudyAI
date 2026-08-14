@@ -4,8 +4,8 @@ export class AtomesusAdapter implements ProviderAdapter {
   providerName = 'Atomesus';
   private baseUrl = 'https://api.atomesus.com/v1/chat/completions'; // Standard API format
 
-  private getApiKey(): string {
-    const key = process.env.ATOMESUS_API_KEY;
+  private getApiKey(dynamicApiKey?: string): string {
+    const key = dynamicApiKey || process.env.ATOMESUS_API_KEY;
     if (!key) throw new Error("Atomesus API key is missing");
     return key;
   }
@@ -15,7 +15,7 @@ export class AtomesusAdapter implements ProviderAdapter {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.getApiKey()}`
+        'Authorization': `Bearer ${this.getApiKey(options?.apiKey)}`
       },
       body: JSON.stringify({
         model: model || 'atomesus-latest',
@@ -47,7 +47,7 @@ export class AtomesusAdapter implements ProviderAdapter {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.getApiKey()}`
+        'Authorization': `Bearer ${this.getApiKey(options?.apiKey)}`
       },
       body: JSON.stringify({
         model: model || 'atomesus-latest',

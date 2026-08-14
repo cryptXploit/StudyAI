@@ -30,7 +30,7 @@ export interface ProviderAdapter {
   /**
    * Optional support for text embeddings
    */
-  generateEmbedding?(text: string, model: string): Promise<number[]>;
+  generateEmbedding?(text: string, model: string, apiKey?: string): Promise<number[]>;
   
   /**
    * Optional streaming support for low-latency responses

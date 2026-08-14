@@ -8,7 +8,7 @@ export class GroqAdapter implements ProviderAdapter {
     model: string,
     options?: CompletionOptions
   ): Promise<CompletionResult> {
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = options?.apiKey || process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error('Groq API Key missing');
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -53,7 +53,7 @@ export class GroqAdapter implements ProviderAdapter {
     model: string,
     options?: CompletionOptions
   ): AsyncIterable<string> {
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = options?.apiKey || process.env.GROQ_API_KEY;
     if (!apiKey) throw new Error('Groq API Key missing');
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {

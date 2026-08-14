@@ -3,8 +3,8 @@ import { ProviderAdapter, ChatMessage, CompletionOptions, CompletionResult } fro
 export class GeminiAdapter implements ProviderAdapter {
   providerName = 'gemini';
 
-  private getApiKey(): string {
-    return process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
+  private getApiKey(dynamicApiKey?: string): string {
+    return dynamicApiKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '';
   }
 
   // 🟢 FIX: Gemini Format Converter (Converts 'system' to system_instruction)
@@ -31,33 +31,33 @@ export class GeminiAdapter implements ProviderAdapter {
     const lower = model.toLowerCase();
     
     // Explicit 2.0 Mappings
-    if (lower.includes('flash-2.0') || lower.includes('2.0-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
-    if (lower.includes('pro-2.0') || lower.includes('2.0-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-1.5-pro';
+    if (lower.includes('flash-2.0') || lower.includes('2.0-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
+    if (lower.includes('pro-2.0') || lower.includes('2.0-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-2.5-pro';
     
-    // Explicit 1.5 Mappings (Auto-upgrade to 3.5 since 1.5 is deprecated)
-    if (lower.includes('1.5-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
-    if (lower.includes('1.5-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-1.5-pro';
+    // Explicit 1.5 Mappings (Auto-upgrade to 3.5/2.5 since 1.5 is deprecated)
+    if (lower.includes('1.5-flash')) return process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
+    if (lower.includes('1.5-pro')) return process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-2.5-pro';
     
-    let resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
+    let resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
 
     // Generic Fallbacks
     if (lower === 'gemini' || lower === 'flash') {
-        resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-1.5-flash';
+        resultModel = process.env.DEFAULT_GEMINI_GENERAL_MODEL || 'gemini-3.5-flash';
     } else if (lower === 'pro') {
         resultModel = process.env.DEFAULT_GEMINI_COMPLEX_MODEL || 'gemini-1.5-pro';
     } else if (lower.startsWith('gemini-')) {
         resultModel = model;
     }
 
-    // Absolute Safety Net: If the PM2 environment variable or the result model is the deprecated 1.5, FORCE 3.5
-    if (resultModel.includes('1.5-flash')) resultModel = 'gemini-1.5-flash';
-    if (resultModel.includes('1.5-pro')) resultModel = 'gemini-1.5-pro';
+    // Absolute Safety Net: If the PM2 environment variable or the result model is the deprecated 1.5, FORCE upgrade
+    if (resultModel.includes('1.5-flash')) resultModel = 'gemini-3.5-flash';
+    if (resultModel.includes('1.5-pro')) resultModel = 'gemini-2.5-pro';
 
     return resultModel;
   }
 
   async generateCompletion(messages: ChatMessage[], model: string, options?: CompletionOptions): Promise<CompletionResult> {
-    const apiKey = this.getApiKey();
+    const apiKey = this.getApiKey(options?.apiKey);
     if (!apiKey) throw new Error('Gemini API Key is missing. Please configure it in the Admin Settings.');
 
     const safeModel = this.getSafeModelName(model);
@@ -100,7 +100,7 @@ export class GeminiAdapter implements ProviderAdapter {
   }
 
   async *generateStream(messages: ChatMessage[], model: string, options?: CompletionOptions): AsyncIterable<string> {
-    const apiKey = this.getApiKey();
+    const apiKey = this.getApiKey(options?.apiKey);
     if (!apiKey) throw new Error('Gemini API Key is missing. Please configure it in the Admin Settings.');
 
     const safeModel = this.getSafeModelName(model);
@@ -162,8 +162,8 @@ export class GeminiAdapter implements ProviderAdapter {
     }
   }
 
-  async generateEmbedding(text: string, model: string): Promise<number[]> {
-    const apiKey = this.getApiKey();
+  async generateEmbedding(text: string, model: string, dynamicApiKey?: string): Promise<number[]> {
+    const apiKey = this.getApiKey(dynamicApiKey);
     if (!apiKey) throw new Error('Gemini API Key is missing.');
 
     // Fallback to gemini-embedding-001 if model is not properly passed
