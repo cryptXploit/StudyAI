@@ -2314,7 +2314,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/06-youtube-podcast.png`
 
 ```md
-![StudyAI YouTube Decoder and Podcast](docs/screenshots/06-youtube-podcast.png)
+[StudyAI YouTube Decoder and Podcast](docs/screenshots/06-youtube-podcast.png)
 ```
 
 **Caption:**  
