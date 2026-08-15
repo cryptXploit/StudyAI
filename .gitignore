@@ -58,7 +58,7 @@ Thumbs.db
 
 # Folders
 Arcitecture/*
-docs/*
+docs_MyApps/*
 Mannual_Task_For_Later/*
 migrations/*
 AI_PROJECT_CONTEXT.md
@@ -109,3 +109,4 @@ backend\.env.local
 
 
 !README.md
+!docs
