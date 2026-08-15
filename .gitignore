@@ -123,3 +123,11 @@ test-*.js
 test-*.ts
 temp-*.js
 temp-*.ts
+check_*.js
+check_*.sh
+deploy_*.sh
+diagnose*.sh
+fix_*.sh
+restore-*.js
+test_*.mp3
+*.mp3
