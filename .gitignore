@@ -110,3 +110,16 @@ backend\.env.local
 
 !README.md
 !docs
+!docs/*
+
+# Temporary fix and refactor scripts
+fix-*.js
+fix-*.sh
+fix-*.ts
+refactor-*.js
+refactor-*.sh
+refactor-*.ts
+test-*.js
+test-*.ts
+temp-*.js
+temp-*.ts
