@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { requireAuth } from '../middlewares/auth.middleware';
 import { requireAdmin } from '../middlewares/admin.middleware';
 import { invalidateEmbeddingConfigCache } from '../services/modelRouter';
+import { PRICING_TIERS } from '../config/pricing.config';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 
@@ -72,13 +73,72 @@ export function registerAdminRoutes(app: any): void {
     }
     res.json({ costs: costsResult.data || [], health: healthResult.data || [] });
   });
+  router.get('/users', async (_req: Request, res: Response) => {
+    try {
+      const [profilesRes, subsRes, paymentsRes] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, tier, created_at').order('created_at', { ascending: false }),
+        supabase.from('user_subscriptions').select('user_id, plan_type, current_period_end, status').eq('status', 'active'),
+        supabase.from('payment_requests').select('user_id, trx_id, plan_type, created_at').eq('status', 'completed')
+      ]);
+
+      if (profilesRes.error) throw profilesRes.error;
+
+      const subsMap = new Map();
+      (subsRes.data || []).forEach((s: any) => subsMap.set(s.user_id, s));
+
+      const paymentsMap = new Map();
+      (paymentsRes.data || []).forEach((p: any) => {
+        const existing = paymentsMap.get(p.user_id);
+        if (!existing || new Date(p.created_at) > new Date(existing.created_at)) {
+          paymentsMap.set(p.user_id, p);
+        }
+      });
+
+      const users = (profilesRes.data || []).map((profile: any) => {
+        const sub = subsMap.get(profile.id);
+        const payment = paymentsMap.get(profile.id);
+
+        let amount = 0;
+        let planType = profile.tier === 'free' ? 'Free Plan' : profile.tier;
+        
+        if (payment && payment.plan_type) {
+           const tierInfo = PRICING_TIERS[payment.plan_type as keyof typeof PRICING_TIERS];
+           if (tierInfo) {
+              amount = tierInfo.bdPrice;
+              planType = tierInfo.title;
+           } else {
+              planType = payment.plan_type;
+           }
+        }
+
+        return {
+          id: profile.id,
+          fullName: profile.full_name || 'Anonymous User',
+          tier: profile.tier,
+          createdAt: profile.created_at,
+          planType: planType,
+          packageEnd: sub ? sub.current_period_end : null,
+          trxId: payment ? payment.trx_id : null,
+          amount: amount
+        };
+      });
+
+      const totalUsers = users.length;
+      const proUsers = users.filter((u: any) => u.tier && u.tier.toLowerCase() !== 'free').length;
+      const totalRevenue = users.reduce((sum: number, u: any) => sum + (u.amount || 0), 0);
+
+      res.json({ totalUsers, proUsers, totalRevenue, users });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
   router.post('/process-sms', processSmsHandler);
 
   app.use('/api/admin', router);
 }
 
-import { PRICING_TIERS } from '../config/pricing.config';
+
 import { claimBdPaymentAndActivateFamilyPlan, claimBangladeshPayment } from '../services/creditLedger.service';
 
 export const processSmsHandler = async (req: Request, res: Response): Promise<void> => {
