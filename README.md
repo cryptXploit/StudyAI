@@ -2142,7 +2142,7 @@ The repository is intentionally documented so a reviewer can understand the prod
 
 > **This is my real 2–3 minute demo link of my project**
 
-**[🎥 Watch the 2–3 Minute StudyAI Demo](https://youtu.be/ZWFV5I6aKes?si=nV2VdK6pDWHFiV4X)**
+**[🎥 Watch the 2–3 Minute StudyAI Demo](https://youtu.be/Vss47tiwNUw?si=YC3pFLA0MGON_i1j)**
 
 ### The demo Video Shows
 
@@ -2894,7 +2894,7 @@ If a reviewer has only a few minutes, this is the shortest route through the rep
 
 ### ① Start with the demo
 
-**[🎥 2–3 Minute Demo](https://youtu.be/ZWFV5I6aKes?si=nV2VdK6pDWHFiV4X)**
+**[🎥 2–3 Minute Demo](https://youtu.be/Vss47tiwNUw?si=YC3pFLA0MGON_i1j)**
 
 ### ② Understand the thesis
 
