@@ -101,13 +101,15 @@ export function registerAdminRoutes(app: any): void {
         let amount = 0;
         let planType = profile.tier === 'free' ? 'Free Plan' : profile.tier;
         
-        if (payment && payment.plan_type) {
-           const tierInfo = PRICING_TIERS[payment.plan_type as keyof typeof PRICING_TIERS];
+        let targetPlan = (payment && payment.plan_type) || (sub && sub.plan_type);
+
+        if (targetPlan) {
+           const tierInfo = PRICING_TIERS[targetPlan as keyof typeof PRICING_TIERS];
            if (tierInfo) {
               amount = tierInfo.bdPrice;
               planType = tierInfo.title;
            } else {
-              planType = payment.plan_type;
+              planType = targetPlan;
            }
         }
 
