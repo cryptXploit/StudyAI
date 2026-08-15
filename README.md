@@ -2,6 +2,7 @@
 
 > **Hackathon submission:** XPRIZE / Devpost  
 > **Repository:** https://github.com/cryptXploit/StudyAI
+> **Live URL** → https://prepia.app
 
 StudyAI is a production-oriented, AI-native study platform designed around one principle:
 
