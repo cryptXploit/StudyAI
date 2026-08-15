@@ -2894,7 +2894,7 @@ If a reviewer has only a few minutes, this is the shortest route through the rep
 
 ### ① Start with the demo
 
-**[🎥 2–3 Minute Demo](YOUR_DEMO_VIDEO_URL_HERE)**
+**[🎥 2–3 Minute Demo](https://youtu.be/ZWFV5I6aKes?si=nV2VdK6pDWHFiV4X)**
 
 ### ② Understand the thesis
 
