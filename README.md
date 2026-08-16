@@ -1,95 +1,211 @@
-# StudyAI — AI-Native Learning Infrastructure for Students
+# Prepia — AI-Powered Personalized Learning Platform
 
 > **Hackathon submission:** XPRIZE / Devpost  
+> **Live:** https://prepia.app  
 > **Repository:** https://github.com/cryptXploit/StudyAI
 
-StudyAI is a production-oriented, AI-native study platform designed around one principle:
+<p align="center">
+  <a href="https://youtu.be/Vss47tiwNUw"><img src="https://img.shields.io/badge/🎥_Demo-2%E2%80%933_Minutes-111827?style=for-the-badge" alt="Demo" /></a>
+  <a href="https://github.com/cryptXploit/StudyAI/blob/main/QUICK_START.md"><img src="https://img.shields.io/badge/🚀_Quick_Start-30_Minutes-1f2937?style=for-the-badge" alt="Quick Start" /></a>
+  <a href="https://github.com/cryptXploit/StudyAI/blob/main/COMPLETE_DELIVERY_SUMMARY.md"><img src="https://img.shields.io/badge/🏗️_Architecture-Deep_Dive-374151?style=for-the-badge" alt="Architecture" /></a>
+</p>
+
+## 👋 Start Here — 30 Seconds
+
+**Prepia turns a student's own PDFs and learning materials into an interactive study environment.** Students can ask grounded questions, generate quizzes and flashcards, summarize material, prepare for exams, and use visual, audio/video, productivity, and gamified learning tools around the same source material.
+
+The core engineering idea is:
 
 > **Use AI where reasoning creates value; use deterministic software, retrieval, caching, workers, and fallbacks everywhere else.**
 
-Instead of treating an LLM as the entire product, StudyAI combines LLMs with retrieval systems, mathematical algorithms, structured generation, Redis caching, background workers, object storage, database constraints, routing policies, and graceful degradation.
+Instead of making an LLM the entire product, Prepia surrounds AI with retrieval, structured generation, Redis caching, background workers, object storage, database constraints, model routing, and graceful degradation.
 
-The result is a broad learning workspace covering document intelligence, exam preparation, multimodal solving, knowledge visualization, productivity, gamification, career assistance, audio/video learning, and operational administration.
+### The problem
 
-This README intentionally separates **what is implemented** from **what is planned**. Performance, cost, reliability, and scale claims are architectural goals or observed design properties unless explicitly measured.
+Students already have their study materials, but turning them into an effective study workflow is fragmented and time-consuming. A large PDF still leaves students manually searching for concepts, creating notes, making flashcards, preparing questions, and deciding what to study next.
 
+Generic AI chat can answer questions, but it is not necessarily designed around the complete study workflow or consistently grounded in the student's own materials.
 
-<p align="center">
-  <a href="https://github.com/cryptXploit/StudyAI/blob/main/QUICK_START.md"><img src="https://img.shields.io/badge/⭐_Quick_Start-30_min-111827?style=for-the-badge" alt="Quick Start" /></a>
-  <a href="https://github.com/cryptXploit/StudyAI/blob/main/COMPLETE_DELIVERY_SUMMARY.md"><img src="https://img.shields.io/badge/🏗️_Architecture-Deep_Dive-1f2937?style=for-the-badge" alt="Architecture" /></a>
-  <a href="https://github.com/cryptXploit/StudyAI/blob/main/BULLMQ_WORKERS_QUICKSTART.md"><img src="https://img.shields.io/badge/⚙️_Workers-BullMQ%20%2B%20Redis-374151?style=for-the-badge" alt="Workers" /></a>
-  <a href="https://github.com/cryptXploit/StudyAI/blob/main/DOCUMENTATION_MASTER_INDEX.md"><img src="https://img.shields.io/badge/📚_Docs-26%2B-4b5563?style=for-the-badge" alt="Documentation" /></a>
-</p>
+### The approach
 
-<p align="center">
-  <a href="#ai-features">AI Features</a> ·
-  <a href="#exam-intelligence">Exam Intelligence</a> ·
-  <a href="#audio-and-video-learning">Audio/Video</a> ·
-  <a href="#gamification-rewards-and-growth">Gamification</a> ·
-  <a href="#admin-mission-control">Admin</a> ·
-  <a href="#implemented-vs-future-work">Future Roadmap</a>
-</p>
+```text
+Student material
+      ↓
+Object storage + metadata
+      ↓
+Extraction / OCR
+      ↓
+Chunking + embeddings
+      ↓
+Retrieval / RAG
+      ↓
+Cache / deterministic logic
+      ↓
+Task-aware model routing
+      ↓
+Gemini / other configured providers
+      ↓
+Structured generation + validation
+      ↓
+Fallback / recovery
+      ↓
+Learning artifact
+      ↓
+Progress / rewards / analytics
+```
 
-> **Judge note:** This README intentionally distinguishes implemented architecture from future extensions. Claims about performance, cost, availability, and scale are presented as engineering properties/design goals unless benchmarked.
+### Why this is more than an LLM wrapper
 
----
+A page heatmap does not need an LLM. A repeated result should not be regenerated. A 500-page document should not be sent wholesale to a model. A provider outage should not automatically become a product outage.
 
-## Table of Contents
+The system therefore asks:
 
-- [Why StudyAI](#why-studyai)
-- [Architecture at a Glance](#architecture-at-a-glance)
-- [Technology Stack](#technology-stack)
-- [System Architecture](#system-architecture)
-- [File Upload to AI Pipeline](#file-upload-to-ai-pipeline)
-- [AI Model Routing](#ai-model-routing)
-- [RAG and Knowledge Retrieval](#rag-and-knowledge-retrieval)
-- [Caching Strategy](#caching-strategy)
-- [Background Jobs and BullMQ](#background-jobs-and-bullmq)
-- [Storage and Database](#storage-and-database)
-- [AI Features](#ai-features)
-- [Exam Intelligence](#exam-intelligence)
-- [Visual and Algorithmic Learning](#visual-and-algorithmic-learning)
-- [Audio and Video Learning](#audio-and-video-learning)
-- [Productivity and Learning Environment](#productivity-and-learning-environment)
-- [Gamification, Rewards and Growth](#gamification-rewards-and-growth)
-- [Career and Student Utilities](#career-and-student-utilities)
-- [Admin Mission Control](#admin-mission-control)
-- [Security and Reliability](#security-and-reliability)
-- [Cost and Latency Engineering](#cost-and-latency-engineering)
-- [Failure and Fallback Philosophy](#failure-and-fallback-philosophy)
-- [Architecture Tree](#architecture-tree)
-- [Implemented vs Future Work](#implemented-vs-future-work)
-- [Known Limitations](#known-limitations)
-- [Documentation Map](#documentation-map)
-- [Local Development](#local-development)
-- [Deployment Model](#deployment-model)
-- [Engineering Philosophy](#engineering-philosophy)
+> **What is the cheapest, fastest, safest, and most reliable way to produce a useful answer?**
+
+Sometimes that is Gemini. Sometimes it is another model, Redis, vector search, PostgreSQL, a mathematical algorithm, a background worker, or the original source content.
 
 ---
 
+## 🎬 Judge Path — See the Product Before the Documentation
 
+**Recommended order:**
 
-<details>
-<summary><strong>🧩 Implemented Feature Inventory — click to expand</strong></summary>
+**Demo → Problem/Solution → Gemini → Architecture → Features → Engineering trade-offs → Future work → Deep technical docs**
 
-**Core intelligence:** AI Chat/Solver, RAG, Syllabus Quests, Story, Quiz, Flashcards, Molecule Insight, Oracle Exam Predictor, Night Before Exam, Notes Purifier, Flowchart, LogicFlow, YouTube Decoder, Podcast Room.
+### 1. Watch the demo
 
-**Visual/cognitive:** Focus Island, Bionic Reader, Wallpaper Generator, GeoMapper, Knowledge Universe, Timeline.
+**[🎥 Prepia Demo](https://youtu.be/Vss47tiwNUw)**
 
-**Productivity:** Study Planner, Calendar, Focus analytics, Book Jumper.
+The demo covers the product workflow, document upload, AI/RAG features, exam tools, visual learning, YouTube/audio learning, gamification, admin controls, and the architecture behind them.
 
-**Career:** Career Hacker / Pathway.
+### 2. Understand the thesis
 
-**Gamification/growth:** Aura, streaks, daily rewards, profile bounty, learning heatmap, referrals, Panic Mode, Neural Feed unlock paths, rewarded ads, Alumni Bounty.
+> **AI + RAG + deterministic software + caching + queues + fallback routing**
 
-**Commerce/account:** Free/Student/Pro feature mappings, pricing, payment verification, manual admin payment recovery, profile, feedback, legal/account surfaces.
+### 3. Inspect the architecture
 
-**Platform:** Supabase/PostgreSQL + RLS, Cloudflare R2, Redis, BullMQ, Node.js/Express/TypeScript, Next.js/React/Tailwind, Docker, Kubernetes-oriented deployment, configurable multi-provider AI routing, streaming, fallbacks and structured-output validation.
+- **[🏗️ Complete Delivery Summary](https://github.com/cryptXploit/StudyAI/blob/main/COMPLETE_DELIVERY_SUMMARY.md)**
+- **[⚙️ BullMQ Workers Quickstart](https://github.com/cryptXploit/StudyAI/blob/main/BULLMQ_WORKERS_QUICKSTART.md)**
+- `backend/src/controllers/`
+- `modelRouter.ts`
+- retrieval services
+- worker services
 
-</details>
+### 4. Inspect operational control
 
+The Admin section exposes provider/model configuration, priorities, feature mappings, tier controls, and fallback strategy.
 
-# Why StudyAI
+### 5. Inspect limitations
+
+The repository intentionally separates current implementation from future architecture and avoids presenting unmeasured performance or reliability goals as benchmark results.
+
+---
+
+## 🤖 How Gemini Fits Into Prepia
+
+Gemini API is integrated into Prepia's deployed AI workflow for LLM-powered learning tasks. Depending on the workload and configured routing policy, the system can use Gemini alongside other configured providers.
+
+The AI layer follows this path:
+
+```text
+Feature
+   ↓
+Task type
+   ↓
+User tier / entitlement
+   ↓
+Model Router
+   ↓
+Provider priority + health / timeout policy
+   ↓
+Gemini or another configured provider
+   ↓
+Structured result
+   ↓
+Validation / persistence / UI
+```
+
+Gemini is therefore part of a provider-agnostic AI layer rather than being hard-coded into every feature controller. This makes provider switching and cost/capability tuning possible at the operational layer.
+
+**Important:** performance, cost savings, availability, and scale are described as architectural goals/design properties unless the repository explicitly provides a benchmark.
+
+---
+
+## 🧩 Feature Snapshot
+
+| Capability | Engineering idea |
+|---|---|
+| Document intelligence | Extraction/OCR → chunks → embeddings → RAG |
+| AI Chat / Solver | Streaming + routing + retrieval + fallback |
+| Story | RAG + constrained narrative generation |
+| Quiz | Structured JSON + controlled generation + LaTeX |
+| Flashcards | Structured cards + glossary + cache reuse |
+| Oracle Exam Predictor | Similarity + clustering + frequency ranking |
+| Night Before Exam | Multi-action preparation + bounded context + reusable summaries |
+| Notes Purifier | OCR/noisy-note normalization |
+| Flowchart | Structured generation + sanitation |
+| LogicFlow | Algorithm animation + graph representation |
+| YouTube Decoder | Multi-source transcript fallback |
+| Podcast | Chunking + script generation + TTS fallback |
+| Book Jumper | Vector retrieval + page heatmap |
+| Knowledge Universe | Nodes/links → 3D visualization |
+| Geo Mapper | AI interpretation + visualization metadata |
+| Planner / Calendar | Structured scheduling + persistence |
+| Focus Island | Focus sessions + room primitives |
+| Bionic Reader | Reading presentation transformation |
+| Wallpaper | Deterministic SVG + Sharp |
+| Career Hacker | Retrieval + personalized matching |
+| Syllabus Quests | Content-hash reuse + Aura rewards |
+| Gamification | Rewards + streaks + heatmap |
+| Referrals | Atomic claim protection |
+| Rewarded ads | Signed ticket + server-side validation |
+| Family / Alumni Bounty | Hashed invite codes + entitlement logic |
+| Payments | Transaction extraction + verification + manual recovery |
+| Multi-language AI | Prompt-controlled values + stable schema keys |
+| Admin routing | Database-driven provider/model control |
+| Background jobs | BullMQ + Redis |
+| Object storage | Cloudflare R2 |
+| Persistent data | Supabase/PostgreSQL |
+| Containerization | Docker |
+| Orchestration direction | Kubernetes-compatible architecture |
+
+> **Status note:** The table summarizes capabilities documented as implemented in this repository. Future extensions are explicitly marked in the roadmap below; no future capability should be interpreted as a current product claim.
+
+---
+
+## 📈 Traction at Submission
+
+Prepia was launched shortly before submission and has reached **61 users**, including **4 Pro users**, with **BDT 1,696 in actual customer revenue** during the program period.
+
+Customer acquisition has been organic through Facebook, LinkedIn, YouTube, and direct outreach, with no paid advertising.
+
+---
+
+## 🛠️ Technology at a Glance
+
+**Frontend:** Next.js, React, TypeScript, Tailwind CSS  
+**Backend:** Node.js, Express, TypeScript, REST-style controllers, SSE  
+**Data:** Supabase/PostgreSQL  
+**Cache/Queues:** Redis + BullMQ  
+**Object storage:** Cloudflare R2  
+**AI:** Gemini + configurable model providers, embeddings, RAG, structured generation, multimodal handling  
+**Packaging/deployment direction:** Docker + Kubernetes-oriented architecture
+
+---
+
+## 📚 Documentation Depth
+
+This README is intentionally layered:
+
+- ⚡ **30 seconds:** product thesis + demo
+- 🧠 **5 minutes:** architecture + feature groups + trade-offs
+- 🔬 **30+ minutes:** routing, RAG, workers, storage, caching, security, deployment, limitations, and future architecture
+
+The deeper documentation remains below so a judge who wants to inspect the engineering can continue without needing a separate explanation.
+
+---
+
+# Why Prepia
 
 Most AI study applications follow a simple pattern:
 
@@ -97,7 +213,7 @@ Most AI study applications follow a simple pattern:
 User → Prompt → LLM → Answer
 ```
 
-StudyAI is intentionally different:
+Prepia is intentionally different:
 
 ```text
 User
@@ -245,7 +361,7 @@ The architecture attempts to minimize unnecessary model calls while preserving u
 
 # System Architecture
 
-StudyAI is organized around several boundaries.
+Prepia is organized around several boundaries.
 
 ### 1. Experience layer
 
@@ -372,7 +488,7 @@ The ingestion layer is designed to:
 
 # AI Model Routing
 
-StudyAI uses a database-driven model routing approach.
+Prepia uses a database-driven model routing approach.
 
 The administrator can configure providers/models and their priorities without requiring a source-code change for every provider switch.
 
@@ -431,7 +547,7 @@ The routing layer contains defensive behavior for invalid model assignments. For
 
 # RAG and Knowledge Retrieval
 
-RAG is central to StudyAI's document intelligence.
+RAG is central to Prepia's document intelligence.
 
 ```text
 Uploaded document
@@ -538,7 +654,7 @@ Retrieve relevant context
 Call appropriate model
 ```
 
-This is one of the core ways StudyAI attempts to keep AI usage proportional to actual intelligence required.
+This is one of the core ways Prepia attempts to keep AI usage proportional to actual intelligence required.
 
 ---
 
@@ -898,7 +1014,7 @@ Piped instances
 Invidious instances
 ```
 
-The exact availability of external providers is inherently outside StudyAI's control, so this should be understood as a multi-source fallback strategy rather than a guarantee that every video will always decode.
+The exact availability of external providers is inherently outside Prepia's control, so this should be understood as a multi-source fallback strategy rather than a guarantee that every video will always decode.
 
 ### Transcript processing
 
@@ -1202,7 +1318,7 @@ Atomic entitlement logic can then control membership changes.
 
 # Payments and Monetization
 
-StudyAI includes a Bangladesh-oriented payment workflow.
+Prepia includes a Bangladesh-oriented payment workflow.
 
 The payment controller can process transaction messages and extract identifiers such as TrxID/TxnID and amounts.
 
@@ -1230,7 +1346,7 @@ An administrative manual verification path exists for cases where automated paym
 
 # Multi-Language AI
 
-StudyAI uses prompt-level language control for generated learning content.
+Prepia uses prompt-level language control for generated learning content.
 
 Instead of maintaining thousands of duplicated AI-output translations, the model is instructed to generate values in the requested language while keeping machine-readable schema keys stable.
 
@@ -1328,7 +1444,7 @@ This reduces dependency on a single AI provider.
 
 # Security and Reliability
 
-StudyAI applies multiple layers of defensive engineering.
+Prepia applies multiple layers of defensive engineering.
 
 ## Input controls
 
@@ -1475,7 +1591,7 @@ The architecture chooses stability where uncontrolled concurrency could exhaust 
 
 # Failure and Fallback Philosophy
 
-StudyAI repeatedly uses a layered fallback model.
+Prepia repeatedly uses a layered fallback model.
 
 ### Example
 
@@ -1516,7 +1632,7 @@ This pattern is especially important for a hackathon project because it demonstr
 The following is a conceptual architecture tree rather than a claim that every directory below has exactly this name in the repository.
 
 ```text
-StudyAI/
+Prepia/
 ├── frontend/
 │   ├── app/                     # Next.js application
 │   ├── components/              # reusable UI
@@ -1907,7 +2023,7 @@ This is particularly useful because document/OCR/AI jobs and normal API traffic 
 
 # Known Limitations
 
-StudyAI deliberately does not claim perfection.
+Prepia deliberately does not claim perfection.
 
 ### AI limitations
 
@@ -1934,7 +2050,7 @@ StudyAI deliberately does not claim perfection.
 
 ### Security limitations
 
-No client/server system can honestly promise absolute security. StudyAI uses multiple defenses, but production deployments still require:
+No client/server system can honestly promise absolute security. Prepia uses multiple defenses, but production deployments still require:
 
 - monitoring
 - rate limiting
@@ -1990,7 +2106,7 @@ https://github.com/cryptXploit/StudyAI/blob/main/BULLMQ_WORKERS_QUICKSTART.md
 
 # Deployment Model
 
-StudyAI is designed around separable runtime responsibilities.
+Prepia is designed around separable runtime responsibilities.
 
 ```text
                      Internet
@@ -2035,7 +2151,7 @@ For a small deployment, the complete Kubernetes architecture is not required. Th
 
 # Engineering Philosophy
 
-StudyAI's architecture can be summarized by eight rules.
+Prepia's architecture can be summarized by eight rules.
 
 ### 1. Don't call an LLM for deterministic work.
 
@@ -2073,7 +2189,7 @@ The architecture is designed for cost efficiency, latency control, and resilienc
 
 # The Core Architectural Thesis
 
-StudyAI is not built around:
+Prepia is not built around:
 
 > **"Which LLM should answer this question?"**
 
@@ -2099,13 +2215,13 @@ Sometimes it is a background worker.
 
 And sometimes the best fallback is the original content itself.
 
-That hybrid mindset is the foundation of StudyAI.
+That hybrid mindset is the foundation of Prepia.
 
 ---
 
 ## Final Note
 
-StudyAI is designed as a practical AI learning platform where the intelligence is distributed across the entire system—not concentrated inside one model.
+Prepia is designed as a practical AI learning platform where the intelligence is distributed across the entire system—not concentrated inside one model.
 
 The project combines:
 
@@ -2120,127 +2236,18 @@ The result is an architecture intended to remain useful even when:
 - a large document exceeds a comfortable context window,
 - or an expensive AI call is simply unnecessary.
 
-That is the central engineering idea behind StudyAI:
+That is the central engineering idea behind Prepia:
 
 > **Build the product so that AI makes the system smarter—not so that the system becomes completely dependent on AI.**
 
 
 ---
 
-# 🎬 XPRIZE Judge Experience — See It Before You Read It
-
-> **Recommended order for reviewers:**  
-> **Demo → Problem/Solution → Architecture → Feature Matrix → Engineering Trade-offs → Future Work**
-
-The repository is intentionally documented so a reviewer can understand the product at three depths:
-
-- ⚡ **30 seconds:** demo + architecture thesis
-- 🧠 **5 minutes:** major feature groups + system design
-- 🔬 **30+ minutes:** controllers, workers, routing, RAG, storage, caching, security and deployment
-
-## ▶️ Product Demo
-
-> **This is my real 2–3 minute demo link of my project**
-
-**[🎥 Watch the 2–3 Minute StudyAI Demo](https://youtu.be/Vss47tiwNUw?si=YC3pFLA0MGON_i1j)**
-
-### The demo Video Shows
-
-```text
-00:00  Problem → StudyAI thesis
-00:20  File upload → R2 → processing
-00:40  RAG / Solver / document intelligence
-01:00  Oracle + Night Before Exam
-01:20  LogicFlow / Universe / Molecule Lab
-01:40  YouTube Decoder / Podcast
-02:00  Gamification + Planner
-02:20  Admin Mission Control + model switching
-02:40  Architecture / why the hybrid design matters
-```
-
-
-
----
-
-# 🧩 Problem → Solution → Engineering Thesis
-
-## The Problem
-
-Students increasingly use generic AI assistants for studying, but a generic:
-
-```text
-Prompt → LLM → Answer
-```
-
-architecture creates recurring problems:
-
-- the model may not know the student's own material;
-- large documents are expensive to repeatedly process;
-- repeated requests regenerate the same information;
-- long-running tasks can occupy HTTP connections;
-- one AI provider can become a single point of failure;
-- probabilistic output can break deterministic UI components;
-- students need more than chat: revision, quizzes, flashcards, planning, visualization, audio/video learning and motivation.
-
-## The StudyAI Approach
-
-StudyAI turns the learning workflow into a hybrid system:
-
-```text
-Student material
-      ↓
-Object storage + metadata
-      ↓
-Extraction / OCR
-      ↓
-Chunking + embeddings
-      ↓
-RAG / retrieval
-      ↓
-Cache / deterministic logic
-      ↓
-Task-aware model routing
-      ↓
-Structured generation
-      ↓
-Validation / fallback
-      ↓
-Learning artifact
-      ↓
-Progress / rewards / analytics
-```
-
-The core idea is deliberately simple:
-
-> **Use AI for reasoning. Use software for everything that software can solve better.**
-
-That means a page-number heatmap does not need an LLM.  
-A repeated molecule lookup should not require regeneration.  
-A large document should not be sent wholesale to a model.  
-A provider outage should not become a product outage.
-
----
-
-# 🌍 Designed for Cost-Constrained, Real-World Usage
-
-StudyAI's architecture is particularly relevant to environments where:
-
-- AI inference budgets are limited;
-- cloud compute is modest;
-- network quality varies;
-- provider quotas can change;
-- local payment workflows matter;
-- students may need multilingual learning content.
-
-The Bangladesh-oriented payment workflow is one example: transaction messages can be processed into pending payment records, while an administrative verification path provides recovery when automation is unavailable.
-
-The architecture does **not** claim that every external service is always available. Instead, it attempts to make external failures local rather than systemic.
-
 ---
 
 # 🖼️ Product Showcase
 
-> **This section is intentionally prepared for screenshots. Add real screenshots before the final Devpost submission.**
+> **These screenshots are optional repository showcase assets. Only include paths for screenshots that actually exist in the repository.**
 >
 > Recommended: 6–8 screenshots, each showing one meaningful capability rather than a generic dashboard.
 
@@ -2249,7 +2256,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/01-learning-workspace.png`
 
 ```md
-![StudyAI Learning Workspace](docs/screenshots/01-learning-workspace.png)
+![Prepia Learning Workspace](docs/screenshots/01-learning-workspace.png)
 ```
 
 **Caption:**  
@@ -2262,7 +2269,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/02-oracle.png`
 
 ```md
-![StudyAI Oracle Exam Predictor](docs/screenshots/02-oracle.png)
+![Prepia Oracle Exam Predictor](docs/screenshots/02-oracle.png)
 ```
 
 **Caption:**  
@@ -2275,7 +2282,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/03-night-before-exam.png`
 
 ```md
-![StudyAI Night Before Exam](docs/screenshots/03-night-before-exam.png)
+![Prepia Night Before Exam](docs/screenshots/03-night-before-exam.png)
 ```
 
 **Caption:**  
@@ -2288,7 +2295,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/04-logicflow.png`
 
 ```md
-![StudyAI LogicFlow](docs/screenshots/04-logicflow.png)
+![Prepia LogicFlow](docs/screenshots/04-logicflow.png)
 ```
 
 **Caption:**  
@@ -2301,7 +2308,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/05-knowledge-universe.png`
 
 ```md
-![StudyAI Knowledge Universe](docs/screenshots/05-knowledge-universe.png)
+![Prepia Knowledge Universe](docs/screenshots/05-knowledge-universe.png)
 ```
 
 **Caption:**  
@@ -2314,7 +2321,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/06-youtube-podcast.png`
 
 ```md
-[StudyAI YouTube Decoder and Podcast](docs/screenshots/06-youtube-podcast.png)
+![Prepia YouTube Decoder and Podcast](docs/screenshots/06-youtube-podcast.png)
 ```
 
 **Caption:**  
@@ -2327,7 +2334,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/07-learning-heatmap.png`
 
 ```md
-![StudyAI Learning Heatmap](docs/screenshots/07-learning-heatmap.png)
+![Prepia Learning Heatmap](docs/screenshots/07-learning-heatmap.png)
 ```
 
 **Caption:**  
@@ -2340,7 +2347,7 @@ The architecture does **not** claim that every external service is always availa
 **File:** `docs/screenshots/08-admin-mission-control.png`
 
 ```md
-![StudyAI Admin Mission Control](docs/screenshots/08-admin-mission-control.png)
+![Prepia Admin Mission Control](docs/screenshots/08-admin-mission-control.png)
 ```
 
 **Caption:**  
@@ -2450,7 +2457,7 @@ Then the Markdown paths above work directly on GitHub.
 
 A common mistake in AI products is to use an LLM as the universal execution engine.
 
-StudyAI deliberately separates responsibilities:
+Prepia deliberately separates responsibilities:
 
 <details>
 <summary><strong>Click to see the responsibility split</strong></summary>
@@ -2586,7 +2593,7 @@ BullMQ allows the system to process heavy jobs independently from normal API tra
 
 # ⚡ Latency Engineering — Average Speed Is Not the Whole Story
 
-StudyAI considers several different latency problems:
+Prepia considers several different latency problems:
 
 ```text
 Cold request
@@ -2819,7 +2826,7 @@ Potential integrations:
 - Blackboard
 - university portals
 
-This could turn StudyAI from a study workspace into a connected academic operating layer.
+This could turn Prepia from a study workspace into a connected academic operating layer.
 
 ---
 
@@ -2955,8 +2962,8 @@ Before submitting to XPRIZE/Devpost:
 <details>
 <summary><strong>Click to expand final submission checklist</strong></summary>
 
-- [ ] Replace `YOUR_DEMO_VIDEO_URL_HERE`
-- [ ] Add 6–8 real screenshots
+- [ ] Verify the demo URL
+- [ ] Add only real screenshots that exist in `docs/screenshots/`
 - [ ] Verify every screenshot path
 - [ ] Add the deployed application URL if publicly available
 - [ ] Verify GitHub repository is accessible
@@ -2976,32 +2983,6 @@ Before submitting to XPRIZE/Devpost:
 
 # 🏆 The One-Sentence Judge Takeaway
 
-> **StudyAI is not an LLM wrapper; it is a hybrid learning infrastructure where deterministic software, retrieval, caching, background workers and failure recovery surround AI so that intelligence remains useful without making the entire product dependent on a single model, provider or expensive inference path.**
+> **Prepia is not an LLM wrapper; it is a hybrid learning infrastructure where deterministic software, retrieval, caching, background workers and failure recovery surround AI so that intelligence remains useful without making the entire product dependent on a single model, provider or expensive inference path.**
 
 ---
-
-# 📌 Reviewer Links
-
-<p align="center">
-
-<a href="https://github.com/cryptXploit/StudyAI/blob/main/QUICK_START.md">
-<img src="https://img.shields.io/badge/🚀_Run_It-Quick_Start-111827?style=for-the-badge" alt="Quick Start"/>
-</a>
-
-<a href="https://github.com/cryptXploit/StudyAI/blob/main/COMPLETE_DELIVERY_SUMMARY.md">
-<img src="https://img.shields.io/badge/🏗️_Understand_It-Architecture-1f2937?style=for-the-badge" alt="Architecture"/>
-</a>
-
-<a href="https://github.com/cryptXploit/StudyAI/blob/main/BULLMQ_WORKERS_QUICKSTART.md">
-<img src="https://img.shields.io/badge/⚙️_Inspect_It-Workers-374151?style=for-the-badge" alt="Workers"/>
-</a>
-
-<a href="https://github.com/cryptXploit/StudyAI/blob/main/DOCUMENTATION_MASTER_INDEX.md">
-<img src="https://img.shields.io/badge/📚_Explore_All_Docs-26%2B-4b5563?style=for-the-badge" alt="Documentation"/>
-</a>
-
-</p>
-
----
-
-> **Built for students. Engineered for constraints. Designed to evolve.**
