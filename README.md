@@ -2986,3 +2986,6 @@ Before submitting to XPRIZE/Devpost:
 > **Prepia is not an LLM wrapper; it is a hybrid learning infrastructure where deterministic software, retrieval, caching, background workers and failure recovery surround AI so that intelligence remains useful without making the entire product dependent on a single model, provider or expensive inference path.**
 
 ---
+
+## Third-Party Software & Licenses
+Prepia includes third-party open-source libraries, frameworks, SDKs, and APIs. These components remain subject to their respective licenses and terms. Prepia's proprietary license applies only to original Prepia code and does not modify or restrict rights granted by third-party licenses. Major third-party technologies include React, Next.js, Supabase, LangChain, Redis/BullMQ, Google Gemini SDKs, and YouTube-related libraries.
