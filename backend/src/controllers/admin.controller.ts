@@ -73,6 +73,43 @@ export function registerAdminRoutes(app: any): void {
     }
     res.json({ costs: costsResult.data || [], health: healthResult.data || [] });
   });
+
+  router.get('/feedbacks', async (_req: Request, res: Response) => {
+    try {
+      const { data: feedbacks, error } = await supabase
+        .from('user_feedbacks')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const uniqueUserIds = [...new Set((feedbacks || []).map((f: any) => f.user_id))];
+      const profilesRes = await supabase.from('profiles').select('id, full_name').in('id', uniqueUserIds);
+      
+      const emailMap = new Map();
+      await Promise.all(uniqueUserIds.map(async (uid) => {
+        if (!uid) return;
+        const { data } = await supabase.auth.admin.getUserById(uid);
+        if (data?.user?.email) {
+          emailMap.set(uid, data.user.email);
+        }
+      }));
+
+      const profilesMap = new Map();
+      (profilesRes.data || []).forEach((p: any) => profilesMap.set(p.id, p));
+
+      const enrichedFeedbacks = (feedbacks || []).map((f: any) => ({
+        ...f,
+        full_name: profilesMap.get(f.user_id)?.full_name || 'Unknown',
+        email: emailMap.get(f.user_id) || 'Unknown'
+      }));
+
+      res.json(enrichedFeedbacks);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   router.get('/users', async (_req: Request, res: Response) => {
     try {
       const [profilesRes, subsRes, paymentsRes] = await Promise.all([
