@@ -30,36 +30,85 @@ const translations = {
 };
 type LanguageType = 'English' | 'Bangla' | 'Hindi';
 
+const preprocessLaTeX = (text: string) => {
+  if (!text) return '';
+  return text
+    .replace(/\\\[([\s\S]*?)\\\]/g, '$$$$$1$$$$')
+    .replace(/\\\(([\s\S]*?)\\\)/g, '$$$1$$');
+};
+
 const MemoizedMarkdown = React.memo(({ content }: { content: string }) => {
+  const [showThinking, setShowThinking] = useState(false);
+
+  let thinkingContent = '';
+  let displayContent = content || '';
+  
+  const thinkMatch = displayContent.match(/<think>([\s\S]*?)<\/think>/);
+  if (thinkMatch) {
+    thinkingContent = thinkMatch[1].trim();
+    displayContent = displayContent.replace(thinkMatch[0], '').trim();
+  } else if (displayContent.includes('<think>')) {
+    thinkingContent = displayContent.split('<think>')[1] || '';
+    displayContent = '';
+  }
+
+  const processedContent = preprocessLaTeX(displayContent);
+
   return (
-    <ReactMarkdown 
-      remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} rehypePlugins={[rehypeKatex]}
-      components={{
-        table: ({node, ...props}) => <div className="overflow-x-auto my-6 border border-slate-700/50 rounded-xl shadow-sm bg-slate-900/50"><table className="min-w-full divide-y divide-slate-700/50 text-sm" {...props}/></div>,
-        th: ({node, ...props}) => <th className="bg-slate-800/80 px-4 py-3 text-left font-bold text-slate-300 uppercase tracking-wider" {...props}/>,
-        td: ({node, ...props}) => <td className="px-4 py-3 border-t border-slate-700/50 text-slate-400 font-medium" {...props}/>,
-        p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
-        code: ({node, inline, className, children, ...props}: any) => {
-          const match = /language-(\w+)/.exec(className || '');
-          return !inline ? (
-            <div className="relative group my-6 rounded-2xl overflow-hidden border border-slate-700/50 shadow-2xl">
-              <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 backdrop-blur border-b border-slate-800 text-xs font-mono text-slate-400">
-                <span>{match ? match[1] : 'code'}</span>
-                <button onClick={() => navigator.clipboard.writeText(String(children))} className="hover:text-indigo-400 transition-colors flex items-center gap-1"><Copy size={12}/> Copy</button>
-              </div>
-              <pre className="p-4 bg-slate-950/90 overflow-x-auto text-sm font-mono text-indigo-300">
-                <code {...props}>{children}</code>
-              </pre>
+    <div className="flex flex-col gap-4 w-full">
+      {thinkingContent && (
+        <div className="border border-indigo-500/30 bg-indigo-500/5 rounded-2xl overflow-hidden shadow-sm">
+          <button 
+            onClick={() => setShowThinking(!showThinking)}
+            className="w-full flex items-center justify-between p-4 text-indigo-300 font-semibold hover:bg-indigo-500/10 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <BrainCircuit size={18} className={!thinkMatch ? "animate-pulse text-indigo-400" : ""} />
+              <span>Thought Process {!thinkMatch && <span className="animate-pulse ml-2 text-xs opacity-70">Thinking...</span>}</span>
             </div>
-          ) : (
-            <code className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono text-[13px] border border-indigo-500/20" {...props}>{children}</code>
-          );
-        },
-        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 bg-indigo-500/10 py-3 px-5 rounded-r-2xl my-6 text-slate-300 italic shadow-inner font-medium" {...props}/>
-      }}
-    >
-      {content}
-    </ReactMarkdown>
+            <div className={`transform transition-transform ${showThinking ? 'rotate-180' : ''}`}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </button>
+          {showThinking && (
+            <div className="p-4 border-t border-indigo-500/20 text-indigo-200/70 text-sm font-mono whitespace-pre-wrap">
+              {thinkingContent}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {processedContent && (
+        <ReactMarkdown 
+          remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} rehypePlugins={[rehypeKatex]}
+          components={{
+            table: ({node, ...props}) => <div className="overflow-x-auto my-6 border border-slate-700/50 rounded-xl shadow-sm bg-slate-900/50"><table className="min-w-full divide-y divide-slate-700/50 text-sm" {...props}/></div>,
+            th: ({node, ...props}) => <th className="bg-slate-800/80 px-4 py-3 text-left font-bold text-slate-300 uppercase tracking-wider" {...props}/>,
+            td: ({node, ...props}) => <td className="px-4 py-3 border-t border-slate-700/50 text-slate-400 font-medium" {...props}/>,
+            p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
+            code: ({node, inline, className, children, ...props}: any) => {
+              const match = /language-(\w+)/.exec(className || '');
+              return !inline ? (
+                <div className="relative group my-6 rounded-2xl overflow-hidden border border-slate-700/50 shadow-2xl">
+                  <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 backdrop-blur border-b border-slate-800 text-xs font-mono text-slate-400">
+                    <span>{match ? match[1] : 'code'}</span>
+                    <button onClick={() => navigator.clipboard.writeText(String(children))} className="hover:text-indigo-400 transition-colors flex items-center gap-1"><Copy size={12}/> Copy</button>
+                  </div>
+                  <pre className="p-4 bg-slate-950/90 overflow-x-auto text-sm font-mono text-indigo-300">
+                    <code {...props}>{children}</code>
+                  </pre>
+                </div>
+              ) : (
+                <code className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono text-[13px] border border-indigo-500/20" {...props}>{children}</code>
+              );
+            },
+            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 bg-indigo-500/10 py-3 px-5 rounded-r-2xl my-6 text-slate-300 italic shadow-inner font-medium" {...props}/>
+          }}
+        >
+          {processedContent}
+        </ReactMarkdown>
+      )}
+    </div>
   );
 }, (prev, next) => prev.content === next.content);
 
