@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import RequireAdmin from '@/components/hoc/RequireAdmin';
 import SecureLayout from '@/components/layout/SecureLayout';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { Eye, EyeOff } from 'lucide-react';
 
 const apiOrigin = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/api\/?$/, '');
 
@@ -51,12 +51,12 @@ export default function AdminFeedbacksPage() {
             >
               {hidePersonalInfo ? (
                 <>
-                  <EyeIcon className="w-5 h-5 text-indigo-600" />
+                  <Eye className="w-5 h-5 text-indigo-600" />
                   Show Name & Email
                 </>
               ) : (
                 <>
-                  <EyeSlashIcon className="w-5 h-5 text-rose-500" />
+                  <EyeOff className="w-5 h-5 text-rose-500" />
                   Hide Name & Email
                 </>
               )}

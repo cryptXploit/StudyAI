@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import RequireAdmin from '@/components/hoc/RequireAdmin';
 import SecureLayout from '@/components/layout/SecureLayout';
-import { UsersIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { Users, MessageSquare } from 'lucide-react';
 
 export default function AdminUsersHubPage() {
   return (
@@ -21,7 +21,7 @@ export default function AdminUsersHubPage() {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-emerald-100 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-colors text-emerald-600">
-                    <UsersIcon className="w-8 h-8" />
+                    <Users className="w-8 h-8" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-slate-800">User Payments & Tiers</h2>
@@ -35,7 +35,7 @@ export default function AdminUsersHubPage() {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-indigo-100 rounded-xl group-hover:bg-indigo-500 group-hover:text-white transition-colors text-indigo-600">
-                    <ChatBubbleLeftRightIcon className="w-8 h-8" />
+                    <MessageSquare className="w-8 h-8" />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-slate-800">User Feedbacks</h2>
