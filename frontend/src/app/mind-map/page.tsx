@@ -190,6 +190,10 @@ function MindMapPageContent() {
         });
         
         let initialClean = rawCode.replace(/```mermaid/gi, '').replace(/```/g, '');
+        const thinkMatch = initialClean.match(/<think>[\s\S]*?<\/think>/);
+        if (thinkMatch) {
+          initialClean = initialClean.replace(thinkMatch[0], '');
+        }
         let lines = initialClean.split('\n');
         let sanitizedLines = lines.map(line => {
           let indentMatch = line.match(/^(\s*)/);
