@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import RequireAdmin from '@/components/auth/RequireAdmin';
+import RequireAdmin from '@/components/hoc/RequireAdmin';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { UsersIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import RequireAdmin from '@/components/auth/RequireAdmin';
+import RequireAdmin from '@/components/hoc/RequireAdmin';
 import SecureLayout from '@/components/layout/SecureLayout';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
