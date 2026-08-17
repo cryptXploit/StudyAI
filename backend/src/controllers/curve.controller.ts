@@ -43,10 +43,16 @@ JSON Schema to follow strictly:
     );
 
     try {
-      const startIdx = responseText.indexOf('{');
-      const endIdx = responseText.lastIndexOf('}');
+      let cleanText = responseText;
+      const thinkMatch = cleanText.match(/<think>[\s\S]*?<\/think>/);
+      if (thinkMatch) {
+        cleanText = cleanText.replace(thinkMatch[0], '');
+      }
+
+      const startIdx = cleanText.indexOf('{');
+      const endIdx = cleanText.lastIndexOf('}');
       if (startIdx !== -1 && endIdx !== -1) {
-        const cleanJson = responseText.substring(startIdx, endIdx + 1);
+        const cleanJson = cleanText.substring(startIdx, endIdx + 1);
         const result = JSON.parse(cleanJson);
         res.json(result);
       } else {
