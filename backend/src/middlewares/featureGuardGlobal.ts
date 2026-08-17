@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { createClient } from '@supabase/supabase-js';
 import { requestContext } from '../core/requestContext';
+import jwt from 'jsonwebtoken';
 
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
@@ -34,15 +35,29 @@ export const featureGuardGlobal = async (req: Request, res: Response, next: Next
     // If it's not a known AI feature, skip the feature guard!
     if (!KNOWN_AI_FEATURES.has(featureName)) return next();
 
-    const userTier = (req as any).user?.tier || 'Free';
-    const userId = (req as any).user?.id;
+    let userTier = (req as any).user?.tier;
+    let userId = (req as any).user?.id;
+
+    // 🟢 FIX: Decode JWT natively since this middleware runs BEFORE requireAuth
+    if (!userId && req.headers.authorization?.startsWith('Bearer ')) {
+      try {
+        const token = req.headers.authorization.split(' ')[1];
+        const decoded = jwt.decode(token) as any;
+        if (decoded && decoded.sub) {
+          userId = decoded.sub;
+          userTier = decoded.user_metadata?.tier;
+        }
+      } catch (e) {}
+    }
+    
+    userTier = userTier || 'Free';
 
     let isProUser = false;
     if (userTier.toLowerCase() === 'pro') {
       isProUser = true;
     } else if (userId) {
       const { data: profile } = await supabase.from('profiles').select('tier').eq('id', userId).single();
-      if (profile?.tier === 'Pro') {
+      if (profile?.tier?.toLowerCase() === 'pro') {
         isProUser = true;
       }
     }
