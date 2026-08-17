@@ -86,7 +86,8 @@ export const featureGuardGlobal = async (req: Request, res: Response, next: Next
       }
       
       // Show modal if it's a Pro feature but Free user is mapped to general, OR if it's totally unmapped
-      const needsModal = (requiredTier === 'general' && isProFeature) || isUnmapped;
+      // 🟢 FIX: Only require modal for conversational interfaces to avoid hanging parallel API requests on features like Solver
+      const needsModal = ((requiredTier === 'general' && isProFeature) || isUnmapped) && ['chat', 'live', 'voice', 'podcast'].includes(featureName);
       
       if (needsModal) {
         const forceDowngrade = req.headers['x-force-downgrade'] === 'true' || req.query['forceDowngrade'] === 'true';
@@ -99,6 +100,9 @@ export const featureGuardGlobal = async (req: Request, res: Response, next: Next
         } else {
            (req as any).forcedDowngrade = true;
         }
+      } else if ((requiredTier === 'general' && isProFeature) || isUnmapped) {
+        // Auto-downgrade for non-chat features silently
+        (req as any).forcedDowngrade = true;
       }
     }
 
