@@ -7,6 +7,7 @@ import { ChevronDown, ArrowRight, Swords, Star, Zap, XCircle, CheckCircle2, Targ
 import Lightfall from '@/components/ui/Lightfall';
 import LandingContactWidget from '@/components/ui/LandingContactWidget';
 import CheckoutModal from '@/components/payment/CheckoutModal';
+import LandingInteractiveDemo from '@/components/ui/LandingInteractiveDemo';
 import { useAuth } from '@/components/providers/AuthContext';
 import { useI18n, Language } from '@/components/providers/I18nContext';
 import { LANDING_TRANSLATIONS } from './landingTranslations';
@@ -179,6 +180,7 @@ export default function LandingPage() {
             </button>
           </motion.div>
         </div>
+        <LandingInteractiveDemo />
       </section>
 
       {/* 🚀 WHY WE ARE BEST (ADVANTAGES) */}
