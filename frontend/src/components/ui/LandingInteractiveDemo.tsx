@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, BrainCircuit, Target, Network, MessageSquare, Briefcase, Zap, Calculator, ChevronRight, Lock, PlayCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import { Sparkles, BrainCircuit, Target, Network, MessageSquare, Briefcase, Zap, Calculator, ChevronRight, Lock, PlayCircle, Loader2, CheckCircle2, Copy, FileJson, Presentation as PresentationIcon, Code2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
@@ -10,8 +10,8 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
+import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
-import { Copy } from 'lucide-react';
 import mermaid from 'mermaid';
 
 const DEMO_FEATURES = [
@@ -21,8 +21,8 @@ const DEMO_FEATURES = [
     icon: <Calculator className="w-5 h-5" />,
     color: 'emerald',
     description: 'Solve complex math, physics, or general questions instantly.',
-    mockInput: 'Solve: 2x² - 8 = 0',
-    mockOutput: 'Let\'s solve the equation step-by-step:\n\n1. Move 8 to the right side:\n   2x² = 8\n\n2. Divide by 2:\n   x² = 4\n\n3. Take the square root:\n   x = 2 or x = -2\n\n**Final Answer:** x = 2, -2'
+    mockInput: 'Solve the quadratic equation: $$ 2x^2 - 8 = 0 $$',
+    mockOutput: 'Let\'s solve the equation step-by-step:\n\n1. Move 8 to the right side:\n   $$ 2x^2 = 8 $$\n\n2. Divide both sides by 2:\n   $$ x^2 = 4 $$\n\n3. Take the square root of both sides:\n   $$ x = \\pm \\sqrt{4} $$\n\n**Final Answer:** \n$$ x = 2 \\text{ or } x = -2 $$'
   },
   {
     id: 'mindmap',
@@ -31,7 +31,7 @@ const DEMO_FEATURES = [
     color: 'indigo',
     description: 'Instantly visualize concepts with interactive mind maps.',
     mockInput: 'Create a mind map of Artificial Intelligence branches',
-    mockOutput: '```mermaid\nmindmap\n  root((Artificial Intelligence))\n    Machine Learning\n      Deep Learning\n      Neural Networks\n    Natural Language Processing\n      Chatbots\n      Translation\n    Computer Vision\n      Image Recognition\n      Facial Recognition\n    Robotics\n```'
+    mockOutput: '```mermaid\nmindmap\n  root((AI))\n    Machine Learning\n      Deep Learning\n      Neural Networks\n    NLP\n      Chatbots\n      Translation\n    Computer Vision\n      Image Recognition\n      Facial Recognition\n```'
   },
   {
     id: 'chat',
@@ -39,8 +39,8 @@ const DEMO_FEATURES = [
     icon: <MessageSquare className="w-5 h-5" />,
     color: 'violet',
     description: 'Chat with the most advanced AI models for deep insights.',
-    mockInput: 'Explain Quantum Computing to a 5-year-old',
-    mockOutput: 'Imagine you have a magic coin. A regular coin can only be Heads OR Tails. But a magic quantum coin can be Heads, Tails, or BOTH at the same time while it\'s spinning in the air!\n\nRegular computers use regular coins (0s or 1s). Quantum computers use magic coins (qubits), which lets them solve some giant puzzles millions of times faster!'
+    mockInput: 'Give me a JSON structure for a user profile',
+    mockOutput: '```json\n{\n  "user": {\n    "id": "usr_9832",\n    "name": "Jane Doe",\n    "role": "Pro Member",\n    "preferences": {\n      "theme": "dark",\n      "notifications": true\n    },\n    "skills": ["React", "TypeScript", "Node.js"]\n  }\n}\n```'
   },
   {
     id: 'career',
@@ -48,26 +48,17 @@ const DEMO_FEATURES = [
     icon: <Briefcase className="w-5 h-5" />,
     color: 'amber',
     description: 'Get AI-driven career roadmaps and resume optimizations.',
-    mockInput: 'Roadmap to become a Software Engineer in 2026',
-    mockOutput: 'Here is your 6-month Software Engineering Roadmap:\n\n**Month 1-2: The Fundamentals**\n- Learn HTML, CSS, and modern JavaScript (ES6+).\n- Master Git and GitHub.\n\n**Month 3-4: Frameworks & Backend**\n- Learn React or Next.js for frontend.\n- Learn Node.js and Express for backend.\n\n**Month 5-6: Projects & Prep**\n- Build 3 full-stack portfolio projects.\n- Practice LeetCode algorithms.\n- Optimize your LinkedIn profile.'
-  },
-  {
-    id: 'youtube-decoder',
-    name: 'YouTube Decoder',
-    icon: <PlayCircle className="w-5 h-5" />,
-    color: 'red',
-    description: 'Summarize and extract key insights from any YouTube video.',
-    mockInput: 'Summarize video: https://youtube.com/watch?v=mock-video',
-    mockOutput: '**Video Summary: The Future of AI**\n\n1. **Introduction:** AI is moving from narrow tasks to general reasoning.\n2. **Key Breakthroughs:** Transformers and large language models (LLMs) changed the game.\n3. **Future Predictions:** AI agents will autonomously handle multi-step workflows.\n\n*Key Quote:* "AI won\'t replace humans, but humans using AI will replace those who don\'t."'
+    mockInput: 'HTML Resume Template for Software Engineer',
+    mockOutput: '```html\n<div class="resume-card" style="font-family: sans-serif; background: #1e293b; padding: 20px; border-radius: 12px; color: #f8fafc;">\n  <h2 style="color: #38bdf8; margin-bottom: 5px;">Jane Doe</h2>\n  <p style="color: #94a3b8; font-size: 14px; margin-top: 0;">Senior Software Engineer</p>\n  <hr style="border-color: #334155;" />\n  <ul style="color: #cbd5e1; font-size: 14px;">\n    <li>Built scalable APIs with Node.js</li>\n    <li>Optimized React frontend performance by 40%</li>\n    <li>Mentored junior developers</li>\n  </ul>\n</div>\n```'
   },
   {
     id: 'presentation',
     name: 'AI Presentation',
-    icon: <Sparkles className="w-5 h-5" />,
+    icon: <PresentationIcon className="w-5 h-5" />,
     color: 'blue',
     description: 'Generate beautiful slide decks instantly from a simple prompt.',
-    mockInput: 'Create a 3-slide presentation on Renewable Energy',
-    mockOutput: '---Slide 1---\n**Title:** The Power of Renewable Energy\n**Subtitle:** A Sustainable Future\n\n---Slide 2---\n**Title:** Types of Renewables\n- Solar Energy\n- Wind Power\n- Hydroelectric\n\n---Slide 3---\n**Title:** Why It Matters\n- Combats climate change\n- Reduces carbon footprint\n- Infinite resource supply'
+    mockInput: 'Create a presentation on Renewable Energy',
+    mockOutput: '<div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); padding: 30px; border-radius: 16px; text-align: center; border: 1px solid #4f46e5; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2);">\n  <h1 style="color: #fff; font-size: 2.5rem; margin-bottom: 10px;">Renewable Energy</h1>\n  <h3 style="color: #a5b4fc; font-weight: normal;">The Future of Sustainable Power</h3>\n  <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">\n    <span style="background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; color: #818cf8;">Solar</span>\n    <span style="background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; color: #818cf8;">Wind</span>\n    <span style="background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; color: #818cf8;">Hydro</span>\n  </div>\n</div>'
   },
   {
     id: 'flashcards',
@@ -75,8 +66,8 @@ const DEMO_FEATURES = [
     icon: <BrainCircuit className="w-5 h-5" />,
     color: 'pink',
     description: 'Auto-generate flashcards from text for active recall.',
-    mockInput: 'Make 2 flashcards about the Mitochondria',
-    mockOutput: '**Card 1**\n*Front:* What is the primary function of the mitochondria?\n*Back:* To generate most of the chemical energy needed to power the cell\'s biochemical reactions (powerhouse of the cell).\n\n**Card 2**\n*Front:* What is the energy molecule produced by the mitochondria?\n*Back:* ATP (Adenosine Triphosphate).'
+    mockInput: 'Make a flashcard about the Mitochondria',
+    mockOutput: '<div style="perspective: 1000px; max-width: 400px; margin: 0 auto;">\n  <div style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 30px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); transform-style: preserve-3d; transition: transform 0.6s;">\n    <p style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">Flashcard</p>\n    <h3 style="color: #f8fafc; font-size: 1.25rem;">What is the primary function of the mitochondria?</h3>\n    <hr style="border-color: #334155; margin: 20px 0;" />\n    <p style="color: #ec4899; font-weight: bold;">Powerhouse of the cell (Produces ATP)</p>\n  </div>\n</div>'
   },
   {
     id: 'flowchart',
@@ -85,16 +76,7 @@ const DEMO_FEATURES = [
     color: 'cyan',
     description: 'Generate flowcharts and process diagrams with AI.',
     mockInput: 'Flowchart for user login process',
-    mockOutput: '```mermaid\ngraph TD\n    A[User Enters Credentials] --> B{Are credentials valid?}\n    B -- Yes --> C[Generate JWT Token]\n    C --> D[Redirect to Dashboard]\n    B -- No --> E[Show Error Message]\n    E --> A\n```'
-  },
-  {
-    id: 'notes-purifier',
-    name: 'Notes Purifier',
-    icon: <Sparkles className="w-5 h-5" />,
-    color: 'purple',
-    description: 'Turn messy notes into perfectly structured study material.',
-    mockInput: 'Clean this: Photosynthesis is how plants make food using sun, water, and CO2. Oxygen is released.',
-    mockOutput: '**Photosynthesis Overview**\n\n**Definition:**\nThe process by which green plants and some other organisms use sunlight to synthesize nutrients from carbon dioxide and water.\n\n**Key Components (Inputs):**\n- Sunlight (Energy)\n- Water (H2O)\n- Carbon Dioxide (CO2)\n\n**Byproducts (Outputs):**\n- Glucose (Food/Energy)\n- Oxygen (O2)'
+    mockOutput: '```mermaid\ngraph TD\n    A[Enter Credentials] --> B{Valid?}\n    B -- Yes --> C[Redirect Dashboard]\n    B -- No --> D[Show Error]\n    D --> A\n```'
   }
 ];
 
@@ -102,6 +84,7 @@ const DEMO_FEATURES = [
 const MermaidDemo = ({ code }: { code: string }) => {
   const [svg, setSvg] = useState<string>('');
   const [error, setError] = useState(false);
+  
   useEffect(() => {
     let isMounted = true;
     mermaid.initialize({ startOnLoad: false, theme: 'dark' });
@@ -118,9 +101,9 @@ const MermaidDemo = ({ code }: { code: string }) => {
     return () => { isMounted = false; };
   }, [code]);
   
-  if (error) return <pre className="text-red-400 p-4">Error rendering chart</pre>;
-  if (!svg) return <div className="animate-pulse bg-slate-800 h-40 rounded-xl"></div>;
-  return <div className="bg-slate-900 p-4 rounded-xl flex justify-center" dangerouslySetInnerHTML={{ __html: svg }} />;
+  if (error) return <div className="text-red-400 p-4 border border-red-500/20 bg-red-500/10 rounded-xl text-sm font-mono flex items-center justify-center">Loading diagram...</div>;
+  if (!svg) return <div className="animate-pulse bg-slate-800/50 h-40 rounded-xl w-full border border-slate-700/50"></div>;
+  return <div className="bg-slate-900 border border-slate-700/50 p-6 rounded-xl flex justify-center shadow-lg my-4 overflow-x-auto custom-scrollbar" dangerouslySetInnerHTML={{ __html: svg }} />;
 };
 
 export default function LandingInteractiveDemo() {
@@ -142,10 +125,13 @@ export default function LandingInteractiveDemo() {
       
       const typeNextChar = () => {
         if (currentIndex < text.length) {
-          setDisplayedOutput(text.slice(0, currentIndex + 1));
-          currentIndex += Math.floor(Math.random() * 3) + 1; // Type 1-3 chars at a time
-          timeout = setTimeout(typeNextChar, 15);
+          // Type chunks instead of single chars to make HTML/Mermaid render faster and smoother
+          const chunkSize = Math.floor(Math.random() * 5) + 3; 
+          setDisplayedOutput(text.slice(0, currentIndex + chunkSize));
+          currentIndex += chunkSize;
+          timeout = setTimeout(typeNextChar, 10);
         } else {
+          setDisplayedOutput(text); // Ensure complete text
           setIsSimulating(false);
         }
       };
@@ -217,7 +203,7 @@ export default function LandingInteractiveDemo() {
         </div>
 
         {/* Main Display - Interactive Area */}
-        <div className="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col relative h-[450px]">
+        <div className="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col relative h-[500px]">
           
           {/* Header */}
           <div className="border-b border-slate-800 p-4 flex items-center justify-between bg-slate-900/50">
@@ -239,7 +225,9 @@ export default function LandingInteractiveDemo() {
                   className="flex justify-end"
                 >
                   <div className="bg-emerald-600/20 border border-emerald-500/30 text-emerald-100 px-5 py-3 rounded-2xl rounded-tr-sm max-w-[85%] font-medium text-sm">
-                    {activeFeature.mockInput}
+                    <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                      {activeFeature.mockInput}
+                    </ReactMarkdown>
                   </div>
                 </motion.div>
               )}
@@ -251,38 +239,56 @@ export default function LandingInteractiveDemo() {
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }} 
                   animate={{ opacity: 1, y: 0 }} 
-                  className="flex justify-start"
+                  className="flex justify-start w-full"
                 >
-                  <div className="bg-slate-800/50 border border-slate-700/50 text-slate-200 px-5 py-4 rounded-2xl rounded-tl-sm max-w-[95%] font-medium text-sm leading-relaxed whitespace-pre-wrap ">
+                  <div className="bg-slate-800/40 border border-slate-700/50 text-slate-200 px-5 py-4 rounded-2xl rounded-tl-sm w-full max-w-full font-medium text-sm leading-relaxed overflow-x-hidden">
                     
-<ReactMarkdown 
-  remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} 
-  rehypePlugins={[rehypeKatex]}
-  className="prose prose-invert max-w-none text-sm"
-  components={{
-    code: ({node, inline, className, children, ...props}: any) => {
-      const match = /language-(\w+)/.exec(className || '');
-      if (!inline && match && match[1] === 'mermaid') {
-        return <MermaidDemo code={String(children).replace(/\n$/, '')} />;
-      }
-      return !inline ? (
-        <div className="relative group my-4 rounded-xl overflow-hidden border border-slate-700/50">
-          <pre className="p-4 bg-slate-900 overflow-x-auto text-sm font-mono text-indigo-300">
-            <code {...props}>{children}</code>
-          </pre>
-        </div>
-      ) : (
-        <code className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono text-[13px] border border-indigo-500/20" {...props}>{children}</code>
-      );
-    },
-    table: ({node, ...props}) => <div className="overflow-x-auto my-4 border border-slate-700/50 rounded-xl bg-slate-900/50"><table className="min-w-full divide-y divide-slate-700/50 text-sm" {...props}/></div>,
-    th: ({node, ...props}) => <th className="bg-slate-800/80 px-4 py-2 text-left font-bold text-slate-300" {...props}/>,
-    td: ({node, ...props}) => <td className="px-4 py-2 border-t border-slate-700/50 text-slate-400" {...props}/>,
-    p: ({node, ...props}) => <p className="mb-2 leading-relaxed" {...props} />
-  }}
->
-  {displayedOutput}
-</ReactMarkdown>
+                    <ReactMarkdown 
+                      remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} 
+                      rehypePlugins={[rehypeKatex, rehypeRaw]} // Enabled rehypeRaw for HTML injection!
+                      className="prose prose-invert max-w-none text-sm break-words"
+                      components={{
+                        code: ({node, inline, className, children, ...props}: any) => {
+                          const match = /language-(\w+)/.exec(className || '');
+                          if (!inline && match && match[1] === 'mermaid') {
+                            if (isSimulating) {
+                              return (
+                                <div className="relative group my-4 rounded-xl overflow-hidden border border-slate-700/50">
+                                  <pre className="p-4 bg-slate-900/80 overflow-x-auto text-sm font-mono text-cyan-300">
+                                    <code {...props}>{children}</code>
+                                  </pre>
+                                </div>
+                              );
+                            }
+                            return <MermaidDemo code={String(children).replace(/\n$/, '')} />;
+                          }
+                          return !inline ? (
+                            <div className="relative group my-4 rounded-xl overflow-hidden border border-slate-700/50 shadow-lg">
+                              <div className="flex items-center justify-between px-4 py-2 bg-slate-900/80 backdrop-blur border-b border-slate-800 text-xs font-mono text-slate-400">
+                                <span>{match ? match[1] : 'code'}</span>
+                                <button className="hover:text-indigo-400 transition-colors flex items-center gap-1"><Copy size={12}/> Copy</button>
+                              </div>
+                              <pre className="p-4 bg-slate-950 overflow-x-auto text-sm font-mono text-indigo-300">
+                                <code {...props}>{children}</code>
+                              </pre>
+                            </div>
+                          ) : (
+                            <code className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono text-[13px] border border-indigo-500/20" {...props}>{children}</code>
+                          );
+                        },
+                        table: ({node, ...props}) => <div className="overflow-x-auto my-4 border border-slate-700/50 rounded-xl bg-slate-900/50"><table className="min-w-full divide-y divide-slate-700/50 text-sm" {...props}/></div>,
+                        th: ({node, ...props}) => <th className="bg-slate-800/80 px-4 py-2 text-left font-bold text-slate-300" {...props}/>,
+                        td: ({node, ...props}) => <td className="px-4 py-2 border-t border-slate-700/50 text-slate-400" {...props}/>,
+                        p: ({node, ...props}) => <p className="mb-2 leading-relaxed text-slate-300" {...props} />,
+                        h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2 text-white" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-lg font-bold mt-4 mb-2 text-white" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-base font-bold mt-3 mb-1 text-slate-200" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-5 my-2 space-y-1 text-slate-300" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-5 my-2 space-y-1 text-slate-300" {...props} />
+                      }}
+                    >
+                      {displayedOutput}
+                    </ReactMarkdown>
 
                     {isSimulating && (
                       <span className="inline-block w-2 h-4 bg-emerald-500 animate-pulse ml-1 align-middle"></span>
@@ -302,7 +308,7 @@ export default function LandingInteractiveDemo() {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-slate-900 border-t border-slate-800 relative">
+          <div className="p-4 bg-slate-900 border-t border-slate-800 relative mt-auto">
             
             {/* Signup Prompt Overlay */}
             <AnimatePresence>
@@ -333,9 +339,11 @@ export default function LandingInteractiveDemo() {
             <div className="flex items-center gap-2 relative">
               <div 
                 onClick={handleCustomInput}
-                className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-400 cursor-text hover:border-slate-500 transition-colors"
+                className="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-400 cursor-text hover:border-slate-500 transition-colors flex items-center"
               >
-                {activeFeature.mockInput}
+                <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                   {activeFeature.mockInput}
+                </ReactMarkdown>
               </div>
               <button 
                 onClick={handleTestClick}
