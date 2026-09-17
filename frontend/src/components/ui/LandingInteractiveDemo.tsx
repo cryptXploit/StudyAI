@@ -40,7 +40,100 @@ const DEMO_FEATURES = [
     color: 'blue',
     description: 'Generate 5-10 slide beautiful decks instantly from a simple prompt.',
     mockInput: 'Create a 5-slide presentation on The Future of Quantum Computing',
-    mockOutput: '<div style="display:flex; flex-direction:column; gap:20px;">\n\n<!-- Slide 1 -->\n<div style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #4f46e5; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2);">\n  <h4 style="color: #6366f1; text-transform: uppercase; letter-spacing: 2px;">Slide 1: Title</h4>\n  <h1 style="color: #fff; font-size: 2.5rem; margin: 15px 0;">The Quantum Leap</h1>\n  <h3 style="color: #a5b4fc; font-weight: normal;">How Quantum Computing will redefine the 21st Century</h3>\n</div>\n\n<!-- Slide 2 -->\n<div style="background: #1e293b; padding: 40px; border-radius: 16px; border: 1px solid #334155;">\n  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Slide 2: The Basics</h4>\n  <h2 style="color: #e2e8f0; font-size: 1.8rem; border-bottom: 2px solid #4f46e5; padding-bottom: 10px;">Bits vs Qubits</h2>\n  <ul style="color: #cbd5e1; font-size: 1.1rem; line-height: 1.8; margin-top: 20px;">\n    <li><b style="color: #60a5fa;">Classical Bits:</b> Exist as 0 or 1.</li>\n    <li><b style="color: #818cf8;">Qubits:</b> Can exist as 0, 1, or both simultaneously (Superposition).</li>\n    <li><b style="color: #c084fc;">Entanglement:</b> Qubits can be linked, so changing one instantly changes the other, regardless of distance.</li>\n  </ul>\n</div>\n\n<!-- Slide 3 -->\n<div style="background: #1e293b; padding: 40px; border-radius: 16px; border: 1px solid #334155;">\n  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Slide 3: Real-World Applications</h4>\n  <h2 style="color: #e2e8f0; font-size: 1.8rem; border-bottom: 2px solid #10b981; padding-bottom: 10px;">What will it solve?</h2>\n  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">\n    <div style="background: #0f172a; padding: 20px; border-radius: 8px;"><h3 style="color:#34d399; margin-top:0;">Drug Discovery</h3><p style="color:#94a3b8; font-size:0.9rem;">Simulating molecular structures in seconds.</p></div>\n    <div style="background: #0f172a; padding: 20px; border-radius: 8px;"><h3 style="color:#38bdf8; margin-top:0;">Cryptography</h3><p style="color:#94a3b8; font-size:0.9rem;">Breaking RSA encryption and establishing quantum-secure networks.</p></div>\n    <div style="background: #0f172a; padding: 20px; border-radius: 8px;"><h3 style="color:#fbbf24; margin-top:0;">Financial Modeling</h3><p style="color:#94a3b8; font-size:0.9rem;">Optimizing vast portfolios instantly.</p></div>\n    <div style="background: #0f172a; padding: 20px; border-radius: 8px;"><h3 style="color:#f472b6; margin-top:0;">Climate Change</h3><p style="color:#94a3b8; font-size:0.9rem;">Discovering new carbon-capture materials.</p></div>\n  </div>\n</div>\n\n<!-- Slide 4 -->\n<div style="background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #7c3aed;">\n  <h4 style="color: #a78bfa; text-transform: uppercase; letter-spacing: 2px;">Slide 4: The Threat</h4>\n  <h2 style="color: #fff; font-size: 2rem;">Shor\'s Algorithm</h2>\n  <p style="color: #ddd; font-size: 1.1rem; max-width: 600px; margin: 20px auto;">A quantum computer with enough stable qubits could factor massive prime numbers exponentially faster than classical supercomputers, rendering current internet security protocols obsolete.</p>\n</div>\n\n<!-- Slide 5 -->\n<div style="background: #0f172a; padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #334155;">\n  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px;">Slide 5: Conclusion</h4>\n  <h1 style="color: #f8fafc; font-size: 3rem; margin: 20px 0;">The Race is On.</h1>\n  <p style="color: #64748b; font-size: 1.2rem;">Google, IBM, and nations globally are investing billions to reach Quantum Supremacy.</p>\n</div>\n\n</div>'
+    mockOutput: '<div style="overflow-x:auto; display:flex; scroll-snap-type: x mandatory; gap: 20px; padding-bottom: 15px; scrollbar-width: thin; scroll-behavior: smooth;" class="custom-scrollbar">
+
+<!-- Slide 1: Title -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: linear-gradient(135deg, #0B0F19 0%, #1e1b4b 100%); border-radius: 16px; text-align: center; border: 1px solid #4f46e5; box-shadow: 0 10px 40px rgba(79, 70, 229, 0.3); scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; overflow:hidden; transition: transform 0.3s; cursor: grab;">
+  <div style="position:absolute; top:-50%; left:-50%; width:200%; height:200%; background:radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%); animation: spin 20s linear infinite;"></div>
+  <h4 style="color: #6366f1; text-transform: uppercase; letter-spacing: 4px; font-size: 12px; margin-bottom: 10px; z-index:1;">AI Generated Presentation</h4>
+  <h1 style="color: #fff; font-size: 3.5rem; margin: 10px 0; z-index:1; font-weight:900;">Quantum Leap</h1>
+  <h3 style="color: #a5b4fc; font-weight: normal; font-size: 1.2rem; z-index:1;">How Quantum Computing will redefine the 21st Century</h3>
+  <div style="position:absolute; bottom:20px; font-size:12px; color:#6366f1; font-weight:bold; animation: pulse 2s infinite;">Swipe or Scroll to navigate &rarr;</div>
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#a5b4fc; font-weight:bold;">1 / 8</div>
+</div>
+
+<!-- Slide 2: Two Columns -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: #131620; padding: 40px; border-radius: 16px; border: 1px solid #334155; scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; position:relative;">
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#94a3b8; font-weight:bold;">2 / 8</div>
+  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size:12px;">The Basics</h4>
+  <h2 style="color: #e2e8f0; font-size: 2.2rem; border-bottom: 2px solid #4f46e5; padding-bottom: 15px; margin-bottom:30px;">Classical vs Quantum</h2>
+  <div style="display:flex; gap:30px;">
+    <div style="flex:1; background:#1e253c; padding:25px; border-radius:12px; border-top:4px solid #38bdf8; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <h3 style="color:#38bdf8; margin-top:0;">Bits (Classical)</h3>
+      <p style="color:#94a3b8; line-height:1.6; font-size:14px;">Exist exclusively as either 0 or 1. Think of it like a light switch that is strictly ON or OFF.</p>
+    </div>
+    <div style="flex:1; background:#1e253c; padding:25px; border-radius:12px; border-top:4px solid #818cf8; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <h3 style="color:#818cf8; margin-top:0;">Qubits (Quantum)</h3>
+      <p style="color:#94a3b8; line-height:1.6; font-size:14px;">Can exist as 0, 1, or both simultaneously via Superposition. Like a spinning coin in the air.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: Detailed List -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: #131620; padding: 40px; border-radius: 16px; border: 1px solid #334155; scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; position:relative;">
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#94a3b8; font-weight:bold;">3 / 8</div>
+  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size:12px;">Core Concepts</h4>
+  <h2 style="color: #e2e8f0; font-size: 2.2rem; border-bottom: 2px solid #a78bfa; padding-bottom: 15px; margin-bottom:30px;">Quantum Mechanics 101</h2>
+  <ul style="color: #cbd5e1; font-size: 1.1rem; line-height: 2; margin-top: 10px; padding-left: 20px;">
+    <li><b style="color: #60a5fa;">Superposition:</b> The ability to process vast numbers of outcomes simultaneously.</li>
+    <li><b style="color: #c084fc;">Entanglement:</b> Qubits can be linked, so changing one instantly changes the other, regardless of distance.</li>
+    <li><b style="color: #f472b6;">Interference:</b> Amplifying correct paths to a solution while cancelling out incorrect ones.</li>
+  </ul>
+</div>
+
+<!-- Slide 4: Quote -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: #0B0F19; padding: 40px; border-radius: 16px; border: 1px solid #10b981; scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; position:relative;">
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#10b981; font-weight:bold;">4 / 8</div>
+  <div style="font-size: 8rem; color: rgba(16,185,129,0.1); position:absolute; top:20px; left:40px; line-height:1;">"</div>
+  <p style="color: #ecfdf5; font-size: 2rem; font-style: italic; max-width: 80%; z-index:1; margin-bottom:20px;">Nature isn\'t classical, dammit, and if you want to make a simulation of nature, you\'d better make it quantum mechanical.</p>
+  <h4 style="color: #10b981; text-transform: uppercase; letter-spacing: 2px;">— Richard Feynman (1981)</h4>
+</div>
+
+<!-- Slide 5: Data visualization Grid -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: #131620; padding: 40px; border-radius: 16px; border: 1px solid #334155; scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; position:relative;">
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#94a3b8; font-weight:bold;">5 / 8</div>
+  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size:12px;">Timeline</h4>
+  <h2 style="color: #e2e8f0; font-size: 2.2rem; border-bottom: 2px solid #10b981; padding-bottom: 15px; margin-bottom:20px;">Projected Growth (Qubit Count)</h2>
+  <div style="display:flex; align-items:flex-end; gap:20px; height:200px; padding:20px; background:#1e253c; border-radius:12px; border-bottom:1px solid #334155; border-left:1px solid #334155;">
+    <div style="flex:1; background:#475569; height:10%; border-radius:4px 4px 0 0; position:relative; transition:height 1s;"><span style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); color:#cbd5e1; font-size:12px;">2024 (1k)</span></div>
+    <div style="flex:1; background:#3b82f6; height:30%; border-radius:4px 4px 0 0; position:relative;"><span style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); color:#cbd5e1; font-size:12px;">2026 (4k)</span></div>
+    <div style="flex:1; background:#8b5cf6; height:50%; border-radius:4px 4px 0 0; position:relative;"><span style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); color:#cbd5e1; font-size:12px;">2028 (10k)</span></div>
+    <div style="flex:1; background:#10b981; height:100%; border-radius:4px 4px 0 0; position:relative; box-shadow:0 0 20px rgba(16,185,129,0.5);"><span style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); color:#10b981; font-weight:bold; font-size:12px;">2030 (1M+)</span></div>
+  </div>
+</div>
+
+<!-- Slide 6: Grid of applications -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: #131620; padding: 40px; border-radius: 16px; border: 1px solid #334155; scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; position:relative;">
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#94a3b8; font-weight:bold;">6 / 8</div>
+  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; font-size:12px;">Impact</h4>
+  <h2 style="color: #e2e8f0; font-size: 2.2rem; border-bottom: 2px solid #f43f5e; padding-bottom: 10px; margin-bottom:20px;">Real-world Applications</h2>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+    <div style="background: #0B0F19; padding: 20px; border-radius: 8px; border-left:3px solid #34d399;"><h3 style="color:#34d399; margin:0 0 5px 0;">Drug Discovery</h3><p style="color:#94a3b8; font-size:0.85rem; margin:0;">Simulating complex molecular structures in seconds instead of years.</p></div>
+    <div style="background: #0B0F19; padding: 20px; border-radius: 8px; border-left:3px solid #38bdf8;"><h3 style="color:#38bdf8; margin:0 0 5px 0;">Cryptography</h3><p style="color:#94a3b8; font-size:0.85rem; margin:0;">Breaking RSA encryption and establishing quantum-secure networks.</p></div>
+    <div style="background: #0B0F19; padding: 20px; border-radius: 8px; border-left:3px solid #fbbf24;"><h3 style="color:#fbbf24; margin:0 0 5px 0;">Financial Modeling</h3><p style="color:#94a3b8; font-size:0.85rem; margin:0;">Optimizing vast investment portfolios instantly.</p></div>
+    <div style="background: #0B0F19; padding: 20px; border-radius: 8px; border-left:3px solid #f472b6;"><h3 style="color:#f472b6; margin:0 0 5px 0;">Climate Change</h3><p style="color:#94a3b8; font-size:0.85rem; margin:0;">Discovering new carbon-capture materials via molecular modeling.</p></div>
+  </div>
+</div>
+
+<!-- Slide 7: Big Threat (Dark theme) -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #7c3aed; scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative;">
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#a78bfa; font-weight:bold;">7 / 8</div>
+  <div style="width:60px; height:60px; border-radius:50%; background:rgba(239,68,68,0.2); border:2px solid #ef4444; display:flex; align-items:center; justify-content:center; margin-bottom:20px;"><span style="color:#ef4444; font-size:24px; font-weight:bold;">!</span></div>
+  <h4 style="color: #a78bfa; text-transform: uppercase; letter-spacing: 2px;">The Threat</h4>
+  <h2 style="color: #fff; font-size: 2.5rem; margin-top:0;">Shor\'s Algorithm</h2>
+  <p style="color: #ddd; font-size: 1.1rem; max-width: 80%; margin: 10px auto;">A quantum computer with enough stable qubits could factor massive prime numbers exponentially faster than classical supercomputers, rendering current internet security (RSA) entirely obsolete.</p>
+</div>
+
+<!-- Slide 8: Conclusion -->
+<div style="min-width: 100%; aspect-ratio: 16/9; background: #0B0F19; padding: 40px; border-radius: 16px; text-align: center; border: 1px solid #334155; scroll-snap-align: center; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative;">
+  <div style="position:absolute; top:20px; right:20px; font-size:12px; color:#94a3b8; font-weight:bold;">8 / 8</div>
+  <h4 style="color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom:20px;">Conclusion</h4>
+  <h1 style="color: #f8fafc; font-size: 3.5rem; margin: 0; background: -webkit-linear-gradient(45deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">The Race is On.</h1>
+  <p style="color: #64748b; font-size: 1.2rem; margin-top:20px;">Are we ready for the next industrial revolution?</p>
+  <button style="margin-top:30px; padding:10px 30px; background:transparent; border:2px solid #4f46e5; color:#a5b4fc; border-radius:30px; cursor:pointer; font-weight:bold; transition:all 0.3s;" onMouseOver="this.style.background=\'#4f46e5\'; this.style.color=\'white\';" onMouseOut="this.style.background=\'transparent\'; this.style.color=\'#a5b4fc\';">End Presentation</button>
+</div>
+
+</div>'
   },
   {
     id: 'flowchart',
