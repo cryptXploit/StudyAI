@@ -243,11 +243,11 @@ export default function LandingInteractiveDemo() {
                 >
                   <div className="bg-slate-800/40 border border-slate-700/50 text-slate-200 px-5 py-4 rounded-2xl rounded-tl-sm w-full max-w-full font-medium text-sm leading-relaxed overflow-x-hidden">
                     
-                    <ReactMarkdown 
-                      remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} 
-                      rehypePlugins={[rehypeKatex, rehypeRaw]} // Enabled rehypeRaw for HTML injection!
-                      className="prose prose-invert max-w-none text-sm break-words"
-                      components={{
+                    <div className="prose prose-invert max-w-none text-sm break-words">
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} 
+                        rehypePlugins={[rehypeKatex, rehypeRaw]} // Enabled rehypeRaw for HTML injection!
+                        components={{
                         code: ({node, inline, className, children, ...props}: any) => {
                           const match = /language-(\w+)/.exec(className || '');
                           if (!inline && match && match[1] === 'mermaid') {
@@ -289,6 +289,7 @@ export default function LandingInteractiveDemo() {
                     >
                       {displayedOutput}
                     </ReactMarkdown>
+                    </div>
 
                     {isSimulating && (
                       <span className="inline-block w-2 h-4 bg-emerald-500 animate-pulse ml-1 align-middle"></span>
