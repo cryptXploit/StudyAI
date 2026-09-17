@@ -5,7 +5,8 @@
 html,
 body {
   min-height: 100%;
-  background: #020617;
+  background: #0B0F19; /* Deep Midnight Blue */
+  color: #F8FAFC; /* Off-white for better readability */
   overflow-x: hidden;
   overscroll-behavior-x: none;
 }
