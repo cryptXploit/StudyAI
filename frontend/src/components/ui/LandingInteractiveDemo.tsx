@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, BrainCircuit, Target, Network, MessageSquare, Briefcase, Zap, Calculator, ChevronRight, Lock, PlayCircle } from 'lucide-react';
+import { Sparkles, BrainCircuit, Target, Network, MessageSquare, Briefcase, Zap, Calculator, ChevronRight, Lock, PlayCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
