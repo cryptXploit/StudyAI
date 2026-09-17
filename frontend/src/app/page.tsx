@@ -13,6 +13,7 @@ import { LANDING_TRANSLATIONS } from './landingTranslations';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [showAllFaqs, setShowAllFaqs] = useState(false);
 
   const { user, isLoading } = useAuth();
   const { language, setLanguage } = useI18n();
@@ -304,7 +305,7 @@ export default function LandingPage() {
           </div>
 
           <div className="space-y-4">
-            {Array.from({length: 50}).map((_, idx) => (
+            {Array.from({length: showAllFaqs ? 50 : 5}).map((_, idx) => (
               <div key={idx} className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden transition-all shadow-sm hover:border-emerald-500/30">
                 <button 
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
@@ -323,6 +324,18 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+
+          {!showAllFaqs && (
+            <div className="mt-10 flex justify-center">
+              <button 
+                onClick={() => setShowAllFaqs(true)}
+                className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg hover:shadow-emerald-500/20 active:scale-95 flex items-center gap-2"
+              >
+                View More FAQs
+                <ChevronDown className="w-5 h-5" />
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
