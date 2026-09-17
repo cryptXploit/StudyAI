@@ -5,6 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, BrainCircuit, Target, Network, MessageSquare, Briefcase, Zap, Calculator, ChevronRight, Lock, PlayCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import 'katex/dist/katex.min.css';
+import { Copy } from 'lucide-react';
+import mermaid from 'mermaid';
 
 const DEMO_FEATURES = [
   {
@@ -89,6 +97,31 @@ const DEMO_FEATURES = [
     mockOutput: '**Photosynthesis Overview**\n\n**Definition:**\nThe process by which green plants and some other organisms use sunlight to synthesize nutrients from carbon dioxide and water.\n\n**Key Components (Inputs):**\n- Sunlight (Energy)\n- Water (H2O)\n- Carbon Dioxide (CO2)\n\n**Byproducts (Outputs):**\n- Glucose (Food/Energy)\n- Oxygen (O2)'
   }
 ];
+
+
+const MermaidDemo = ({ code }: { code: string }) => {
+  const [svg, setSvg] = useState<string>('');
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let isMounted = true;
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    const renderChart = async () => {
+      try {
+        setError(false);
+        const { svg } = await mermaid.render('mermaid-demo-' + Math.random().toString(36).substring(7), code);
+        if (isMounted) setSvg(svg);
+      } catch (err) {
+        setError(true);
+      }
+    };
+    renderChart();
+    return () => { isMounted = false; };
+  }, [code]);
+  
+  if (error) return <pre className="text-red-400 p-4">Error rendering chart</pre>;
+  if (!svg) return <div className="animate-pulse bg-slate-800 h-40 rounded-xl"></div>;
+  return <div className="bg-slate-900 p-4 rounded-xl flex justify-center" dangerouslySetInnerHTML={{ __html: svg }} />;
+};
 
 export default function LandingInteractiveDemo() {
   const router = useRouter();
@@ -220,8 +253,37 @@ export default function LandingInteractiveDemo() {
                   animate={{ opacity: 1, y: 0 }} 
                   className="flex justify-start"
                 >
-                  <div className="bg-slate-800/50 border border-slate-700/50 text-slate-200 px-5 py-4 rounded-2xl rounded-tl-sm max-w-[95%] font-medium text-sm leading-relaxed whitespace-pre-wrap font-mono">
-                    {displayedOutput}
+                  <div className="bg-slate-800/50 border border-slate-700/50 text-slate-200 px-5 py-4 rounded-2xl rounded-tl-sm max-w-[95%] font-medium text-sm leading-relaxed whitespace-pre-wrap ">
+                    
+<ReactMarkdown 
+  remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]} 
+  rehypePlugins={[rehypeKatex]}
+  className="prose prose-invert max-w-none text-sm"
+  components={{
+    code: ({node, inline, className, children, ...props}: any) => {
+      const match = /language-(\w+)/.exec(className || '');
+      if (!inline && match && match[1] === 'mermaid') {
+        return <MermaidDemo code={String(children).replace(/\n$/, '')} />;
+      }
+      return !inline ? (
+        <div className="relative group my-4 rounded-xl overflow-hidden border border-slate-700/50">
+          <pre className="p-4 bg-slate-900 overflow-x-auto text-sm font-mono text-indigo-300">
+            <code {...props}>{children}</code>
+          </pre>
+        </div>
+      ) : (
+        <code className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-300 font-mono text-[13px] border border-indigo-500/20" {...props}>{children}</code>
+      );
+    },
+    table: ({node, ...props}) => <div className="overflow-x-auto my-4 border border-slate-700/50 rounded-xl bg-slate-900/50"><table className="min-w-full divide-y divide-slate-700/50 text-sm" {...props}/></div>,
+    th: ({node, ...props}) => <th className="bg-slate-800/80 px-4 py-2 text-left font-bold text-slate-300" {...props}/>,
+    td: ({node, ...props}) => <td className="px-4 py-2 border-t border-slate-700/50 text-slate-400" {...props}/>,
+    p: ({node, ...props}) => <p className="mb-2 leading-relaxed" {...props} />
+  }}
+>
+  {displayedOutput}
+</ReactMarkdown>
+
                     {isSimulating && (
                       <span className="inline-block w-2 h-4 bg-emerald-500 animate-pulse ml-1 align-middle"></span>
                     )}
