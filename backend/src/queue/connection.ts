@@ -2,18 +2,24 @@ import Redis from 'ioredis';
 import { Queue } from 'bullmq';
 
 // Reuse connection across BullMQ instances as per best practices
-export const connection = new Redis({
-  host: process.env.REDIS_HOST || '127.0.0.1',
-  port: parseInt(process.env.REDIS_PORT || '6379', 10),
-  password: process.env.REDIS_PASSWORD || undefined,
-  maxRetriesPerRequest: null, // Required by BullMQ
-});
+// If REDIS_URL is provided, we use it (ideal for Upstash/Render/production)
+// Otherwise fallback to individual host/port variables
+const redisUrl = process.env.REDIS_URL;
+
+export const connection = redisUrl 
+  ? new Redis(redisUrl, { maxRetriesPerRequest: null }) 
+  : new Redis({
+      host: process.env.REDIS_HOST || '127.0.0.1',
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      password: process.env.REDIS_PASSWORD || undefined,
+      maxRetriesPerRequest: null, // Required by BullMQ
+    });
 
 // ==========================================
-// 🟢 Create the Queue for Document Processing
+// dYY Create the Queue for Document Processing
 // ==========================================
 export const documentQueue = new Queue('document-processing', { 
-  connection: connection as any, // 🟢 FIX: TypeScript-এর ভার্সন কনফ্লিক্ট বাইপাস করার জন্য 'as any'
+  connection: connection as any, // dYY FIX: TypeScript error workaround
   defaultJobOptions: {
     attempts: 3, 
     backoff: { type: 'exponential', delay: 2000 }, 
@@ -21,7 +27,7 @@ export const documentQueue = new Queue('document-processing', {
 });
 
 // ==========================================
-// 🟢 Create the Queue for Oracle Background Extraction
+// dYY Create the Queue for Oracle Background Extraction
 // ==========================================
 export const oracleQueue = new Queue('oracle-extraction', { 
   connection: connection as any,
