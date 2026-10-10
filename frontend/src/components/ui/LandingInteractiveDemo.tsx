@@ -177,7 +177,7 @@ const DEMO_FEATURES = [
     icon: <Code2 className="w-5 h-5" />,
     color: 'red',
     description: 'Solve digital logic, boolean algebra, and truth tables.',
-    mockInput: 'Simplify the boolean expression: Y = A'B'C + A'BC + AB'C + ABC',
+    mockInput: `Simplify the boolean expression: Y = A'B'C + A'BC + AB'C + ABC`,
     mockOutput: `Let\'s simplify the Boolean expression using algebra:\n\n$$ Y = \\bar{A}\\bar{B}C + \\bar{A}BC + A\\bar{B}C + ABC $$\n\n**Step 1:** Factor out common terms in pairs.\nGroup the first two and the last two terms:\n$$ Y = \\bar{A}C(\\bar{B} + B) + AC(\\bar{B} + B) $$\n\n**Step 2:** Apply the complement rule ($$ B + \\bar{B} = 1 $$).\n$$ Y = \\bar{A}C(1) + AC(1) $$\n$$ Y = \\bar{A}C + AC $$\n\n**Step 3:** Factor out $$C$$.\n$$ Y = C(\\bar{A} + A) $$\n\n**Step 4:** Apply the complement rule again ($$ A + \\bar{A} = 1 $$).\n$$ Y = C(1) $$\n\n**Final Simplified Expression:**\n$$ Y = C $$\n\n### Truth Table Verification\n| A | B | C | Y (Original) | Y (Simplified) |\n|---|---|---|--------------|----------------|\n| 0 | 0 | 0 | 0 | 0 |\n| 0 | 0 | 1 | 1 | 1 |\n| 0 | 1 | 0 | 0 | 0 |\n| 0 | 1 | 1 | 1 | 1 |\n| 1 | 0 | 0 | 0 | 0 |\n| 1 | 0 | 1 | 1 | 1 |\n| 1 | 1 | 0 | 0 | 0 |\n| 1 | 1 | 1 | 1 | 1 |`
   },
   {
